@@ -14,8 +14,7 @@ const app = express();
 
 // ── Middleware ──────────────────────────────────────────────────────────────────
 app.use(cors({
-  // In production, replace * with your actual frontend origin
-  origin: NODE_ENV === "production" ? "https://your-frontend-domain.com" : "*",
+  origin: "*"
 }));
 app.use(express.json());
 
