@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../utils/api";
+
+const API = import.meta.env.VITE_API_BASE_URL ?? "";
 import {
   getTitle,
   getYear,
@@ -150,7 +152,7 @@ export default function SearchPage() {
     
     Promise.all([
       api.search(query).then(d => (d.results ?? []).filter((i) => ["movie", "tv", "person"].includes(i.media_type))).catch(() => []),
-      fetch(`http://localhost:5000/api/users/search?query=${encodeURIComponent(query)}`)
+      fetch(`${API}/api/users/search?query=${encodeURIComponent(query)}`)
         .then(res => res.json())
         .catch(() => [])
     ])

@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useCollections } from "../context/CollectionsContext";
 import { useClubs } from "../context/ClubsContext";
 
-const API = "http://localhost:5000";
+const API = import.meta.env.VITE_API_BASE_URL ?? "";
 const IMG = "https://image.tmdb.org/t/p";
 
 function timeAgo(d) {

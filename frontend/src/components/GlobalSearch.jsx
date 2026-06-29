@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../utils/api";
 import { getTitle, getYear, getMediaLabel, getRating, getResultHref, posterUrl } from "../utils/tmdb";
 
+const API = import.meta.env.VITE_API_BASE_URL ?? "";
+
 function SearchIcon({ className = "h-5 w-5" }) {
   return (
     <svg aria-hidden="true" className={className} fill="none" viewBox="0 0 24 24">
@@ -58,7 +60,7 @@ export default function GlobalSearch({ className = "" }) {
         }
         if (filter === "all" || filter === "users") {
           fetchers.push(
-            fetch(`http://localhost:5000/api/users/search?query=${encodeURIComponent(trimmed)}`)
+            fetch(`${API}/api/users/search?query=${encodeURIComponent(trimmed)}`)
               .then(res => res.json())
               .catch(() => [])
               .then(users => (Array.isArray(users) ? users : []).map(u => ({

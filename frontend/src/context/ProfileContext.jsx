@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 import { useAuth } from "./AuthContext";
 
 const ProfileContext = createContext(null);
+const API = import.meta.env.VITE_API_BASE_URL ?? "";
 
 
 
@@ -13,7 +14,7 @@ export function ProfileProvider({ children }) {
   const loadProfile = useCallback(async (username) => {
     try {
       const lowerUsername = username.toLowerCase();
-      const response = await fetch(`http://localhost:5000/api/users/${username}`);
+      const response = await fetch(`${API}/api/users/${username}`);
       if (response.ok) {
         const data = await response.json();
         setProfiles(prev => ({
@@ -65,7 +66,7 @@ export function ProfileProvider({ children }) {
   const updateProfile = useCallback(async (username, updates) => {
     try {
       const lowerUsername = username.toLowerCase();
-      const response = await fetch(`http://localhost:5000/api/users/${username}`, {
+      const response = await fetch(`${API}/api/users/${username}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates) // { displayName, bio, avatarUrl }
@@ -102,7 +103,7 @@ export function ProfileProvider({ children }) {
 
     try {
       const endpoint = isFollowing ? 'unfollow' : 'follow';
-      const response = await fetch(`http://localhost:5000/api/users/${tUser}/${endpoint}`, {
+      const response = await fetch(`${API}/api/users/${tUser}/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ followerUsername: currentUsername })

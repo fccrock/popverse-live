@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 
+const API = import.meta.env.VITE_API_BASE_URL ?? "";
 const ClubsContext = createContext(null);
 const STORAGE_KEY = "pch_clubs";
 
@@ -127,7 +128,7 @@ export function ClubsProvider({ children }) {
     setIsLoading(true);
     try {
       // Fetch clubs from our new AWS backend!
-      const response = await fetch("http://localhost:5000/api/clubs");
+      const response = await fetch(`${API}/api/clubs`);
       if (response.ok) {
         const data = await response.json();
         
@@ -231,7 +232,7 @@ export function ClubsProvider({ children }) {
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     
     try {
-      const response = await fetch("http://localhost:5000/api/clubs", {
+      const response = await fetch(`${API}/api/clubs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -260,7 +261,7 @@ export function ClubsProvider({ children }) {
     if (!isAuthenticated || !currentUsername) return false;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/join`, {
+      const response = await fetch(`${API}/api/clubs/${clubId}/join`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUsername })
@@ -282,7 +283,7 @@ export function ClubsProvider({ children }) {
     if (!isAuthenticated || !currentUsername) return false;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/leave`, {
+      const response = await fetch(`${API}/api/clubs/${clubId}/leave`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUsername })
@@ -303,7 +304,7 @@ export function ClubsProvider({ children }) {
   const addPost = useCallback(async (clubId, content) => {
     if (!isAuthenticated || !currentUsername) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/posts`, {
+      const response = await fetch(`${API}/api/clubs/${clubId}/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content, createdBy: currentUsername })
@@ -319,7 +320,7 @@ export function ClubsProvider({ children }) {
   const likePost = useCallback(async (clubId, postId) => {
     if (!isAuthenticated || !currentUsername) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/posts/${postId}/like`, {
+      const response = await fetch(`${API}/api/clubs/${clubId}/posts/${postId}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUsername })
@@ -335,7 +336,7 @@ export function ClubsProvider({ children }) {
   const addDiscussion = useCallback(async (clubId, title, content) => {
     if (!isAuthenticated || !currentUsername) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/discussions`, {
+      const response = await fetch(`${API}/api/clubs/${clubId}/discussions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content, createdBy: currentUsername })
@@ -351,7 +352,7 @@ export function ClubsProvider({ children }) {
   const addReply = useCallback(async (clubId, discussionId, content, parentId = null) => {
     if (!isAuthenticated || !currentUsername) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/discussions/${discussionId}/replies`, {
+      const response = await fetch(`${API}/api/clubs/${clubId}/discussions/${discussionId}/replies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content, createdBy: currentUsername, parentId })
@@ -367,7 +368,7 @@ export function ClubsProvider({ children }) {
   const deletePost = useCallback(async (clubId, postId) => {
     if (!isAuthenticated || !currentUsername) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/posts/${postId}`, {
+      const response = await fetch(`${API}/api/clubs/${clubId}/posts/${postId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUsername })
@@ -381,7 +382,7 @@ export function ClubsProvider({ children }) {
   const deleteDiscussion = useCallback(async (clubId, discussionId) => {
     if (!isAuthenticated || !currentUsername) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/discussions/${discussionId}`, {
+      const response = await fetch(`${API}/api/clubs/${clubId}/discussions/${discussionId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUsername })
@@ -395,7 +396,7 @@ export function ClubsProvider({ children }) {
   const deleteReply = useCallback(async (clubId, discussionId, replyId) => {
     if (!isAuthenticated || !currentUsername) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/clubs/${clubId}/discussions/${discussionId}/replies/${replyId}`, {
+      const response = await fetch(`${API}/api/clubs/${clubId}/discussions/${discussionId}/replies/${replyId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUsername })

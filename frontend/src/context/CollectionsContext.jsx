@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef } f
 import { useAuth } from "./AuthContext";
 
 const CollectionsContext = createContext(null);
-const API = "http://localhost:5000";
+const API = import.meta.env.VITE_API_BASE_URL ?? "";
 
 // ── Community Collections (mock discover feed — not user-owned) ──────────────
 const SAVED_KEY = "pch_saved_collections";

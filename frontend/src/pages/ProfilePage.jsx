@@ -8,6 +8,8 @@ import { useProfile } from "../context/ProfileContext";
 import { useCollections } from "../context/CollectionsContext";
 import { useClubs, MOCK_COLLECTIONS as GLOBAL_COLLECTIONS } from "../context/ClubsContext";
 import { api } from "../utils/api";
+
+const API = import.meta.env.VITE_API_BASE_URL ?? "";
 import { posterUrl } from "../utils/tmdb";
 
 // ── Seed Reviews Data ────────────────────────────────────────────────────────
@@ -87,7 +89,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!targetUsername) return;
     setReviewsLoading(true);
-    fetch(`http://localhost:5000/api/reviews/user/${targetUsername}`)
+    fetch(`${API}/api/reviews/user/${targetUsername}`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -105,7 +107,7 @@ export default function ProfilePage() {
   // Load collections for target user
   useEffect(() => {
     if (!targetUsername) return;
-    fetch(`http://localhost:5000/api/collections/user/${targetUsername}`)
+    fetch(`${API}/api/collections/user/${targetUsername}`)
       .then(res => res.json())
       .then(data => setTargetCollections(data || []))
       .catch(() => setTargetCollections([]));
