@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  cognitoId   String   @unique
+  username    String   @unique
+  displayName String?
+  bio         String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  collections     Collection[]
+  clubMemberships ClubMember[]
+  ClubPost        ClubPost[]
+  PostLike        PostLike[]
+  ClubDiscussion  ClubDiscussion[]
+  DiscussionReply DiscussionReply[]
+  reviews         Review[]
+
+  followers       UserFollows[] @relation("following")
+  following       UserFollows[] @relation("follower")
+}
+
+model UserFollows {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+}
+
+model Collection {
+  id               String           @id @default(uuid())
+  title            String
+  description      String?
+  coverImage       String?
+  tags             String[]         @default([])
+  isPublic         Boolean          @default(false)
+  userId           String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isCommunitySaved Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  items            CollectionItem[]
+}
+
+model CollectionItem {
+  id           String     @id @default(uuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  mediaId      String
+  mediaType    String
+  title        String
+  posterPath   String?
+  year         String?
+  watched      Boolean    @default(false)
+  addedAt      DateTime   @default(now())
+}
+
+model Club {
+  id             String           @id @default(uuid())
+  name           String
+  slug           String           @unique
+  description    String?
+  category       String
+  coverImage     String?
+  createdBy      String
+  createdAt      DateTime         @default(now())
+  members        ClubMember[]
+  ClubPost       ClubPost[]
+  ClubDiscussion ClubDiscussion[]
+}
+
+model ClubMember {
+  id       String   @id @default(uuid())
+  clubId   String
+  club     Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String   @default("member") // "admin", "moderator", "member"
+  joinedAt DateTime @default(now())
+
+  @@unique([clubId, userId])
+}
+
+model ClubPost {
+  id        String     @id @default(uuid())
+  content   String
+  authorId  String
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  clubId    String
+  club      Club       @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  likes     PostLike[]
+}
+
+model PostLike {
+  id        String   @id @default(uuid())
+  postId    String
+  post      ClubPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+}
+
+model ClubDiscussion {
+  id        String            @id @default(uuid())
+  title     String
+  content   String
+  authorId  String
+  author    User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  clubId    String
+  club      Club              @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  createdAt DateTime          @default(now())
+  replies   DiscussionReply[]
+}
+
+model DiscussionReply {
+  id           String            @id @default(uuid())
+  content      String
+  authorId     String
+  author       User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  discussionId String
+  discussion   ClubDiscussion    @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  parentId     String?
+  parent       DiscussionReply?  @relation("ReplyToReply", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      DiscussionReply[] @relation("ReplyToReply")
+  createdAt    DateTime          @default(now())
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  mediaId   String
+  mediaType String   // "movie" | "tv"
+  rating    Float
+  text      String
+  isSpoiler Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([authorId, mediaId, mediaType])
+}
