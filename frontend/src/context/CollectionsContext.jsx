@@ -5,9 +5,7 @@ import { useAuth } from "./AuthContext";
 const CollectionsContext = createContext(null);
 const API = import.meta.env.VITE_API_BASE_URL ?? "";
 
-// ── Community Collections (mock discover feed — not user-owned) ──────────────
 const SAVED_KEY = "pch_saved_collections";
-export const MOCK_COLLECTIONS = [];
 
 function loadSaved() {
   try {

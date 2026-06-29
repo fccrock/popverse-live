@@ -6,50 +6,12 @@ import FollowListModal from "../components/FollowListModal";
 import { useAuth } from "../context/AuthContext";
 import { useProfile } from "../context/ProfileContext";
 import { useCollections } from "../context/CollectionsContext";
-import { useClubs, MOCK_COLLECTIONS as GLOBAL_COLLECTIONS } from "../context/ClubsContext";
+import { useClubs } from "../context/ClubsContext";
 import { api } from "../utils/api";
 
 const API = import.meta.env.VITE_API_BASE_URL ?? "";
 import { posterUrl } from "../utils/tmdb";
 
-// ── Seed Reviews Data ────────────────────────────────────────────────────────
-const SEED_REVIEWS = {
-  cinemaphile: [
-    { id: "rev-c1", rating: 5, text: "An absolute masterpiece of modern cinema. Nolan's screenplay is brilliant, and the pacing is perfect. The dream layers are crafted with such precision that it demands multiple viewings.", isSpoiler: false, timestamp: Date.now() - 3 * 86400000, helpful: 24, mediaId: "27205", mediaType: "movie" },
-    { id: "rev-c2", rating: 5, text: "Mind-bending and emotionally resonant. The Hans Zimmer soundtrack elevates it to a spiritual experience. The relationship between Cooper and Murph is the emotional anchor that holds this cosmic epic together.", isSpoiler: false, timestamp: Date.now() - 10 * 86400000, helpful: 42, mediaId: "157336", mediaType: "movie" }
-  ],
-  moviefreak: [
-    { id: "rev-m1", rating: 5, text: "Non-stop action, incredible stunts, and amazing practical effects. A masterclass in action cinema! George Miller proves that visual storytelling is still alive and kicking in Hollywood.", isSpoiler: false, timestamp: Date.now() - 1 * 86400000, helpful: 18, mediaId: "76341", mediaType: "movie" },
-    { id: "rev-m2", rating: 5, text: "Ledger's performance is legendary. The screenplay is tight and the themes of chaos and order are perfectly explored. The best comic book film ever made, hands down.", isSpoiler: false, timestamp: Date.now() - 6 * 86400000, helpful: 35, mediaId: "155", mediaType: "movie" }
-  ],
-  screen_siren: [
-    { id: "rev-s1", rating: 5, text: "Kubrick's atmosphere is unmatched. Jack Nicholson's descent into madness is chilling, and the cinematography makes the Overlook Hotel a character of its own. Truly terrifying.", isSpoiler: true, timestamp: Date.now() - 4 * 86400000, helpful: 29, mediaId: "694", mediaType: "movie" }
-  ]
-};
-
-// ── Mock Collections for Seed Users ──────────────────────────────────────────
-const MOCK_COLLECTIONS = {
-  cinemaphile: [
-    { id: "col-c1", name: "Mind Benders", items: [
-      { mediaId: "movie-27205", posterPath: "/o0OehrcA7JuD58Ad6fs4Qj7GiZ1.jpg", title: "Inception" },
-      { mediaId: "movie-157336", posterPath: "/gEU2QvHOm56YvTHz6U6pI2fh0Mn.jpg", title: "Interstellar" }
-    ]},
-    { id: "col-c2", name: "Modern Classics", items: [
-      { mediaId: "movie-155", posterPath: "/qJ2tWwGb51Y2tZ65PGqvAzPsuP3.jpg", title: "The Dark Knight" }
-    ]}
-  ],
-  moviefreak: [
-    { id: "col-m1", name: "Adrenaline Rushes", items: [
-      { mediaId: "movie-76341", posterPath: "/hA2QPEw2gcI6n5iRzqnR786Y4wK.jpg", title: "Mad Max: Fury Road" },
-      { mediaId: "movie-155", posterPath: "/qJ2tWwGb51Y2tZ65PGqvAzPsuP3.jpg", title: "The Dark Knight" }
-    ]}
-  ],
-  screen_siren: [
-    { id: "col-s1", name: "Spooky Classics", items: [
-      { mediaId: "movie-694", posterPath: "/998N2z20A65R6c2nH6t7HGecUhi.jpg", title: "The Shining" }
-    ]}
-  ]
-};
 
 export default function ProfilePage() {
   const { username } = useParams();
