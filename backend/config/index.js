@@ -1,7 +1,7 @@
 // config/index.js
-// Loads .env from the project root (one level above /backend)
+// Loads .env from the backend root directory
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const TMDB_TOKEN = process.env.TMDB_TOKEN;
 

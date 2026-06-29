@@ -156,11 +156,7 @@ function CreateCollectionModal({ onClose, onCreate }) {
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState([]);
   const [isPublic, setIsPublic] = useState(true);
-  const [selectedAccent, setSelectedAccent] = useState("violet");
-  const [coverType, setCoverType] = useState("color"); // "color" or "image"
   const [coverImageUrl, setCoverImageUrl] = useState("");
-  
-  const g = COMM_ACCENT_GRADIENTS.find(g => g.id === selectedAccent);
 
   const TAG_OPTIONS = ["cinema", "music", "anime", "horror", "sci-fi", "feel-good", "drama", "comedy", "action"];
 
@@ -171,20 +167,19 @@ function CreateCollectionModal({ onClose, onCreate }) {
   async function handleCreate(e) {
     e.preventDefault();
     if (!name.trim()) return;
-    const coverImage = coverType === "image" && coverImageUrl ? coverImageUrl : `gradient:${g.from}|${g.to}`;
-    await onCreate(name.trim(), { description: description.trim(), isPublic, coverImage, tags });
+    await onCreate(name.trim(), { description: description.trim(), isPublic, coverImage: coverImageUrl || "", tags });
     onClose();
   }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div className="relative w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#0c0c12] shadow-2xl shadow-black/60 animate-scale-in overflow-hidden" onClick={(e) => e.stopPropagation()}>
-        {/* Gradient preview header */}
+        {/* Header preview */}
         <div className="h-24 relative" style={{
-          background: coverType === "color" ? `linear-gradient(135deg, ${g.from}, ${g.to})` : undefined,
-          backgroundImage: coverType === "image" && coverImageUrl ? `url(${coverImageUrl})` : undefined,
+          backgroundImage: coverImageUrl ? `url(${coverImageUrl})` : undefined,
           backgroundSize: "cover",
-          backgroundPosition: "center"
+          backgroundPosition: "center",
+          backgroundColor: coverImageUrl ? undefined : "#18181f"
         }}>
           <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c12]/60 to-transparent" />
           <p className="absolute bottom-3 left-5 text-white font-black text-lg tracking-tight drop-shadow">{name || "New Collection"}</p>
@@ -203,51 +198,14 @@ function CreateCollectionModal({ onClose, onCreate }) {
             <textarea className="input-field min-h-[60px] resize-none" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What's the vibe?" maxLength={200} />
           </div>
 
-          {/* Cover Image/Color Picker */}
+          {/* Cover Image Upload Only */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Collection Cover</label>
-              <div className="flex gap-1 bg-white/5 p-1 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => setCoverType("color")}
-                  className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition ${coverType === "color" ? "bg-violet-600 text-white" : "text-zinc-400 hover:text-white"}`}
-                >
-                  COLOR
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCoverType("image")}
-                  className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition ${coverType === "image" ? "bg-violet-600 text-white" : "text-zinc-400 hover:text-white"}`}
-                >
-                  IMAGE
-                </button>
-              </div>
-            </div>
-
-            {coverType === "color" ? (
-              <div className="grid grid-cols-4 gap-2 mt-3">
-                {COMM_ACCENT_GRADIENTS.map(gr => (
-                  <button key={gr.id} type="button" onClick={() => setSelectedAccent(gr.id)}
-                    className={`relative h-9 rounded-xl transition-all duration-200 ${selectedAccent === gr.id ? "ring-2 ring-white ring-offset-2 ring-offset-[#0c0c12] scale-105" : "opacity-60 hover:opacity-100"}`}
-                    style={{ background: `linear-gradient(135deg, ${gr.from}, ${gr.to})` }}>
-                    {selectedAccent === gr.id && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <svg className="h-4 w-4 text-white drop-shadow" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-3">
-                <ImageUpload
-                  currentImage={coverImageUrl}
-                  onUploadComplete={setCoverImageUrl}
-                  label="Upload Cover Image"
-                />
-              </div>
-            )}
+            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Cover Image</label>
+            <ImageUpload
+              currentImage={coverImageUrl}
+              onUploadComplete={setCoverImageUrl}
+              label="Upload Cover Image"
+            />
           </div>
 
           <div>
