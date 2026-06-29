@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 
+const API = import.meta.env.VITE_API_BASE_URL ?? "";
+
 /**
  * A reusable AWS S3 image uploader component.
  * 
@@ -32,7 +34,7 @@ export default function ImageUpload({ currentImage, onUploadComplete, className 
 
     try {
       // 1. Get presigned URL from our backend
-      const res = await fetch("http://localhost:5000/api/upload/presigned-url", {
+      const res = await fetch(`${API}/api/upload/presigned-url`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fileName: file.name, fileType: file.type }),

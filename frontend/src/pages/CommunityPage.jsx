@@ -86,13 +86,12 @@ function CreateClubModal({ onClose, onCreate }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("general");
-  const [coverType, setCoverType] = useState("preset"); // "preset" or "image"
-  const [coverImage, setCoverImage] = useState(COVER_OPTIONS[0]);
+  const [coverImage, setCoverImage] = useState("");
 
   function handleCreate(e) {
     e.preventDefault();
     if (!name.trim() || !description.trim()) return;
-    onCreate({ name: name.trim(), description: description.trim(), category, coverImage });
+    onCreate({ name: name.trim(), description: description.trim(), category, coverImage: coverImage || COVER_OPTIONS[0] });
     onClose();
   }
 
@@ -124,50 +123,16 @@ function CreateClubModal({ onClose, onCreate }) {
             </div>
           </div>
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Cover Image</label>
-              <div className="flex gap-1 bg-white/5 p-1 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => setCoverType("preset")}
-                  className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition ${coverType === "preset" ? "bg-violet-600 text-white" : "text-zinc-400 hover:text-white"}`}
-                >
-                  PRESET
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCoverType("image")}
-                  className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition ${coverType === "image" ? "bg-violet-600 text-white" : "text-zinc-400 hover:text-white"}`}
-                >
-                  UPLOAD
-                </button>
-              </div>
+            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Cover Image</label>
+            <div className="mt-2">
+              <ImageUpload
+                currentImage={coverImage}
+                onUploadComplete={setCoverImage}
+                label="Upload Club Banner"
+              />
             </div>
-            
-            {coverType === "preset" ? (
-              <div className="grid grid-cols-3 gap-2 mt-3">
-                {COVER_OPTIONS.map((url) => (
-                  <button key={url} type="button" onClick={() => setCoverImage(url)} className={`relative aspect-video overflow-hidden rounded-xl border-2 transition-all duration-150 ${coverImage === url ? "border-violet-500 shadow-lg shadow-violet-500/20" : "border-transparent opacity-60 hover:opacity-100"}`}>
-                    <img src={url} className="h-full w-full object-cover" alt="" />
-                    {coverImage === url && (
-                      <div className="absolute inset-0 grid place-items-center bg-violet-500/20">
-                        <svg className="h-5 w-5 text-white drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-3">
-                <ImageUpload
-                  currentImage={coverImage}
-                  onUploadComplete={setCoverImage}
-                  label="Upload Club Banner"
-                />
-              </div>
-            )}
           </div>
-          <button type="submit" disabled={coverType === "image" && !coverImage.startsWith("http")} className="btn-v w-full py-3 text-[15px] font-bold mt-2 disabled:opacity-50">Create Club</button>
+          <button type="submit" className="btn-v w-full py-3 text-[15px] font-bold mt-2">Create Club</button>
         </form>
       </div>
     </div>
