@@ -138,7 +138,6 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
             )}
           </div>
         )}
-        )}
       </div>
 
       {/* Footer: Likes & Replies */}
@@ -291,7 +290,6 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
           </div>
         )}
       </article>
-    </div>
   );
 }
 
