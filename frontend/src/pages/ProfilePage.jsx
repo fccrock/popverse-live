@@ -9,7 +9,7 @@ import { useCollections } from "../context/CollectionsContext";
 import { useClubs } from "../context/ClubsContext";
 import { api } from "../utils/api";
 
-const API = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE as API } from "../config.js";
 import { posterUrl } from "../utils/tmdb";
 
 

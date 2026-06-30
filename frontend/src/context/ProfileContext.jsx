@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 import { useAuth } from "./AuthContext";
 
 const ProfileContext = createContext(null);
-const API = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE as API } from "../config.js";
 
 
 

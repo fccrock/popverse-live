@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useCollections } from "../context/CollectionsContext";
 import ImageUpload from "../components/ImageUpload";
 
-const API = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE as API } from "../config.js";
 
 const CLUB_CATEGORIES = [
   { key: "all", label: "All" },

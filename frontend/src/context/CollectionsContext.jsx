@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef } f
 import { useAuth } from "./AuthContext";
 
 const CollectionsContext = createContext(null);
-const API = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE as API } from "../config.js";
 
 const SAVED_KEY = "pch_saved_collections";
 

@@ -1,7 +1,7 @@
 // src/utils/api.js
 // All requests go to our Express backend — the TMDB token never touches the browser.
 
-const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE as BASE } from "../config.js";
 
 async function apiFetch(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, options);

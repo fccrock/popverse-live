@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../utils/api";
 
-const API = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE as API } from "../config.js";
 import {
   getTitle,
   getYear,

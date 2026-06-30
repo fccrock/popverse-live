@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 
-const API = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE as API } from "../config.js";
 
 /**
  * A reusable AWS S3 image uploader component.

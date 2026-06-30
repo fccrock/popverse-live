@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../utils/api";
 import { getTitle, getYear, getMediaLabel, getRating, getResultHref, posterUrl } from "../utils/tmdb";
 
-const API = import.meta.env.VITE_API_BASE_URL ?? "";
+import { API_BASE as API } from "../config.js";
 
 function SearchIcon({ className = "h-5 w-5" }) {
   return (
