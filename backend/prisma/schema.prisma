@@ -209,5 +209,8 @@ model ReviewReply {
   review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   authorId  String
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    ReviewReply?  @relation("ReviewReplyToReply", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   ReviewReply[] @relation("ReviewReplyToReply")
   createdAt DateTime @default(now())
 }

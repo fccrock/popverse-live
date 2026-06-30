@@ -160,7 +160,7 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
 
         {/* Reply Button */}
         <button
-          onClick={() => isAuthenticated && setReplyingTo(replyingTo === review.id ? null : review.id)}
+          onClick={() => isAuthenticated && setReplyingTo(replyingTo?.reviewId === review.id && replyingTo?.parentId === null ? null : { reviewId: review.id, parentId: null })}
           className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-400 transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -172,44 +172,96 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
 
       {/* Replies List */}
       {review.replies?.length > 0 && (
-        <div className="mt-4 space-y-3 border-l-2 border-white/[0.05] pl-4">
+        <div className="mt-4 space-y-3">
           {review.replies.map(reply => {
             const replyAuthor = reply.author?.username || "user";
             return (
-              <div key={reply.id} className="group/reply flex items-start justify-between gap-3">
-                <div>
+              <div key={reply.id} className="relative flex items-start px-2 py-2 group/reply">
+                <div className="absolute left-[5px] top-0 h-[26px] w-[24px] rounded-bl-xl border-b-[2px] border-l-[2px] border-white/10" />
+                
+                <div className="ml-[34px] flex flex-1 flex-col relative z-10">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-zinc-300">@{replyAuthor}</span>
-                    <span className="text-[10px] text-zinc-600">{timeAgo(reply.createdAt)}</span>
+                    <span className="text-[12px] font-bold text-white">@{replyAuthor}</span>
+                    <span className="text-[10px] text-zinc-500">{timeAgo(reply.createdAt)}</span>
                   </div>
                   <p className="mt-0.5 text-[13px] text-zinc-400 leading-relaxed">{reply.content}</p>
+                  
+                  {/* Action Buttons for Level 1 */}
+                  <div className="mt-1 flex items-center gap-4">
+                    <button 
+                      onClick={() => { setReplyingTo({ reviewId: review.id, parentId: reply.id }); }}
+                      className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-wide"
+                    >
+                      Reply
+                    </button>
+                    {currentUsername && currentUsername.toLowerCase() === replyAuthor.toLowerCase() && (
+                      <button
+                        onClick={() => { if(window.confirm("Delete this reply?")) onDeleteReply(review.id, reply.id); }}
+                        className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide opacity-0 group-hover/reply:opacity-100"
+                        title="Delete reply"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Level 2 Sub-Replies */}
+                  {reply.replies && reply.replies.length > 0 && (
+                    <div className="relative mt-3 space-y-2">
+                      <div className="absolute left-[-15px] top-[-10px] bottom-[15px] w-[2px] bg-white/10" />
+                      
+                      {reply.replies.map((subR) => {
+                        const subAuthor = subR.author?.username || "user";
+                        return (
+                          <div key={subR.id} className="relative flex items-start py-1 group/subreply">
+                            <div className="absolute left-[-15px] top-0 h-[22px] w-[24px] rounded-bl-xl border-b-[2px] border-l-[2px] border-white/10" />
+                            
+                            <div className="ml-[18px] flex flex-1 flex-col relative z-10">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] font-bold text-white">@{subAuthor}</span>
+                                <span className="text-[9px] text-zinc-500">{timeAgo(subR.createdAt)}</span>
+                              </div>
+                              <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
+                              <div className="mt-1 flex items-center gap-4">
+                                <button 
+                                  onClick={() => { setReplyingTo({ reviewId: review.id, parentId: reply.id }); }}
+                                  className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
+                                >
+                                  Reply
+                                </button>
+                                {currentUsername && currentUsername.toLowerCase() === subAuthor.toLowerCase() && (
+                                  <button
+                                    onClick={() => { if(window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
+                                    className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide opacity-0 group-hover/subreply:opacity-100"
+                                    title="Delete reply"
+                                  >
+                                    Delete
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-                {currentUsername && currentUsername.toLowerCase() === replyAuthor.toLowerCase() && (
-                  <button
-                    onClick={() => onDeleteReply(review.id, reply.id)}
-                    className="opacity-0 group-hover/reply:opacity-100 flex items-center gap-1 rounded-lg p-1 text-[10px] font-bold text-zinc-600 transition hover:bg-rose-500/10 hover:text-rose-400"
-                    title="Delete reply"
-                  >
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                )}
               </div>
             );
           })}
         </div>
       )}
 
+
       {/* Reply Input Box */}
-      {replyingTo === review.id && (
-        <div className="mt-3">
+      {replyingTo?.reviewId === review.id && (
+        <div className="mt-3 ml-4">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               const val = e.target.replyInput.value;
               if (val.trim()) {
-                onReply(review.id, val.trim());
+                onReply(review.id, val.trim(), replyingTo?.parentId || null);
                 e.target.replyInput.value = "";
               }
             }}
@@ -222,16 +274,24 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
               className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
               placeholder="Write a reply..."
             />
-            <button
-              type="submit"
-              className={`shrink-0 rounded-xl px-3 py-1.5 text-[13px] font-bold text-white transition ${accentBg}`}
-            >
-              Reply
-            </button>
-          </form>
-        </div>
-      )}
-    </article>
+              <button
+                type="button"
+                onClick={() => setReplyingTo(null)}
+                className="shrink-0 rounded-xl px-3 py-1.5 text-[13px] font-bold text-zinc-400 hover:bg-white/[0.05] transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className={`shrink-0 rounded-xl px-3 py-1.5 text-[13px] font-bold text-white transition ${accentBg}`}
+              >
+                Reply
+              </button>
+            </form>
+          </div>
+        )}
+      </article>
+    </div>
   );
 }
 
@@ -334,18 +394,18 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
     }
   }
 
-  async function handleReplyReview(reviewId, content) {
+  async function handleReplyReview(reviewId, text, parentId = null) {
     const currentUsername = user?.preferredUsername || user?.username;
     if (!currentUsername) return;
     try {
       const res = await fetch(`${API}/api/reviews/${reviewId}/replies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, createdBy: currentUsername }),
+        body: JSON.stringify({ content: text, createdBy: currentUsername, parentId }),
       });
       if (res.ok) {
-        const reply = await res.json();
-        setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, replies: [...(r.replies || []), reply] } : r));
+        // Refresh reviews from DB to get populated tree
+        await fetchReviews();
         setReplyingTo(null);
       }
     } catch (e) {
@@ -358,7 +418,7 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
     try {
       const res = await fetch(`${API}/api/reviews/${reviewId}/replies/${replyId}`, { method: "DELETE" });
       if (res.ok) {
-        setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, replies: r.replies.filter(rep => rep.id !== replyId) } : r));
+        await fetchReviews();
       }
     } catch (e) {
       console.error("Failed to delete reply", e);

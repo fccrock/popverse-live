@@ -16,7 +16,17 @@ async function getUserReviews(req, res) {
       include: {
         author: true,
         likes: { include: { user: true } },
-        replies: { include: { author: true }, orderBy: { createdAt: "asc" } }
+        replies: {
+          where: { parentId: null },
+          include: {
+            author: true,
+            replies: {
+              include: { author: true },
+              orderBy: { createdAt: "asc" }
+            }
+          },
+          orderBy: { createdAt: "asc" }
+        }
       },
       orderBy: { createdAt: "desc" },
     });
@@ -38,7 +48,17 @@ async function getMediaReviews(req, res) {
       include: {
         author: true,
         likes: { include: { user: true } },
-        replies: { include: { author: true }, orderBy: { createdAt: "asc" } }
+        replies: {
+          where: { parentId: null },
+          include: {
+            author: true,
+            replies: {
+              include: { author: true },
+              orderBy: { createdAt: "asc" }
+            }
+          },
+          orderBy: { createdAt: "asc" }
+        }
       },
       orderBy: { createdAt: "desc" },
     });
@@ -84,7 +104,17 @@ async function upsertReview(req, res) {
       include: {
         author: true,
         likes: { include: { user: true } },
-        replies: { include: { author: true }, orderBy: { createdAt: "asc" } }
+        replies: {
+          where: { parentId: null },
+          include: {
+            author: true,
+            replies: {
+              include: { author: true },
+              orderBy: { createdAt: "asc" }
+            }
+          },
+          orderBy: { createdAt: "asc" }
+        }
       },
     });
 
@@ -145,7 +175,7 @@ async function toggleReviewLike(req, res) {
 async function createReviewReply(req, res) {
   try {
     const { reviewId } = req.params;
-    const { content, createdBy } = req.body;
+    const { content, createdBy, parentId } = req.body;
 
     let user = await prisma.user.findFirst({
       where: { username: { equals: createdBy, mode: "insensitive" } }
@@ -157,7 +187,7 @@ async function createReviewReply(req, res) {
     }
 
     const reply = await prisma.reviewReply.create({
-      data: { content, reviewId, authorId: user.id },
+      data: { content, reviewId, authorId: user.id, parentId: parentId || null },
       include: { author: true }
     });
     res.json(reply);

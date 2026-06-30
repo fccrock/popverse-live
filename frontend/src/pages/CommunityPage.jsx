@@ -436,7 +436,12 @@ export default function CommunityPage() {
             ].map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => { setSection(tab.key); setActiveCategory("all"); setActiveTag("all"); }}
+                onClick={() => { 
+                  setSection(tab.key); 
+                  setActiveCategory("all"); 
+                  setActiveTag("all"); 
+                  setSearchParams({ tab: tab.key }, { replace: true });
+                }}
                 className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
                   section === tab.key
                     ? "bg-violet-500/15 text-violet-300 shadow-inner shadow-violet-500/10"

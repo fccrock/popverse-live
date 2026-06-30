@@ -56,6 +56,13 @@ export default function SignupPage() {
     
     const result = await register(email, username, password);
     if (result.success) {
+      // Reserve username in Prisma immediately
+      try {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ""}/api/users/${username}`);
+      } catch (e) {
+        console.warn("Failed to reserve username in Prisma", e);
+      }
+
       if (result.nextStep?.signUpStep === "CONFIRM_SIGN_UP") {
         setStep("confirm");
         setIsLoading(false);
