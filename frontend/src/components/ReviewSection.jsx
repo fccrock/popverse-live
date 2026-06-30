@@ -1,5 +1,5 @@
 // src/components/ReviewSection.jsx
-// Fully database-backed review system. Reviews visible to all users.
+// Fully database-backed review system with threaded replies like club discussions.
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -53,8 +53,21 @@ function StarSelector({ value, onChange, accent }) {
 
 // ── Single review card ────────────────────────────────────────────────────────
 
-function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete, onLike, onReply, onDeleteReply, replyingTo, setReplyingTo }) {
+function ReviewCard({
+  review,
+  accent,
+  isAuthenticated,
+  currentUsername,
+  onDelete,
+  onLike,
+  onReply,
+  onDeleteReply,
+  activeReply,
+  setActiveReply,
+}) {
   const [revealed, setRevealed] = useState(false);
+  const [replyText, setReplyText] = useState("");
+
   const accentStar  = accent === "rose" ? "text-rose-400" : "text-violet-400";
   const accentBadge = accent === "rose"
     ? "bg-rose-500/10 text-rose-300 ring-1 ring-rose-500/20"
@@ -63,17 +76,26 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
     ? "from-rose-600 to-violet-600"
     : "from-violet-600 to-fuchsia-600";
   const accentBg = accent === "rose"
-    ? "bg-rose-600 hover:bg-rose-500 shadow-rose-900/30"
-    : "bg-violet-600 hover:bg-violet-500 shadow-violet-900/30";
+    ? "bg-rose-600 hover:bg-rose-500"
+    : "bg-violet-600 hover:bg-violet-500";
 
   const username = review.author?.username || review.username || "user";
+  const iLiked = !!(currentUsername && review.likes?.some(l => l.user?.username?.toLowerCase() === currentUsername.toLowerCase()));
+  const isReplyingToThis = activeReply?.reviewId === review.id;
+
+  function handleSubmitReply(e) {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+    onReply(review.id, replyText.trim(), activeReply?.parentId || null);
+    setReplyText("");
+    setActiveReply(null);
+  }
 
   return (
     <article className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-5 shadow-xl shadow-black/10 backdrop-blur-sm transition-all duration-200 hover:border-white/[0.10] hover:bg-white/[0.04]">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <Link to={`/profile/${username}`} className="flex items-center gap-3 group">
-          {/* Avatar */}
           <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-xs font-black text-white shadow-lg`}>
             {username.slice(0, 2).toUpperCase()}
           </div>
@@ -89,13 +111,11 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
               Spoiler
             </span>
           )}
-          {/* Stars */}
           <div className="flex items-center gap-0.5">
             {[1, 2, 3, 4, 5].map((s) => (
               <span key={s} className={`text-sm ${s <= review.rating ? accentStar : "text-zinc-800"}`}>★</span>
             ))}
           </div>
-          {/* Delete button — only for the review author */}
           {currentUsername && currentUsername.toLowerCase() === username.toLowerCase() && (
             <button
               onClick={() => onDelete(review.id)}
@@ -140,64 +160,87 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
         )}
       </div>
 
-      {/* Footer: Likes & Replies */}
+      {/* Footer: Likes & Reply button */}
       <div className="mt-4 flex items-center gap-4">
         {/* Like Button */}
         <button
-          onClick={() => isAuthenticated && onLike(review.id)}
+          onClick={() => {
+            if (!isAuthenticated) return;
+            onLike(review.id);
+          }}
           className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${
-            currentUsername && review.likes?.some(l => l.user?.username === currentUsername)
-              ? accentStar
-              : "text-zinc-600 hover:text-zinc-400"
+            iLiked ? accentStar : "text-zinc-600 hover:text-zinc-400"
           }`}
         >
-          <svg className="h-4 w-4" fill={currentUsername && review.likes?.some(l => l.user?.username === currentUsername) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <svg className="h-4 w-4" fill={iLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
           </svg>
-          {review.likes?.length > 0 && review.likes.length}
+          {(review.likes?.length || 0) > 0 && review.likes.length}
         </button>
 
         {/* Reply Button */}
-        <button
-          onClick={() => isAuthenticated && setReplyingTo(replyingTo?.reviewId === review.id && replyingTo?.parentId === null ? null : { reviewId: review.id, parentId: null })}
-          className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-400 transition-colors"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-          </svg>
-          {review.replies?.length > 0 && review.replies.length} Reply
-        </button>
+        {isAuthenticated && (
+          <button
+            onClick={() => {
+              if (isReplyingToThis && activeReply?.parentId === null) {
+                setActiveReply(null);
+                setReplyText("");
+              } else {
+                setActiveReply({ reviewId: review.id, parentId: null });
+                setReplyText("");
+              }
+            }}
+            className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-400 transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+            </svg>
+            {(review.replies?.length || 0) > 0 && review.replies.length} Reply
+          </button>
+        )}
       </div>
 
-      {/* Replies List */}
+      {/* ── Threaded Replies (like Club Discussion) ── */}
       {review.replies?.length > 0 && (
-        <div className="mt-4 space-y-3">
-          {review.replies.map(reply => {
+        <div className="mt-4 space-y-1">
+          {review.replies.map((reply) => {
             const replyAuthor = reply.author?.username || "user";
+            const isReplyingToLevel1 = activeReply?.reviewId === review.id && activeReply?.parentId === reply.id;
             return (
-              <div key={reply.id} className="relative flex items-start px-2 py-2 group/reply">
-                <div className="absolute left-[5px] top-0 h-[26px] w-[24px] rounded-bl-xl border-b-[2px] border-l-[2px] border-white/10" />
-                
-                <div className="ml-[34px] flex flex-1 flex-col relative z-10">
+              <div key={reply.id} className="relative flex items-start px-3 py-2">
+                {/* Connector line */}
+                <div className="absolute left-[14px] top-0 h-[28px] w-[20px] rounded-bl-xl border-b-[2px] border-l-[2px] border-white/[0.08]" />
+
+                <div className="ml-[38px] flex flex-1 flex-col relative z-10">
+                  {/* Level 1 reply header */}
                   <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-bold text-white">@{replyAuthor}</span>
-                    <span className="text-[10px] text-zinc-500">{timeAgo(reply.createdAt)}</span>
+                    <span className="text-[12px] font-bold text-zinc-200">@{replyAuthor}</span>
+                    <span className="text-[10px] text-zinc-600">{timeAgo(reply.createdAt)}</span>
                   </div>
                   <p className="mt-0.5 text-[13px] text-zinc-400 leading-relaxed">{reply.content}</p>
-                  
-                  {/* Action Buttons for Level 1 */}
-                  <div className="mt-1 flex items-center gap-4">
-                    <button 
-                      onClick={() => { setReplyingTo({ reviewId: review.id, parentId: reply.id }); }}
-                      className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-wide"
-                    >
-                      Reply
-                    </button>
+
+                  {/* Action row */}
+                  <div className="mt-1 flex items-center gap-3">
+                    {isAuthenticated && (
+                      <button
+                        onClick={() => {
+                          if (isReplyingToLevel1) {
+                            setActiveReply(null);
+                            setReplyText("");
+                          } else {
+                            setActiveReply({ reviewId: review.id, parentId: reply.id });
+                            setReplyText(`@${replyAuthor} `);
+                          }
+                        }}
+                        className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-wide"
+                      >
+                        Reply
+                      </button>
+                    )}
                     {currentUsername && currentUsername.toLowerCase() === replyAuthor.toLowerCase() && (
                       <button
-                        onClick={() => { if(window.confirm("Delete this reply?")) onDeleteReply(review.id, reply.id); }}
-                        className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide opacity-0 group-hover/reply:opacity-100"
-                        title="Delete reply"
+                        onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, reply.id); }}
+                        className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
                       >
                         Delete
                       </button>
@@ -206,33 +249,35 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
 
                   {/* Level 2 Sub-Replies */}
                   {reply.replies && reply.replies.length > 0 && (
-                    <div className="relative mt-3 space-y-2">
-                      <div className="absolute left-[-15px] top-[-10px] bottom-[15px] w-[2px] bg-white/10" />
-                      
+                    <div className="relative mt-2 space-y-1">
+                      <div className="absolute left-[-16px] top-[-8px] bottom-[10px] w-[2px] bg-white/[0.07]" />
                       {reply.replies.map((subR) => {
                         const subAuthor = subR.author?.username || "user";
                         return (
-                          <div key={subR.id} className="relative flex items-start py-1 group/subreply">
-                            <div className="absolute left-[-15px] top-0 h-[22px] w-[24px] rounded-bl-xl border-b-[2px] border-l-[2px] border-white/10" />
-                            
-                            <div className="ml-[18px] flex flex-1 flex-col relative z-10">
+                          <div key={subR.id} className="relative flex items-start py-1.5">
+                            <div className="absolute left-[-16px] top-0 h-[24px] w-[20px] rounded-bl-xl border-b-[2px] border-l-[2px] border-white/[0.08]" />
+                            <div className="ml-[14px] flex flex-1 flex-col relative z-10">
                               <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold text-white">@{subAuthor}</span>
-                                <span className="text-[9px] text-zinc-500">{timeAgo(subR.createdAt)}</span>
+                                <span className="text-[11px] font-bold text-zinc-300">@{subAuthor}</span>
+                                <span className="text-[9px] text-zinc-600">{timeAgo(subR.createdAt)}</span>
                               </div>
                               <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
-                              <div className="mt-1 flex items-center gap-4">
-                                <button 
-                                  onClick={() => { setReplyingTo({ reviewId: review.id, parentId: reply.id }); }}
-                                  className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
-                                >
-                                  Reply
-                                </button>
+                              <div className="mt-1 flex items-center gap-3">
+                                {isAuthenticated && (
+                                  <button
+                                    onClick={() => {
+                                      setActiveReply({ reviewId: review.id, parentId: reply.id });
+                                      setReplyText(`@${subAuthor} `);
+                                    }}
+                                    className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
+                                  >
+                                    Reply
+                                  </button>
+                                )}
                                 {currentUsername && currentUsername.toLowerCase() === subAuthor.toLowerCase() && (
                                   <button
-                                    onClick={() => { if(window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
-                                    className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide opacity-0 group-hover/subreply:opacity-100"
-                                    title="Delete reply"
+                                    onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
+                                    className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
                                   >
                                     Delete
                                   </button>
@@ -244,6 +289,34 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
                       })}
                     </div>
                   )}
+
+                  {/* Reply form for level 1 reply */}
+                  {isReplyingToLevel1 && (
+                    <form onSubmit={handleSubmitReply} className="mt-2 flex gap-2">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={replyText}
+                        onChange={e => setReplyText(e.target.value)}
+                        className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
+                        placeholder={`Replying to @${replyAuthor}...`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => { setActiveReply(null); setReplyText(""); }}
+                        className="shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-zinc-400 hover:bg-white/[0.05] transition"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!replyText.trim()}
+                        className={`shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}
+                      >
+                        Reply
+                      </button>
+                    </form>
+                  )}
                 </div>
               </div>
             );
@@ -251,45 +324,34 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
         </div>
       )}
 
-
-      {/* Reply Input Box */}
-      {replyingTo?.reviewId === review.id && (
-        <div className="mt-3 ml-4">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const val = e.target.replyInput.value;
-              if (val.trim()) {
-                onReply(review.id, val.trim(), replyingTo?.parentId || null);
-                e.target.replyInput.value = "";
-              }
-            }}
-            className="flex items-center gap-2"
+      {/* Main "Reply to review" form */}
+      {isReplyingToThis && activeReply?.parentId === null && (
+        <form onSubmit={handleSubmitReply} className="mt-3 flex gap-2">
+          <input
+            type="text"
+            autoFocus
+            value={replyText}
+            onChange={e => setReplyText(e.target.value)}
+            className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
+            placeholder="Write a reply..."
+          />
+          <button
+            type="button"
+            onClick={() => { setActiveReply(null); setReplyText(""); }}
+            className="shrink-0 rounded-xl px-3 py-1.5 text-[13px] font-bold text-zinc-400 hover:bg-white/[0.05] transition"
           >
-            <input
-              name="replyInput"
-              type="text"
-              autoFocus
-              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
-              placeholder="Write a reply..."
-            />
-              <button
-                type="button"
-                onClick={() => setReplyingTo(null)}
-                className="shrink-0 rounded-xl px-3 py-1.5 text-[13px] font-bold text-zinc-400 hover:bg-white/[0.05] transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className={`shrink-0 rounded-xl px-3 py-1.5 text-[13px] font-bold text-white transition ${accentBg}`}
-              >
-                Reply
-              </button>
-            </form>
-          </div>
-        )}
-      </article>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={!replyText.trim()}
+            className={`shrink-0 rounded-xl px-3 py-1.5 text-[13px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}
+          >
+            Reply
+          </button>
+        </form>
+      )}
+    </article>
   );
 }
 
@@ -304,17 +366,20 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
   const mediaType = parts[0]; // "movie" or "tv"
   const mediaIdNum = parts.slice(1).join("-"); // "123"
 
-  const [reviews, setReviews]       = useState([]);
+  const [reviews, setReviews]           = useState([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(true);
-  const [filter, setFilter]         = useState("all");
-  const [rating, setRating]         = useState(0);
-  const [text, setText]             = useState("");
-  const [isSpoiler, setIsSpoiler]   = useState(false);
-  const [formError, setFormError]   = useState("");
+  const [filter, setFilter]             = useState("all");
+  const [rating, setRating]             = useState(0);
+  const [text, setText]                 = useState("");
+  const [isSpoiler, setIsSpoiler]       = useState(false);
+  const [formError, setFormError]       = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted]   = useState(false);
-  
-  const [replyingTo, setReplyingTo] = useState(null);
+  const [submitted, setSubmitted]       = useState(false);
+
+  // activeReply is { reviewId, parentId } or null
+  const [activeReply, setActiveReply] = useState(null);
+
+  const currentUsername = user?.preferredUsername || user?.username || null;
 
   // Load reviews from DB
   const fetchReviews = useCallback(async () => {
@@ -367,33 +432,37 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
   }
 
   async function handleLikeReview(reviewId) {
-    const currentUsername = user?.preferredUsername || user?.username;
     if (!currentUsername) return;
+    // Optimistic update first
+    setReviews(prev => prev.map(r => {
+      if (r.id !== reviewId) return r;
+      const currentLikes = r.likes || [];
+      const alreadyLiked = currentLikes.some(l => l.user?.username?.toLowerCase() === currentUsername.toLowerCase());
+      const filtered = currentLikes.filter(l => l.user?.username?.toLowerCase() !== currentUsername.toLowerCase());
+      return {
+        ...r,
+        likes: alreadyLiked ? filtered : [...filtered, { user: { username: currentUsername } }]
+      };
+    }));
+
     try {
       const res = await fetch(`${API}/api/reviews/${reviewId}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: currentUsername }),
       });
-      if (res.ok) {
-        const { liked } = await res.json();
-        setReviews(prev => prev.map(r => {
-          if (r.id !== reviewId) return r;
-          const currentLikes = r.likes || [];
-          const filtered = currentLikes.filter(l => l.user?.username !== currentUsername);
-          return {
-            ...r,
-            likes: liked ? [...filtered, { user: { username: currentUsername } }] : filtered
-          };
-        }));
+      if (!res.ok) {
+        // Revert on failure
+        await fetchReviews();
       }
+      // On success, server returns {liked: true/false} - our optimistic update is already correct
     } catch (e) {
       console.error("Failed to like review", e);
+      await fetchReviews(); // revert
     }
   }
 
   async function handleReplyReview(reviewId, text, parentId = null) {
-    const currentUsername = user?.preferredUsername || user?.username;
     if (!currentUsername) return;
     try {
       const res = await fetch(`${API}/api/reviews/${reviewId}/replies`, {
@@ -402,9 +471,12 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
         body: JSON.stringify({ content: text, createdBy: currentUsername, parentId }),
       });
       if (res.ok) {
-        // Refresh reviews from DB to get populated tree
+        // Refresh reviews from DB to get the full populated tree
         await fetchReviews();
-        setReplyingTo(null);
+        setActiveReply(null);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        console.error("Failed to post reply:", err);
       }
     } catch (e) {
       console.error("Failed to reply", e);
@@ -429,7 +501,7 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
       setFormError("You must be signed in to write a review.");
       return;
     }
-    const postUsername = user?.preferredUsername || user?.username || "Anonymous";
+    const postUsername = currentUsername || "Anonymous";
     if (rating === 0)            { setFormError("Please select a star rating."); return; }
     if (!text.trim())            { setFormError("Please write your review."); return; }
     if (text.trim().length < 10) { setFormError("Review must be at least 10 characters."); return; }
@@ -453,7 +525,6 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
         setRating(0); setText(""); setIsSpoiler(false);
         setSubmitted(true);
         setTimeout(() => setSubmitted(false), 3000);
-        // Refresh reviews from DB
         await fetchReviews();
       } else {
         const err = await res.json();
@@ -521,7 +592,7 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
             <div className="flex items-center gap-2 w-fit rounded-full border border-white/[0.07] bg-white/[0.04] px-3 py-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs text-zinc-500">Posting as</span>
-              <span className="text-xs font-black text-white">{user?.preferredUsername || user?.username}</span>
+              <span className="text-xs font-black text-white">{currentUsername}</span>
             </div>
 
             <div>
@@ -624,13 +695,13 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
               review={review}
               accent={accentColor}
               isAuthenticated={isAuthenticated}
-              currentUsername={user?.preferredUsername || user?.username}
+              currentUsername={currentUsername}
               onDelete={handleDelete}
               onLike={handleLikeReview}
               onReply={handleReplyReview}
               onDeleteReply={handleDeleteReply}
-              replyingTo={replyingTo}
-              setReplyingTo={setReplyingTo}
+              activeReply={activeReply}
+              setActiveReply={setActiveReply}
             />
           ))}
         </div>

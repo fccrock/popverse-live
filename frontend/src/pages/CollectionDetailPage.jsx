@@ -137,7 +137,7 @@ export default function CollectionDetailPage() {
 
   const [guestWatched, setGuestWatched] = useState(new Set());
 
-  const currentUsername = user?.preferredUsername;
+  const currentUsername = user?.preferredUsername || user?.username || null;
 
   /* ── Fetch ── */
   useEffect(() => {
@@ -192,21 +192,37 @@ export default function CollectionDetailPage() {
   }, [id]);
 
   /* ── Handlers ── */
-  function handleLike() {
-    if (!isAuthenticated) return;
-    toggleCollectionLike(id);
-    
-    // Optimistic local update for public collections not in myCollections
-    if (!isOwner) {
-      setCollection(prev => {
-        if (!prev) return prev;
-        const currentLikes = prev.likes || [];
-        const filtered = currentLikes.filter(l => l.user?.username !== currentUsername);
-        return {
-          ...prev,
-          likes: likedByMe ? filtered : [...filtered, { user: { username: currentUsername } }]
-        };
+  async function handleLike() {
+    if (!isAuthenticated || !currentUsername) return;
+
+    // Optimistic update immediately
+    setCollection(prev => {
+      if (!prev) return prev;
+      const currentLikes = prev.likes || [];
+      const alreadyLiked = currentLikes.some(l => l.user?.username?.toLowerCase() === currentUsername.toLowerCase());
+      const filtered = currentLikes.filter(l => l.user?.username?.toLowerCase() !== currentUsername.toLowerCase());
+      return {
+        ...prev,
+        likes: alreadyLiked ? filtered : [...filtered, { user: { username: currentUsername } }]
+      };
+    });
+
+    try {
+      const res = await fetch(`${API}/api/collections/${id}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUsername }),
       });
+      if (!res.ok) throw new Error("Failed to toggle like");
+      // Also update context for owner's collections view
+      toggleCollectionLike(id);
+    } catch (e) {
+      console.error("Failed to toggle like:", e);
+      // Revert by re-fetching
+      fetch(`${API}/api/collections/${id}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data) setCollection(data); })
+        .catch(() => {});
     }
   }
 
