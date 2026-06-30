@@ -40,6 +40,20 @@ export default function SignupPage() {
 
     setIsLoading(true);
     
+    try {
+      const checkRes = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ""}/api/users/check/${username}`);
+      if (checkRes.ok) {
+        const checkData = await checkRes.json();
+        if (!checkData.available) {
+          setError("Username is already taken");
+          setIsLoading(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Could not check username uniqueness", err);
+    }
+    
     const result = await register(email, username, password);
     if (result.success) {
       if (result.nextStep?.signUpStep === "CONFIRM_SIGN_UP") {

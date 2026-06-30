@@ -220,10 +220,15 @@ async function toggleCollectionLike(req, res) {
     const { collectionId } = req.params;
     const { username } = req.body;
 
-    const user = await prisma.user.findFirst({
+    let user = await prisma.user.findFirst({
       where: { username: { equals: username, mode: "insensitive" } }
     });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    
+    if (!user) {
+      user = await prisma.user.create({
+        data: { cognitoId: username, username }
+      });
+    }
 
     const existing = await prisma.collectionLike.findUnique({
       where: { collectionId_userId: { collectionId, userId: user.id } }

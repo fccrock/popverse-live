@@ -113,10 +113,14 @@ async function toggleReviewLike(req, res) {
     const { reviewId } = req.params;
     const { username } = req.body;
 
-    const user = await prisma.user.findFirst({
+    let user = await prisma.user.findFirst({
       where: { username: { equals: username, mode: "insensitive" } }
     });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      user = await prisma.user.create({
+        data: { cognitoId: username, username }
+      });
+    }
 
     const existing = await prisma.reviewLike.findUnique({
       where: { reviewId_userId: { reviewId, userId: user.id } }
@@ -143,10 +147,14 @@ async function createReviewReply(req, res) {
     const { reviewId } = req.params;
     const { content, createdBy } = req.body;
 
-    const user = await prisma.user.findFirst({
+    let user = await prisma.user.findFirst({
       where: { username: { equals: createdBy, mode: "insensitive" } }
     });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      user = await prisma.user.create({
+        data: { cognitoId: createdBy, username: createdBy }
+      });
+    }
 
     const reply = await prisma.reviewReply.create({
       data: { content, reviewId, authorId: user.id },

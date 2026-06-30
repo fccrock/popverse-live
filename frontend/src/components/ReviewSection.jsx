@@ -62,6 +62,9 @@ function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete
   const avatarGrad = accent === "rose"
     ? "from-rose-600 to-violet-600"
     : "from-violet-600 to-fuchsia-600";
+  const accentBg = accent === "rose"
+    ? "bg-rose-600 hover:bg-rose-500 shadow-rose-900/30"
+    : "bg-violet-600 hover:bg-violet-500 shadow-violet-900/30";
 
   const username = review.author?.username || review.username || "user";
 

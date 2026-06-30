@@ -145,10 +145,25 @@ async function unfollowUser(req, res) {
   }
 }
 
+// Check if a username is available
+async function checkUsername(req, res) {
+  try {
+    const { username } = req.params;
+    const existing = await prisma.user.findFirst({
+      where: { username: { equals: username, mode: 'insensitive' } }
+    });
+    res.json({ available: !existing });
+  } catch (error) {
+    console.error("Error checking username:", error);
+    res.status(500).json({ error: "Failed to check username" });
+  }
+}
+
 module.exports = {
   getProfile,
   updateProfile,
   searchUsers,
   followUser,
   unfollowUser,
+  checkUsername
 };
