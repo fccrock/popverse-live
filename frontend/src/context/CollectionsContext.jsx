@@ -187,6 +187,34 @@ export function CollectionsProvider({ children }) {
     }
   }, [collections, updateLocal, loadCollections]);
 
+  // ── Toggle collection like ────────────────────────────────────────────────
+  const toggleCollectionLike = useCallback(async (colId) => {
+    if (!currentUsername) return;
+    try {
+      const res = await fetch(`${API}/api/collections/${colId}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUsername }),
+      });
+      if (!res.ok) throw new Error("Failed to toggle like");
+      
+      const { liked } = await res.json();
+      
+      // Update local state optimism
+      updateLocal(prev => prev.map(c => {
+        if (c.id !== colId) return c;
+        const currentLikes = c.likes || [];
+        const filtered = currentLikes.filter(l => l.user?.username !== currentUsername);
+        return {
+          ...c,
+          likes: liked ? [...filtered, { user: { username: currentUsername } }] : filtered
+        };
+      }));
+    } catch (e) {
+      console.error("toggleCollectionLike failed:", e);
+    }
+  }, [currentUsername, updateLocal]);
+
   // ── Delete collection ─────────────────────────────────────────────────────
   const deleteCollection = useCallback(async (colId) => {
     const col = collections.find(c => c.id === colId);
@@ -399,6 +427,7 @@ export function CollectionsProvider({ children }) {
       addToCollection,
       removeFromCollection,
       toggleWatched,
+      toggleCollectionLike,
       isInWatchlist,
       getCollectionsForMedia,
       toggleWatchlist,

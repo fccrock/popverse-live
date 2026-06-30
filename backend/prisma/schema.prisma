@@ -30,6 +30,9 @@ model User {
   ClubDiscussion  ClubDiscussion[]
   DiscussionReply DiscussionReply[]
   reviews         Review[]
+  CollectionLike  CollectionLike[]
+  ReviewLike      ReviewLike[]
+  ReviewReply     ReviewReply[]
 
   followers       UserFollows[] @relation("following")
   following       UserFollows[] @relation("follower")
@@ -59,6 +62,18 @@ model Collection {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   items            CollectionItem[]
+  likes            CollectionLike[]
+}
+
+model CollectionLike {
+  id           String     @id @default(uuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([collectionId, userId])
 }
 
 model CollectionItem {
@@ -167,9 +182,32 @@ model Review {
   mediaType String   // "movie" | "tv"
   rating    Float
   text      String
-  isSpoiler Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isSpoiler Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  likes     ReviewLike[]
+  replies   ReviewReply[]
 
   @@unique([authorId, mediaId, mediaType])
+}
+
+model ReviewLike {
+  id        String   @id @default(uuid())
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, userId])
+}
+
+model ReviewReply {
+  id        String   @id @default(uuid())
+  content   String
+  reviewId  String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }

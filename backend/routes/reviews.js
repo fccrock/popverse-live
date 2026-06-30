@@ -14,4 +14,14 @@ router.post("/", reviewsController.upsertReview);
 // Delete a review
 router.delete("/:reviewId", reviewsController.deleteReview);
 
+// Toggle a like on a review
+router.post("/:reviewId/like", reviewsController.toggleReviewLike);
+
+// Reply to a review
+router.post("/:reviewId/replies", reviewsController.createReviewReply);
+
+// Delete a review reply
+router.delete("/:reviewId/replies/:replyId", reviewsController.deleteReviewReply);
+
+
 module.exports = router;

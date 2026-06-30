@@ -13,7 +13,7 @@ async function getUserCollections(req, res) {
 
     const collections = await prisma.collection.findMany({
       where: { userId: user.id },
-      include: { items: true },
+      include: { items: true, likes: { include: { user: true } } },
       orderBy: { createdAt: "asc" },
     });
 
@@ -31,7 +31,8 @@ async function getPublicCollections(req, res) {
       where: { isPublic: true },
       include: { 
         items: true,
-        user: true 
+        user: true,
+        likes: { include: { user: true } }
       },
       orderBy: { createdAt: "desc" },
       take: 50,
@@ -203,13 +204,43 @@ async function getCollectionById(req, res) {
     const { collectionId } = req.params;
     const collection = await prisma.collection.findUnique({
       where: { id: collectionId },
-      include: { items: true, user: true },
+      include: { items: true, user: true, likes: { include: { user: true } } },
     });
     if (!collection) return res.status(404).json({ error: "Collection not found" });
     res.json({ ...collection, createdBy: collection.user?.username || null });
   } catch (error) {
     console.error("Error fetching collection:", error);
     res.status(500).json({ error: "Failed to fetch collection" });
+  }
+}
+
+// Toggle collection like
+async function toggleCollectionLike(req, res) {
+  try {
+    const { collectionId } = req.params;
+    const { username } = req.body;
+
+    const user = await prisma.user.findFirst({
+      where: { username: { equals: username, mode: "insensitive" } }
+    });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const existing = await prisma.collectionLike.findUnique({
+      where: { collectionId_userId: { collectionId, userId: user.id } }
+    });
+
+    if (existing) {
+      await prisma.collectionLike.delete({ where: { id: existing.id } });
+      res.json({ liked: false });
+    } else {
+      await prisma.collectionLike.create({
+        data: { collectionId, userId: user.id }
+      });
+      res.json({ liked: true });
+    }
+  } catch (error) {
+    console.error("Error toggling collection like:", error);
+    res.status(500).json({ error: "Failed to toggle collection like" });
   }
 }
 
@@ -223,4 +254,5 @@ module.exports = {
   deleteCollection,
   removeItem,
   toggleItemWatched,
+  toggleCollectionLike,
 };

@@ -53,7 +53,7 @@ function StarSelector({ value, onChange, accent }) {
 
 // ── Single review card ────────────────────────────────────────────────────────
 
-function ReviewCard({ review, accent, currentUsername, onDelete }) {
+function ReviewCard({ review, accent, isAuthenticated, currentUsername, onDelete, onLike, onReply, onDeleteReply, replyingTo, setReplyingTo }) {
   const [revealed, setRevealed] = useState(false);
   const accentStar  = accent === "rose" ? "text-rose-400" : "text-violet-400";
   const accentBadge = accent === "rose"
@@ -135,7 +135,99 @@ function ReviewCard({ review, accent, currentUsername, onDelete }) {
             )}
           </div>
         )}
+        )}
       </div>
+
+      {/* Footer: Likes & Replies */}
+      <div className="mt-4 flex items-center gap-4">
+        {/* Like Button */}
+        <button
+          onClick={() => isAuthenticated && onLike(review.id)}
+          className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${
+            currentUsername && review.likes?.some(l => l.user?.username === currentUsername)
+              ? accentStar
+              : "text-zinc-600 hover:text-zinc-400"
+          }`}
+        >
+          <svg className="h-4 w-4" fill={currentUsername && review.likes?.some(l => l.user?.username === currentUsername) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+          </svg>
+          {review.likes?.length > 0 && review.likes.length}
+        </button>
+
+        {/* Reply Button */}
+        <button
+          onClick={() => isAuthenticated && setReplyingTo(replyingTo === review.id ? null : review.id)}
+          className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-400 transition-colors"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+          </svg>
+          {review.replies?.length > 0 && review.replies.length} Reply
+        </button>
+      </div>
+
+      {/* Replies List */}
+      {review.replies?.length > 0 && (
+        <div className="mt-4 space-y-3 border-l-2 border-white/[0.05] pl-4">
+          {review.replies.map(reply => {
+            const replyAuthor = reply.author?.username || "user";
+            return (
+              <div key={reply.id} className="group/reply flex items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-zinc-300">@{replyAuthor}</span>
+                    <span className="text-[10px] text-zinc-600">{timeAgo(reply.createdAt)}</span>
+                  </div>
+                  <p className="mt-0.5 text-[13px] text-zinc-400 leading-relaxed">{reply.content}</p>
+                </div>
+                {currentUsername && currentUsername.toLowerCase() === replyAuthor.toLowerCase() && (
+                  <button
+                    onClick={() => onDeleteReply(review.id, reply.id)}
+                    className="opacity-0 group-hover/reply:opacity-100 flex items-center gap-1 rounded-lg p-1 text-[10px] font-bold text-zinc-600 transition hover:bg-rose-500/10 hover:text-rose-400"
+                    title="Delete reply"
+                  >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Reply Input Box */}
+      {replyingTo === review.id && (
+        <div className="mt-3">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const val = e.target.replyInput.value;
+              if (val.trim()) {
+                onReply(review.id, val.trim());
+                e.target.replyInput.value = "";
+              }
+            }}
+            className="flex items-center gap-2"
+          >
+            <input
+              name="replyInput"
+              type="text"
+              autoFocus
+              className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
+              placeholder="Write a reply..."
+            />
+            <button
+              type="submit"
+              className={`shrink-0 rounded-xl px-3 py-1.5 text-[13px] font-bold text-white transition ${accentBg}`}
+            >
+              Reply
+            </button>
+          </form>
+        </div>
+      )}
     </article>
   );
 }
@@ -160,6 +252,8 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
   const [formError, setFormError]   = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted]   = useState(false);
+  
+  const [replyingTo, setReplyingTo] = useState(null);
 
   // Load reviews from DB
   const fetchReviews = useCallback(async () => {
@@ -208,6 +302,63 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
       }
     } catch (e) {
       console.error("Failed to delete review", e);
+    }
+  }
+
+  async function handleLikeReview(reviewId) {
+    const currentUsername = user?.preferredUsername || user?.username;
+    if (!currentUsername) return;
+    try {
+      const res = await fetch(`${API}/api/reviews/${reviewId}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUsername }),
+      });
+      if (res.ok) {
+        const { liked } = await res.json();
+        setReviews(prev => prev.map(r => {
+          if (r.id !== reviewId) return r;
+          const currentLikes = r.likes || [];
+          const filtered = currentLikes.filter(l => l.user?.username !== currentUsername);
+          return {
+            ...r,
+            likes: liked ? [...filtered, { user: { username: currentUsername } }] : filtered
+          };
+        }));
+      }
+    } catch (e) {
+      console.error("Failed to like review", e);
+    }
+  }
+
+  async function handleReplyReview(reviewId, content) {
+    const currentUsername = user?.preferredUsername || user?.username;
+    if (!currentUsername) return;
+    try {
+      const res = await fetch(`${API}/api/reviews/${reviewId}/replies`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, createdBy: currentUsername }),
+      });
+      if (res.ok) {
+        const reply = await res.json();
+        setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, replies: [...(r.replies || []), reply] } : r));
+        setReplyingTo(null);
+      }
+    } catch (e) {
+      console.error("Failed to reply", e);
+    }
+  }
+
+  async function handleDeleteReply(reviewId, replyId) {
+    if (!window.confirm("Delete this reply?")) return;
+    try {
+      const res = await fetch(`${API}/api/reviews/${reviewId}/replies/${replyId}`, { method: "DELETE" });
+      if (res.ok) {
+        setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, replies: r.replies.filter(rep => rep.id !== replyId) } : r));
+      }
+    } catch (e) {
+      console.error("Failed to delete reply", e);
     }
   }
 
@@ -411,8 +562,14 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
               key={review.id}
               review={review}
               accent={accentColor}
+              isAuthenticated={isAuthenticated}
               currentUsername={user?.preferredUsername || user?.username}
               onDelete={handleDelete}
+              onLike={handleLikeReview}
+              onReply={handleReplyReview}
+              onDeleteReply={handleDeleteReply}
+              replyingTo={replyingTo}
+              setReplyingTo={setReplyingTo}
             />
           ))}
         </div>

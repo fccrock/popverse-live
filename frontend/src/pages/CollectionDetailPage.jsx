@@ -119,6 +119,7 @@ export default function CollectionDetailPage() {
     togglePrivacy,
     removeFromCollection,
     deleteCollection,
+    toggleCollectionLike,
   } = useCollections();
   const { savedCollectionIds, toggleSaveCollection } = useClubs();
 
@@ -134,8 +135,6 @@ export default function CollectionDetailPage() {
   const [compactView,   setCompactView]   = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const [liked,        setLiked]        = useState(false);
-  const [likeCount,    setLikeCount]    = useState(0);
   const [guestWatched, setGuestWatched] = useState(new Set());
 
   const currentUsername = user?.preferredUsername;
@@ -180,13 +179,10 @@ export default function CollectionDetailPage() {
     if (own) setCollection(own);
   }, [myCollections, id, isOwner]);
 
-  /* ── Like init ── */
-  useEffect(() => {
-    if (!id) return;
-    const ls = JSON.parse(localStorage.getItem("col_likes") || "{}");
-    setLiked(!!ls[id]?.liked);
-    setLikeCount(ls[id]?.count ?? Math.floor(Math.random() * 20 + 2));
-  }, [id]);
+  /* ── Like state derived from API ── */
+  const likes = collection?.likes || [];
+  const likeCount = likes.length;
+  const likedByMe = !!(currentUsername && likes.some(l => l.user?.username === currentUsername));
 
   /* ── Guest-watched init ── */
   useEffect(() => {
@@ -197,12 +193,21 @@ export default function CollectionDetailPage() {
 
   /* ── Handlers ── */
   function handleLike() {
-    const ls = JSON.parse(localStorage.getItem("col_likes") || "{}");
-    const next = !liked;
-    const nc = next ? likeCount + 1 : Math.max(0, likeCount - 1);
-    ls[id] = { liked: next, count: nc };
-    localStorage.setItem("col_likes", JSON.stringify(ls));
-    setLiked(next); setLikeCount(nc);
+    if (!isAuthenticated) return;
+    toggleCollectionLike(id);
+    
+    // Optimistic local update for public collections not in myCollections
+    if (!isOwner) {
+      setCollection(prev => {
+        if (!prev) return prev;
+        const currentLikes = prev.likes || [];
+        const filtered = currentLikes.filter(l => l.user?.username !== currentUsername);
+        return {
+          ...prev,
+          likes: likedByMe ? filtered : [...filtered, { user: { username: currentUsername } }]
+        };
+      });
+    }
   }
 
   function handleToggleWatched(e, item) {
@@ -279,8 +284,12 @@ export default function CollectionDetailPage() {
   if (loading) return <Skeleton />;
   if (error) return (
     <div className="min-h-screen bg-[#060608] flex flex-col items-center justify-center gap-4">
+      <div className="absolute top-5 left-5 z-10 flex items-center gap-2">
+        <button onClick={() => navigate(-1)} className="text-sm text-zinc-500 hover:text-white transition">
+          ← Back
+        </button>
+      </div>
       <p className="text-zinc-400 font-bold text-lg">{error}</p>
-      <button onClick={() => navigate("/community?tab=collections")} className="text-sm text-zinc-500 hover:text-white transition px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5">← Go back</button>
     </div>
   );
   if (!collection) return null;
@@ -301,11 +310,9 @@ export default function CollectionDetailPage() {
         <HeroCover coverImage={collection.coverImage} items={rawItems} />
         <div className="absolute inset-0 bg-gradient-to-t from-[#060608] via-[#060608]/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#060608]/60 via-transparent to-transparent" />
-        <button onClick={() => navigate("/community?tab=collections")}
-          className="absolute top-5 left-5 sm:left-8 flex items-center gap-1.5 rounded-xl bg-black/50 px-3.5 py-2 text-sm font-semibold text-white backdrop-blur-md border border-white/10 hover:bg-black/70 transition-all">
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-          </svg>
+        <button onClick={() => navigate(-1)}
+          className="absolute top-5 left-5 sm:left-8 flex items-center gap-1.5 rounded-xl bg-black/50 px-3 py-1.5 text-xs font-bold text-zinc-300 backdrop-blur transition hover:bg-black/70 hover:text-white z-10">
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
           Back
         </button>
       </div>
@@ -529,13 +536,13 @@ export default function CollectionDetailPage() {
 
                   <button onClick={handleLike}
                     className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-bold border transition-all ${
-                      liked ? "bg-rose-500/15 text-rose-300 border-rose-500/25"
+                      likedByMe ? "bg-rose-500/15 text-rose-300 border-rose-500/25"
                             : "text-zinc-400 border-white/10 hover:bg-rose-500/10 hover:text-rose-300"
                     }`}>
-                    <svg className="h-4 w-4" fill={liked?"currentColor":"none"} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <svg className="h-4 w-4" fill={likedByMe?"currentColor":"none"} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                     </svg>
-                    {likeCount}
+                    {likeCount > 0 && likeCount}
                   </button>
                   {isAuthenticated && !isOwner && (
                     <button onClick={() => toggleSaveCollection(id)}

@@ -23,6 +23,10 @@ router.delete("/:collectionId", collectionsController.deleteCollection);
 // Add an item to a collection
 router.post("/:collectionId/items", collectionsController.saveItem);
 
+// Toggle a like on a collection
+router.post("/:collectionId/like", collectionsController.toggleCollectionLike);
+
+
 // Remove an item from a collection
 router.delete("/:collectionId/items/:mediaId", collectionsController.removeItem);
 
