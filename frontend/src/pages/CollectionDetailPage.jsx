@@ -214,17 +214,17 @@ export default function CollectionDetailPage() {
         body: JSON.stringify({ username: currentUsername }),
       });
       if (!res.ok) throw new Error("Failed to toggle like");
-      // Also update context for owner's collections view
-      toggleCollectionLike(id);
+      // Success — like is saved in DB. Optimistic UI is already correct.
     } catch (e) {
       console.error("Failed to toggle like:", e);
-      // Revert by re-fetching
+      // Revert optimistic update by re-fetching real data
       fetch(`${API}/api/collections/${id}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => { if (data) setCollection(data); })
         .catch(() => {});
     }
   }
+
 
   function handleToggleWatched(e, item) {
     e.preventDefault(); e.stopPropagation();
