@@ -347,6 +347,21 @@ async function deletePost(req, res) {
   }
 }
 
+// Delete a club entirely (cascade: members, posts, likes, discussions, replies)
+async function deleteClub(req, res) {
+  try {
+    const { clubId } = req.params;
+
+    // Prisma cascade is set in schema; just delete the club
+    await prisma.club.delete({ where: { id: clubId } });
+
+    res.json({ success: true, message: "Club deleted" });
+  } catch (error) {
+    console.error("Error deleting club:", error);
+    res.status(500).json({ error: "Failed to delete club" });
+  }
+}
+
 module.exports = {
   getClubs,
   joinClub,
@@ -358,6 +373,8 @@ module.exports = {
   createDiscussion,
   deleteDiscussion,
   createReply,
-  deleteReply
+  deleteReply,
+  deleteClub
 };
+
 

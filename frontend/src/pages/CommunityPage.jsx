@@ -341,7 +341,11 @@ export default function CommunityPage() {
   const { createCollection, collections: myCollections } = useCollections();
   const navigate = useNavigate();
 
-  const [section, setSection] = useState("clubs");
+  const [section, setSection] = useState(() => {
+    // Read ?tab=collections from URL on first render
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") === "collections" ? "collections" : "clubs";
+  });
   const [colSubView, setColSubView] = useState("discover"); // discover | mine | saved
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeTag, setActiveTag] = useState("all");
@@ -365,6 +369,9 @@ export default function CommunityPage() {
     }
   }, []);
 
+  // Always fetch public collections on mount so the count badge is correct
+  useEffect(() => { fetchPublicCollections(); }, [fetchPublicCollections]);
+  // Re-fetch whenever switching to collections tab
   useEffect(() => {
     if (section === "collections") fetchPublicCollections();
   }, [section, fetchPublicCollections]);

@@ -280,7 +280,7 @@ export default function CollectionDetailPage() {
   if (error) return (
     <div className="min-h-screen bg-[#060608] flex flex-col items-center justify-center gap-4">
       <p className="text-zinc-400 font-bold text-lg">{error}</p>
-      <button onClick={() => navigate(-1)} className="text-sm text-zinc-500 hover:text-white transition px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5">← Go back</button>
+      <button onClick={() => navigate("/community?tab=collections")} className="text-sm text-zinc-500 hover:text-white transition px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5">← Go back</button>
     </div>
   );
   if (!collection) return null;
@@ -301,7 +301,7 @@ export default function CollectionDetailPage() {
         <HeroCover coverImage={collection.coverImage} items={rawItems} />
         <div className="absolute inset-0 bg-gradient-to-t from-[#060608] via-[#060608]/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#060608]/60 via-transparent to-transparent" />
-        <button onClick={() => navigate(-1)}
+        <button onClick={() => navigate("/community?tab=collections")}
           className="absolute top-5 left-5 sm:left-8 flex items-center gap-1.5 rounded-xl bg-black/50 px-3.5 py-2 text-sm font-semibold text-white backdrop-blur-md border border-white/10 hover:bg-black/70 transition-all">
           <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
