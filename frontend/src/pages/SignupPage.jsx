@@ -41,7 +41,7 @@ export default function SignupPage() {
     setIsLoading(true);
     
     try {
-      const checkRes = await fetch(`${(import.meta.env.VITE_API_BASE_URL || "http://popverse.ap-south-1.elasticbeanstalk.com")}/api/users/check/${username}`);
+      const checkRes = await fetch(`${(import.meta.env.VITE_API_BASE_URL || "https://d3f5nevxbkvjem.cloudfront.net")}/api/users/check/${username}`);
       if (checkRes.ok) {
         const checkData = await checkRes.json();
         if (!checkData.available) {
@@ -58,7 +58,7 @@ export default function SignupPage() {
     if (result.success) {
       // Reserve username in Prisma immediately
       try {
-        await fetch(`${(import.meta.env.VITE_API_BASE_URL || "http://popverse.ap-south-1.elasticbeanstalk.com")}/api/users/${username}`);
+        await fetch(`${(import.meta.env.VITE_API_BASE_URL || "https://d3f5nevxbkvjem.cloudfront.net")}/api/users/${username}`);
       } catch (e) {
         console.warn("Failed to reserve username in Prisma", e);
       }
