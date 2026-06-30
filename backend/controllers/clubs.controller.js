@@ -18,6 +18,10 @@ async function getClubs(req, res) {
               include: {
                 user: true
               }
+            },
+            replies: {
+              include: { author: true },
+              orderBy: { createdAt: 'asc' }
             }
           },
           orderBy: { createdAt: 'desc' }
@@ -174,7 +178,7 @@ async function createClub(req, res) {
 async function createPost(req, res) {
   try {
     const { clubId } = req.params;
-    const { content, createdBy } = req.body;
+    const { content, createdBy, imageUrl } = req.body;
 
     const user = await prisma.user.findUnique({ where: { username: createdBy } });
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -182,16 +186,53 @@ async function createPost(req, res) {
     const post = await prisma.clubPost.create({
       data: {
         content,
+        imageUrl: imageUrl || null,
         authorId: user.id,
         clubId,
       },
-      include: { author: true, likes: true }
+      include: {
+        author: true,
+        likes: { include: { user: true } },
+        replies: { include: { author: true }, orderBy: { createdAt: "asc" } }
+      }
     });
 
     res.json(post);
   } catch (error) {
     console.error("Error creating post:", error);
     res.status(500).json({ error: "Failed to create post" });
+  }
+}
+
+// Reply to a post
+async function createPostReply(req, res) {
+  try {
+    const { postId } = req.params;
+    const { content, createdBy } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { username: createdBy } });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const reply = await prisma.postReply.create({
+      data: { content, postId, authorId: user.id },
+      include: { author: true }
+    });
+    res.json(reply);
+  } catch (error) {
+    console.error("Error creating post reply:", error);
+    res.status(500).json({ error: "Failed to create reply" });
+  }
+}
+
+// Delete a post reply
+async function deletePostReply(req, res) {
+  try {
+    const { replyId } = req.params;
+    await prisma.postReply.delete({ where: { id: replyId } });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting post reply:", error);
+    res.status(500).json({ error: "Failed to delete reply" });
   }
 }
 
@@ -370,6 +411,8 @@ module.exports = {
   createPost,
   deletePost,
   likePost,
+  createPostReply,
+  deletePostReply,
   createDiscussion,
   deleteDiscussion,
   createReply,

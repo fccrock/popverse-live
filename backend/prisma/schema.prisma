@@ -26,6 +26,7 @@ model User {
   clubMemberships ClubMember[]
   ClubPost        ClubPost[]
   PostLike        PostLike[]
+  PostReply       PostReply[]
   ClubDiscussion  ClubDiscussion[]
   DiscussionReply DiscussionReply[]
   reviews         Review[]
@@ -100,14 +101,16 @@ model ClubMember {
 }
 
 model ClubPost {
-  id        String     @id @default(uuid())
+  id        String      @id @default(uuid())
   content   String
+  imageUrl  String?
   authorId  String
-  author    User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
   clubId    String
-  club      Club       @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  createdAt DateTime   @default(now())
+  club      Club        @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
   likes     PostLike[]
+  replies   PostReply[]
 }
 
 model PostLike {
@@ -119,6 +122,16 @@ model PostLike {
   createdAt DateTime @default(now())
 
   @@unique([postId, userId])
+}
+
+model PostReply {
+  id        String   @id @default(uuid())
+  content   String
+  postId    String
+  post      ClubPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 model ClubDiscussion {

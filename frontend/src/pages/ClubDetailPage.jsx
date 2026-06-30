@@ -1,8 +1,9 @@
 // src/pages/ClubDetailPage.jsx
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useClubs } from "../context/ClubsContext";
 import { useAuth } from "../context/AuthContext";
+import ImageUpload from "../components/ImageUpload";
 
 const TABS = [
   { key: "feed", label: "Feed", icon: "M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" },
@@ -35,37 +36,83 @@ function UserBubble({ username, size = "sm" }) {
 
 /* ── Feed Tab ── */
 function FeedTab({ club, isMember }) {
-  const { addPost, likePost, deletePost } = useClubs();
+  const { addPost, likePost, deletePost, addPostReply } = useClubs();
   const { isAuthenticated, user } = useAuth();
   const [newPost, setNewPost] = useState("");
-
-  function handlePost(e) {
-    e.preventDefault();
-    if (!newPost.trim()) return;
-    addPost(club.id, newPost.trim());
-    setNewPost("");
-  }
+  const [postImageUrl, setPostImageUrl] = useState("");
+  const [showImageUpload, setShowImageUpload] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const [posting, setPosting] = useState(false);
 
   const currentUsername = user?.preferredUsername;
 
+  async function handlePost(e) {
+    e.preventDefault();
+    if (!newPost.trim() && !postImageUrl) return;
+    setPosting(true);
+    await addPost(club.id, newPost.trim() || " ", postImageUrl || null);
+    setNewPost("");
+    setPostImageUrl("");
+    setShowImageUpload(false);
+    setPosting(false);
+  }
+
+  async function handleReply(postId) {
+    if (!replyText.trim()) return;
+    await addPostReply(club.id, postId, replyText.trim());
+    setReplyText("");
+    setReplyingTo(null);
+  }
+
   return (
     <div className="space-y-4">
-      {/* Compose */}
       {isMember && (
         <form onSubmit={handlePost} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
           <div className="flex gap-3">
             <UserBubble username={currentUsername || "?"} />
-            <textarea
-              className="input-field min-h-[56px] resize-none flex-1"
-              placeholder="Share something with the club..."
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              maxLength={500}
-            />
+            <div className="flex-1 space-y-3">
+              <textarea
+                className="input-field min-h-[56px] resize-none w-full"
+                placeholder="Share something with the club..."
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                maxLength={500}
+              />
+              {showImageUpload && (
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                  <ImageUpload
+                    currentImage={postImageUrl}
+                    onUploadComplete={(url) => setPostImageUrl(url)}
+                    label="Add image to post"
+                  />
+                  {postImageUrl && (
+                    <div className="mt-2 relative inline-block">
+                      <img src={postImageUrl} alt="preview" className="h-24 rounded-lg object-cover" />
+                      <button type="button" onClick={() => setPostImageUrl("")}
+                        className="absolute -top-1 -right-1 grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-white text-[10px]">✕</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="mt-3 flex justify-end">
-            <button type="submit" disabled={!newPost.trim()} className="btn-v py-2 px-5 text-sm disabled:opacity-40 disabled:pointer-events-none">
-              Post
+          <div className="mt-3 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setShowImageUpload(v => !v)}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                showImageUpload ? "bg-violet-500/20 text-violet-300" : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+              }`}
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 18h16.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Photo
+            </button>
+            <button type="submit" disabled={(!newPost.trim() && !postImageUrl) || posting}
+              className="btn-v py-2 px-5 text-sm disabled:opacity-40 disabled:pointer-events-none">
+              {posting ? "Posting..." : "Post"}
             </button>
           </div>
         </form>
@@ -78,48 +125,105 @@ function FeedTab({ club, isMember }) {
         </div>
       )}
 
-      {club.feed.map((post) => (
-        <div key={post.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 transition-all duration-200 hover:border-white/[0.1]">
-          <div className="flex items-start gap-3">
-            <UserBubble username={post.author} />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-white">{post.author}</span>
-                  <span className="text-xs text-zinc-600">·</span>
-                  <span className="text-xs text-zinc-600">{timeAgo(post.timestamp)}</span>
+      {club.feed.map((post) => {
+        const isOwner = currentUsername && currentUsername.toLowerCase() === post.author.toLowerCase();
+        const likedByMe = currentUsername && post.likes.includes(currentUsername);
+        const replyCount = (post.replies || []).length;
+
+        return (
+          <div key={post.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 transition-all duration-200 hover:border-white/[0.1]">
+            <div className="flex items-start gap-3">
+              <UserBubble username={post.author} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-white">{post.author}</span>
+                    <span className="text-xs text-zinc-600">·</span>
+                    <span className="text-xs text-zinc-600">{timeAgo(post.timestamp)}</span>
+                  </div>
+                  {isOwner && (
+                    <button
+                      onClick={() => { if (window.confirm("Delete this post?")) deletePost(club.id, post.id); }}
+                      className="grid h-7 w-7 place-items-center rounded-lg text-zinc-700 hover:bg-rose-500/10 hover:text-rose-400 transition"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  )}
                 </div>
-                {/* Delete button for post author */}
-                {currentUsername && currentUsername.toLowerCase() === post.author.toLowerCase() && (
-                  <button
-                    onClick={() => { if(window.confirm("Delete this post?")) deletePost(club.id, post.id); }}
-                    className="grid h-7 w-7 place-items-center rounded-lg text-zinc-700 hover:bg-rose-500/10 hover:text-rose-400 transition"
-                    title="Delete post"
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                  </button>
+
+                {post.content && post.content.trim() && post.content !== " " && (
+                  <p className="mt-2 text-[15px] leading-relaxed text-zinc-300">{post.content}</p>
                 )}
-              </div>
-              <p className="mt-2 text-[15px] leading-relaxed text-zinc-300">{post.content}</p>
-              <div className="mt-3 flex items-center gap-4">
-                <button
-                  onClick={() => isAuthenticated && likePost(club.id, post.id)}
-                  className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${
-                    currentUsername && post.likes.includes(currentUsername)
-                      ? "text-rose-400"
-                      : "text-zinc-600 hover:text-rose-400"
-                  }`}
-                >
-                  <svg className="h-4 w-4" fill={currentUsername && post.likes.includes(currentUsername) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                  </svg>
-                  {post.likes.length > 0 && post.likes.length}
-                </button>
+
+                {post.imageUrl && (
+                  <div className="mt-3 overflow-hidden rounded-xl border border-white/[0.06]">
+                    <img src={post.imageUrl} alt="post" className="w-full object-cover max-h-[480px]" />
+                  </div>
+                )}
+
+                <div className="mt-3 flex items-center gap-4">
+                  <button
+                    onClick={() => isAuthenticated && likePost(club.id, post.id)}
+                    className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${
+                      likedByMe ? "text-rose-400" : "text-zinc-600 hover:text-rose-400"
+                    }`}
+                  >
+                    <svg className="h-4 w-4" fill={likedByMe ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                    {post.likeCount > 0 && post.likeCount}
+                  </button>
+
+                  {isMember && (
+                    <button
+                      onClick={() => { setReplyingTo(replyingTo === post.id ? null : post.id); setReplyText(""); }}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-violet-400 transition-colors"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                      </svg>
+                      {replyCount > 0 && <span>{replyCount}</span>}
+                      Reply
+                    </button>
+                  )}
+                </div>
+
+                {replyCount > 0 && (
+                  <div className="mt-3 space-y-2 border-l-2 border-white/[0.05] pl-4">
+                    {post.replies.map(r => (
+                      <div key={r.id} className="flex items-start gap-2">
+                        <UserBubble username={r.author} size="sm" />
+                        <div>
+                          <span className="text-xs font-bold text-zinc-300">{r.author}</span>
+                          <span className="ml-1.5 text-xs text-zinc-600">{timeAgo(r.timestamp)}</span>
+                          <p className="text-[13px] text-zinc-400 mt-0.5">{r.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {replyingTo === post.id && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <UserBubble username={currentUsername || "?"} size="sm" />
+                    <input
+                      type="text"
+                      className="input-field flex-1 py-1.5 text-sm"
+                      placeholder="Write a reply..."
+                      value={replyText}
+                      onChange={e => setReplyText(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleReply(post.id); } }}
+                      autoFocus
+                    />
+                    <button onClick={() => handleReply(post.id)} disabled={!replyText.trim()}
+                      className="btn-v py-1.5 px-3 text-xs disabled:opacity-40">Send</button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

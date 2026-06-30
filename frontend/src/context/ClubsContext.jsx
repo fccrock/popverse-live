@@ -33,15 +33,26 @@ export function ClubsProvider({ children }) {
           ...club,
           members: club.members.map(m => ({
             username: m.user.username,
+            cognitoId: m.user.cognitoId,
             joinedAt: m.joinedAt,
             role: m.role
           })),
           feed: (club.ClubPost || []).map(p => ({
             id: p.id,
             author: p.author.username,
+            authorCognitoId: p.author.cognitoId,
             content: p.content,
+            imageUrl: p.imageUrl || null,
+            pollOptions: p.pollOptions || null,
             timestamp: p.createdAt,
-            likes: p.likes.map(l => l.user.username)
+            likes: p.likes.map(l => l.user.username),
+            likeCount: p.likes.length,
+            replies: (p.replies || []).map(r => ({
+              id: r.id,
+              author: r.author.username,
+              content: r.content,
+              timestamp: r.createdAt
+            }))
           })),
           discussions: (club.ClubDiscussion || []).map(d => ({
             id: d.id,
@@ -79,29 +90,38 @@ export function ClubsProvider({ children }) {
   useEffect(() => { localStorage.setItem(SAVED_KEY, JSON.stringify(savedCollectionIds)); }, [savedCollectionIds]);
 
   const currentUsername = user?.preferredUsername ?? null;
+  const currentCognitoId = user?.sub ?? null;
 
   /* ── Club Queries ── */
   const getClubBySlug = useCallback((slug) => clubs.find((c) => c.slug === slug) ?? null, [clubs]);
 
   const isClubMember = useCallback(
     (clubId) => {
-      if (!currentUsername) return false;
+      if (!currentCognitoId && !currentUsername) return false;
       const club = clubs.find((c) => c.id === clubId);
       if (!club) return false;
-      return club.members.some((m) => m.username.toLowerCase() === currentUsername.toLowerCase());
+      return club.members.some((m) =>
+        currentCognitoId
+          ? m.cognitoId === currentCognitoId
+          : m.username.toLowerCase() === currentUsername?.toLowerCase()
+      );
     },
-    [clubs, currentUsername]
+    [clubs, currentUsername, currentCognitoId]
   );
 
   const getUserRole = useCallback(
     (clubId) => {
-      if (!currentUsername) return null;
+      if (!currentCognitoId && !currentUsername) return null;
       const club = clubs.find((c) => c.id === clubId);
       if (!club) return null;
-      const member = club.members.find((m) => m.username.toLowerCase() === currentUsername.toLowerCase());
+      const member = club.members.find((m) =>
+        currentCognitoId
+          ? m.cognitoId === currentCognitoId
+          : m.username.toLowerCase() === currentUsername?.toLowerCase()
+      );
       return member?.role ?? null;
     },
-    [clubs, currentUsername]
+    [clubs, currentUsername, currentCognitoId]
   );
 
   /* ── Collection Queries ── */
@@ -198,13 +218,13 @@ export function ClubsProvider({ children }) {
   };
 
 
-  const addPost = useCallback(async (clubId, content) => {
+  const addPost = useCallback(async (clubId, content, imageUrl = null) => {
     if (!isAuthenticated || !currentUsername) return;
     try {
       const response = await fetch(`${API}/api/clubs/${clubId}/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, createdBy: currentUsername })
+        body: JSON.stringify({ content, createdBy: currentUsername, imageUrl })
       });
       if (response.ok) {
         await loadClubs();
@@ -227,6 +247,20 @@ export function ClubsProvider({ children }) {
       }
     } catch (error) {
       console.error("Failed to toggle like", error);
+    }
+  }, [isAuthenticated, currentUsername, loadClubs]);
+
+  const addPostReply = useCallback(async (clubId, postId, content) => {
+    if (!isAuthenticated || !currentUsername) return;
+    try {
+      const response = await fetch(`${API}/api/clubs/${clubId}/posts/${postId}/replies`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, createdBy: currentUsername })
+      });
+      if (response.ok) await loadClubs();
+    } catch (error) {
+      console.error("Failed to add post reply", error);
     }
   }, [isAuthenticated, currentUsername, loadClubs]);
 
@@ -311,6 +345,7 @@ export function ClubsProvider({ children }) {
         createClub, joinClub, leaveClub,
         addPost, deletePost,
         likePost,
+        addPostReply,
         addDiscussion, deleteDiscussion,
         addReply, deleteReply,
         savedCollectionIds, isCollectionSaved, saveCollection, unsaveCollection, toggleSaveCollection,
