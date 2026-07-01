@@ -52,15 +52,30 @@ async function getAlbumDetails(req, res) {
 }
 
 // GET /api/music/search?q=...
-// Search albums/songs
+// Search albums/songs across US + India stores for better coverage
 async function searchMusic(req, res) {
   try {
     const q = encodeURIComponent(req.query.q || "");
     const type = req.query.type || "album"; // album or song
-    const data = await itunesFetch(
-      `/search?term=${q}&media=music&entity=${type}&limit=20`
-    );
-    res.json(data);
+
+    // Search both US and India stores in parallel for better coverage
+    const [usData, inData] = await Promise.all([
+      itunesFetch(`/search?term=${q}&media=music&entity=${type}&limit=15&country=us`).catch(() => ({ results: [] })),
+      itunesFetch(`/search?term=${q}&media=music&entity=${type}&limit=15&country=in`).catch(() => ({ results: [] })),
+    ]);
+
+    const usResults  = usData.results  ?? [];
+    const inResults  = inData.results  ?? [];
+
+    // Merge and deduplicate by trackId / collectionId
+    const seen = new Set();
+    const merged = [];
+    for (const item of [...inResults, ...usResults]) {
+      const key = item.trackId ?? item.collectionId;
+      if (key && !seen.has(key)) { seen.add(key); merged.push(item); }
+    }
+
+    res.json({ resultCount: merged.length, results: merged.slice(0, 20) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
