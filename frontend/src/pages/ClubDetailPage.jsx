@@ -518,8 +518,10 @@ export default function ClubDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { getClubBySlug, isClubMember, joinClub, leaveClub, getUserRole, deleteClub } = useClubs();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState("feed");
+
+  const currentUsername = user?.preferredUsername;
 
   const club = getClubBySlug(slug);
 
