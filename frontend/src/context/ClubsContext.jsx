@@ -174,6 +174,24 @@ export function ClubsProvider({ children }) {
     return null;
   }, [isAuthenticated, currentUsername, loadClubs]);
 
+  const deleteClub = useCallback(async (clubId) => {
+    if (!isAuthenticated || !currentUsername) return false;
+    try {
+      const response = await fetch(`${API}/api/clubs/${clubId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUsername })
+      });
+      if (response.ok) {
+        await loadClubs();
+        return true;
+      }
+    } catch (error) {
+      console.error("Failed to delete club", error);
+    }
+    return false;
+  }, [isAuthenticated, currentUsername, loadClubs]);
+
   const joinClub = async (clubId) => {
     if (!isAuthenticated || !currentUsername) return false;
 
@@ -342,7 +360,7 @@ export function ClubsProvider({ children }) {
     <ClubsContext.Provider
       value={{
         clubs, getClubBySlug, isClubMember, getUserRole,
-        createClub, joinClub, leaveClub,
+        createClub, deleteClub, joinClub, leaveClub,
         addPost, deletePost,
         likePost,
         addPostReply,

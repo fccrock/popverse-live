@@ -517,7 +517,7 @@ function MembersTab({ club }) {
 export default function ClubDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { getClubBySlug, isClubMember, joinClub, leaveClub, getUserRole } = useClubs();
+  const { getClubBySlug, isClubMember, joinClub, leaveClub, getUserRole, deleteClub } = useClubs();
   const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("feed");
 
@@ -591,6 +591,19 @@ export default function ClubDetailPage() {
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
                       Admin
                     </span>
+                  )}
+                  {currentUsername && currentUsername.toLowerCase() === club.createdBy.toLowerCase() && (
+                    <button 
+                      onClick={async () => {
+                        if (window.confirm("Are you sure you want to completely delete this club? This action cannot be undone.")) {
+                          const success = await deleteClub(club.id);
+                          if (success) navigate("/community");
+                        }
+                      }} 
+                      className="btn-ghost py-2.5 px-5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/20"
+                    >
+                      Delete Club
+                    </button>
                   )}
                   <button onClick={() => leaveClub(club.id)} className="btn-ghost py-2.5 px-5 text-sm text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 hover:border-rose-500/20">
                     Leave Club

@@ -360,9 +360,9 @@ function CollectionCard({ collection, onDelete, onToggleWatched, onRemoveItem, o
                 </button>
                 <button className="grid place-items-center h-10 w-10 rounded-full bg-black/40 text-zinc-400 hover:bg-white/10 hover:text-white transition-all border border-white/5" onClick={() => setShowRenameModal(true)}><IconEdit /></button>
                 <button className="grid place-items-center h-10 w-10 rounded-full bg-black/40 text-zinc-400 hover:bg-white/10 hover:text-white transition-all border border-white/5" onClick={() => setShowCoverModal(true)}><IconImage /></button>
-                <button className="grid place-items-center h-10 w-10 rounded-full bg-black/40 text-zinc-400 hover:bg-rose-500/20 hover:text-rose-400 transition-all border border-white/5" onClick={() => onDelete(collection.id)}><IconTrash /></button>
               </>
             )}
+            <button className="grid place-items-center h-10 w-10 rounded-full bg-black/40 text-zinc-400 hover:bg-rose-500/20 hover:text-rose-400 transition-all border border-white/5" onClick={() => { if (window.confirm("Delete this collection?")) onDelete(collection.id); }}><IconTrash /></button>
             {/* View full page */}
             <Link to={`/collection/${collection.id}`}
               className="grid place-items-center h-10 w-10 rounded-full bg-black/40 text-zinc-400 hover:bg-violet-500/20 hover:text-violet-300 transition-all border border-white/5"

@@ -573,8 +573,8 @@ export default function CollectionDetailPage() {
                     </button>
                   )}
 
-                  {/* Delete collection — owner only, non-default */}
-                  {isOwner && !collection.isDefault && (
+                  {/* Delete collection — owner only */}
+                  {isOwner && (
                     confirmDelete ? (
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs font-bold text-zinc-400">Delete?</span>

@@ -15,50 +15,7 @@ function loadSaved() {
   return [];
 }
 
-// ── Helper: ensure a Watchlist and Watched History exist in DB ───────────────
-// Returns the UUID of the watchlist and history collections.
-async function ensureDefaultCollections(username) {
-  try {
-    // 1. Load existing collections
-    const res = await fetch(`${API}/api/collections/user/${username}`);
-    if (!res.ok) throw new Error("fetch failed");
-    const data = await res.json();
-
-    let watchlistId = data.find(c => c.title === "Watchlist")?.id || null;
-    let historyId   = data.find(c => c.title === "Watched History")?.id || null;
-
-    // 2. Create Watchlist if it doesn't exist
-    if (!watchlistId) {
-      const r = await fetch(`${API}/api/collections`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, title: "Watchlist", isPublic: false }),
-      });
-      if (r.ok) {
-        const created = await r.json();
-        watchlistId = created.id;
-      }
-    }
-
-    // 3. Create Watched History if it doesn't exist
-    if (!historyId) {
-      const r = await fetch(`${API}/api/collections`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, title: "Watched History", isPublic: false }),
-      });
-      if (r.ok) {
-        const created = await r.json();
-        historyId = created.id;
-      }
-    }
-
-    return { watchlistId, historyId };
-  } catch (e) {
-    console.error("ensureDefaultCollections failed:", e);
-    return { watchlistId: null, historyId: null };
-  }
-}
+// ── Removed ensureDefaultCollections to allow user deletion of default collections ─
 
 // ── Provider ─────────────────────────────────────────────────────────────────
 export function CollectionsProvider({ children }) {
@@ -80,13 +37,8 @@ export function CollectionsProvider({ children }) {
       ]);
       return;
     }
-
     try {
-      // 1. Make sure default collections exist in DB and get their IDs
-      const { watchlistId, historyId } = await ensureDefaultCollections(currentUsername);
-      defaultIds.current = { watchlistId, historyId };
-
-      // 2. Fetch all collections (which now includes Watchlist & History with real UUIDs)
+      // 1. Fetch all collections from DB
       const res = await fetch(`${API}/api/collections/user/${currentUsername}`);
       if (!res.ok) throw new Error("fetch failed");
       const data = await res.json();
@@ -218,7 +170,8 @@ export function CollectionsProvider({ children }) {
   // ── Delete collection ─────────────────────────────────────────────────────
   const deleteCollection = useCallback(async (colId) => {
     const col = collections.find(c => c.id === colId);
-    if (col?.isDefault) return; // cannot delete Watchlist / History
+    // Option to delete any collection including Watchlist/History is now enabled
+
     updateLocal(prev => prev.filter(c => c.id !== colId));
     try {
       await fetch(`${API}/api/collections/${colId}`, { method: "DELETE" });
@@ -363,12 +316,19 @@ export function CollectionsProvider({ children }) {
 
       // If newly watched and not in any collection → add to history
       const inAny = collections.some(c => c.items.some(i => String(i.mediaId) === mid));
-      if (!inAny && nowWatched && historyId) {
-        await fetch(`${API}/api/collections/${historyId}/items`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...item, mediaId: mid, watched: true }),
-        });
+      if (!inAny && nowWatched) {
+        let history = collections.find(c => c.title === "Watched History");
+        if (!history) {
+          history = await createCollection("Watched History", { isPublic: false });
+        }
+        if (history) {
+          await fetch(`${API}/api/collections/${history.id}/items`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...item, mediaId: mid, watched: true }),
+          });
+          loadCollections();
+        }
       }
     } catch (e) {
       console.error("toggleWatchedGlobally failed:", e);
@@ -383,8 +343,11 @@ export function CollectionsProvider({ children }) {
   }, [collections]);
 
   const toggleWatchlist = useCallback(async (item) => {
-    const wl = collections.find(c => c.title === "Watchlist");
-    if (!wl) return;
+    let wl = collections.find(c => c.title === "Watchlist");
+    if (!wl) {
+      wl = await createCollection("Watchlist", { isPublic: false });
+      if (!wl) return;
+    }
     const mid = String(item.mediaId);
     const inWl = wl.items.some(i => String(i.mediaId) === mid);
     if (inWl) {
@@ -392,7 +355,7 @@ export function CollectionsProvider({ children }) {
     } else {
       await addToCollection(wl.id, item);
     }
-  }, [collections, addToCollection, removeFromCollection]);
+  }, [collections, addToCollection, removeFromCollection, createCollection]);
 
   // ── Get collections for a specific media item ─────────────────────────────
   const getCollectionsForMedia = useCallback((mediaId) => {
