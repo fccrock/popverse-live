@@ -250,6 +250,16 @@ function HeroSection() {
 
 /* ── TRENDING RAIL ──────────────────────────────────────────────────────── */
 function TrendingRail({ title, items, type }) {
+  const railRef = useRef(null);
+
+  const scroll = (direction) => {
+    if (railRef.current) {
+      const { clientWidth } = railRef.current;
+      const scrollAmount = clientWidth * 0.75;
+      railRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-[1840px]">
       <div className="mb-4 flex items-end justify-between px-4 sm:px-6 lg:px-8">
@@ -266,7 +276,28 @@ function TrendingRail({ title, items, type }) {
         </Link>
       </div>
 
-      <div className="rail gap-4 px-4 sm:px-6 lg:px-8">
+      {/* Container with hover group for paddle buttons */}
+      <div className="group relative">
+        {/* Left Paddle */}
+        <button
+          onClick={() => scroll('left')}
+          className="group/paddle absolute left-0 top-0 z-20 h-full w-16 flex items-center justify-center hidden sm:flex cursor-pointer"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-md opacity-0 transition-all duration-200 transform-gpu group-hover:opacity-100 group-hover/paddle:bg-white/20 group-hover/paddle:scale-110 group-active/paddle:scale-95">
+            <svg 
+              className="h-5 w-5 text-white" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor" 
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </div>
+        </button>
+
+        {/* Scrollable rail */}
+        <div ref={railRef} className="rail gap-4 px-4 sm:px-6 lg:px-8 relative z-10 scroll-smooth">
         {items.map((item, idx) => {
           const href = type === "movie" ? `/cinema/${item.id}` : `/tv/${item.id}`;
           const poster = item.poster_path;
@@ -276,10 +307,13 @@ function TrendingRail({ title, items, type }) {
               to={href}
               className="group relative shrink-0 w-[140px] sm:w-[160px]"
             >
-              {/* Rank */}
-              <span className="rank-num">{idx + 1}</span>
               {/* Poster */}
               <div className="poster-card" style={{ aspectRatio: "2/3" }}>
+                {/* Rank (Glassmorphism Overlay) */}
+                <div className="absolute left-0 top-0 z-10 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-br-2xl bg-white/10 backdrop-blur-md border-r border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+                  <span className="text-xl sm:text-2xl font-black text-white drop-shadow-md">{idx + 1}</span>
+                </div>
+                
                 {poster ? (
                   <img
                     src={posterUrl(poster, "w342")}
@@ -308,6 +342,25 @@ function TrendingRail({ title, items, type }) {
             </Link>
           );
         })}
+        </div>
+
+        {/* Right Paddle */}
+        <button
+          onClick={() => scroll('right')}
+          className="group/paddle absolute right-0 top-0 z-20 h-full w-16 flex items-center justify-center hidden sm:flex cursor-pointer"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-md opacity-0 transition-all duration-200 transform-gpu group-hover:opacity-100 group-hover/paddle:bg-white/20 group-hover/paddle:scale-110 group-active/paddle:scale-95">
+            <svg 
+              className="h-5 w-5 text-white" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor" 
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </button>
       </div>
     </div>
   );
