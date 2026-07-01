@@ -119,12 +119,12 @@
   }
   .poster-card:hover { 
     transform: translateY(-8px) scale(1.03); 
-    box-shadow: 0 20px 40px rgba(139,92,246,0.25), 0 0 20px rgba(255,255,255,0.05) inset; 
-    border-color: rgba(139,92,246,0.3);
+    box-shadow: 0 20px 40px rgba(255,255,255,0.12), 0 0 20px rgba(255,255,255,0.05) inset; 
+    border-color: rgba(255,255,255,0.2);
   }
   .poster-card:active {
     transform: translateY(-2px) scale(0.97);
-    box-shadow: 0 10px 20px rgba(139,92,246,0.15);
+    box-shadow: 0 10px 20px rgba(255,255,255,0.08);
     transition-duration: 150ms;
   }
   .poster-card:hover .poster-overlay { opacity: 1; }
