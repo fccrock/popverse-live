@@ -600,9 +600,9 @@ export default function MusicPage() {
           {/* ══════════ RIGHT COLUMN ══════════ */}
           <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
             
-            <div className="glass-panel animate-up" style={{ padding: "28px 0 16px", minHeight: 420, display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: "0 24px" }}><SHead title="Top Charts" viewAll={false} /></div>
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-evenly" }}>
+            <div className="glass-panel animate-up" style={{ padding: "28px 0 16px", height: 420, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              <div style={{ padding: "0 24px", flexShrink: 0 }}><SHead title="Top Charts" viewAll={false} /></div>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-evenly", overflow: "hidden" }}>
               {charts.length === 0
                 ? <div style={{ height: 300 }} />
                 : charts.slice(0, 5).map((item, i) => <ChartRow key={i} item={item} rank={i + 1} />)
