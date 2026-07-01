@@ -129,11 +129,11 @@
   }
   
   .music-card:hover {
-    box-shadow: 0 20px 40px rgba(255,255,255,0.12), 0 0 20px rgba(255,255,255,0.05) inset; 
-    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 20px 40px rgba(255,255,255,0.25), 0 0 25px rgba(255,255,255,0.15) inset; 
+    border-color: rgba(255,255,255,0.4);
   }
   .music-card:active {
-    box-shadow: 0 10px 20px rgba(255,255,255,0.08);
+    box-shadow: 0 10px 20px rgba(255,255,255,0.15);
   }
   .poster-card:hover .poster-overlay { opacity: 1; }
   .poster-overlay {
