@@ -70,10 +70,10 @@ const resolveImg = (path, tmdbSize = "original") => {
 };
 
 const CATEGORIES = [
-  { label: "Cinema", sub: "Movies & TV Shows", href: "/cinema", accent: "#8b5cf6", backdrop: "/2ssWTSVklAEc98frZUQhgtGHx7s.jpg" },
-  { label: "Music",  sub: "Artists & Albums",  href: "/music",  accent: "#f97316", backdrop: "/images/KSHAMA.jpg" },
-  { label: "Games",  sub: "Play & Discover",   href: "/games",  accent: "#c2820a", backdrop: "/images/RDR_2_Artwork_OfficialArt.jpg" },
-  { label: "Books",  sub: "Read & Explore",    href: "/books",  accent: "#06b6d4", backdrop: "https://m.media-amazon.com/images/I/71kxa1-0mfL.jpg" },
+  { label: "Cinema", sub: "Movies & TV Shows", href: "/cinema", accent: "#8b5cf6", backdrop: "/images/scarface-al-pacino-5k-8k-7680x4320-13463.jpg" },
+  { label: "Music",  sub: "Artists & Albums",  href: "/music",  accent: "#f97316", backdrop: "/images/13UMGIM63890.rgb.jpg" },
+  { label: "Games",  sub: "Play & Discover",   href: "/games",  accent: "#c2820a", backdrop: "/images/Games_Ghost-of-Tsushima.jpg" },
+  { label: "Books",  sub: "Read & Explore",    href: "/books",  accent: "#06b6d4", backdrop: "/images/1447315._sy475_ (1).jpg" },
 ];
 
 /* ── MARQUEE TICKER ── */
