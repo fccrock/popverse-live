@@ -57,6 +57,7 @@ function Hero({ items }) {
       borderRadius: 30,
       display: "flex",
       alignItems: "stretch",
+      isolation: "isolate",
     }}>
       {/* Background Images */}
       {items.map((f, i) => (
@@ -280,7 +281,7 @@ function CollectionRow({ collection }) {
         <img src={imgSrc} alt={collection.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{collection.name}</p>
+        <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{collection.title || collection.name || 'Untitled'}</p>
         <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.55)", margin: 0 }}>{itemCount} items · ♥ {likes}</p>
       </div>
       <button className="play-btn-circle" onClick={e => e.preventDefault()}>
@@ -330,7 +331,14 @@ export default function MusicPage() {
     api.getMusicNewReleases().then(d => setReleases(d?.feed?.entry ?? [])).catch(() => {});
     fetch(`${API}/api/collections/public`)
       .then(r => r.ok ? r.json() : [])
-      .then(data => setPublicCols(Array.isArray(data) ? data.slice(0, 5) : []))
+      .then(data => {
+        if (!Array.isArray(data)) return;
+        // Only show collections that have at least one music item (album or track)
+        const musicOnly = data.filter(col =>
+          (col.items ?? []).some(it => it.mediaType === 'album' || it.mediaType === 'track')
+        );
+        setPublicCols(musicOnly.slice(0, 5));
+      })
       .catch(() => {});
   }, []);
 
