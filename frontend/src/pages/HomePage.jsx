@@ -385,12 +385,7 @@ function CategoriesBento() {
             <img
               src={resolveImg(cat.backdrop, 'w780')}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover opacity-50 transition-all duration-500 group-hover:scale-105 group-hover:opacity-70"
-            />
-            {/* Gradient */}
-            <div
-              className="absolute inset-0"
-              style={{ background: `linear-gradient(135deg, ${cat.accent}55 0%, rgba(5,5,7,.8) 100%)` }}
+              className="absolute inset-0 h-full w-full object-cover opacity-80 transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
             />
             {/* Bottom gradient */}
             <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#050507] to-transparent" />
