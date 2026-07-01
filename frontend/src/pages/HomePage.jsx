@@ -72,7 +72,7 @@ const resolveImg = (path, tmdbSize = "original") => {
 const CATEGORIES = [
   { label: "Cinema", sub: "Movies & TV Shows", href: "/cinema", accent: "#8b5cf6", backdrop: "/images/scarface-al-pacino-5k-8k-7680x4320-13463.jpg" },
   { label: "Music",  sub: "Artists & Albums",  href: "/music",  accent: "#f97316", backdrop: "/images/13UMGIM63890.rgb.jpg" },
-  { label: "Games",  sub: "Play & Discover",   href: "/games",  accent: "#dc2626", backdrop: "/images/Games_Ghost-of-Tsushima.jpg" },
+  { label: "Games",  sub: "Play & Discover",   href: "/games",  accent: "#22c55e", backdrop: "/images/Games_Ghost-of-Tsushima.jpg" },
   { label: "Books",  sub: "Read & Explore",    href: "/books",  accent: "#06b6d4", backdrop: "/images/1447315._sy475_ (1).jpg" },
 ];
 
@@ -263,11 +263,11 @@ function TrendingRail({ title, items, type }) {
     <div className="mx-auto w-full max-w-[1840px]">
       <div className="mb-4 flex items-end justify-between px-4 sm:px-6 lg:px-8">
         <div>
-          <p className="eyebrow mb-1">{type === "movie" ? "Cinema" : "TV"}</p>
+          <p className="eyebrow mb-1">{type === "music" ? "Music" : type === "movie" ? "Cinema" : "TV"}</p>
           <h2 className="text-xl font-black tracking-tight text-white sm:text-2xl">{title}</h2>
         </div>
         <Link
-          to={type === "movie" ? "/cinema" : "/search?type=tv"}
+          to={type === "music" ? "/music" : type === "movie" ? "/cinema" : "/search?type=tv"}
           className="flex items-center gap-1 text-sm font-semibold text-zinc-600 transition hover:text-violet-400"
         >
           View all
@@ -298,16 +298,25 @@ function TrendingRail({ title, items, type }) {
         {/* Scrollable rail */}
         <div ref={railRef} className="rail gap-4 px-4 sm:px-6 lg:px-8 relative z-10 scroll-smooth">
         {items.map((item, idx) => {
-          const href = type === "movie" ? `/cinema/${item.id}` : `/tv/${item.id}`;
-          const poster = item.poster_path;
+          const isMusic = type === "music";
+          const itemId = isMusic ? item.id?.attributes?.["im:id"] : item.id;
+          const href = isMusic ? `/music/album/${itemId}` : type === "movie" ? `/cinema/${item.id}` : `/tv/${item.id}`;
+          
+          let poster = isMusic 
+            ? (item["im:image"]?.[2]?.label?.replace("170x170", "500x500") || item["im:image"]?.[2]?.label) 
+            : item.poster_path;
+            
+          const displayTitle = isMusic ? item["im:name"]?.label : getTitle(item);
+          const displaySub = isMusic ? item["im:artist"]?.label : getYear(item);
+
           return (
             <Link
-              key={item.id}
+              key={itemId}
               to={href}
               className="group relative shrink-0 w-[140px] sm:w-[160px]"
             >
               {/* Poster */}
-              <div className="poster-card" style={{ aspectRatio: "2/3" }}>
+              <div className="poster-card" style={{ aspectRatio: isMusic ? "1/1" : "2/3" }}>
                 {/* Rank (Glassmorphism Overlay) */}
                 <div className="absolute left-0 top-0 z-10 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-br-2xl bg-white/10 backdrop-blur-md border-r border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
                   <span className="text-xl sm:text-2xl font-black text-white drop-shadow-md">{idx + 1}</span>
@@ -315,7 +324,7 @@ function TrendingRail({ title, items, type }) {
                 
                 {poster ? (
                   <img
-                    src={posterUrl(poster, "w342")}
+                    src={isMusic ? poster : posterUrl(poster, "w342")}
                     alt=""
                     className="h-full w-full object-cover"
                   />
@@ -323,20 +332,22 @@ function TrendingRail({ title, items, type }) {
                   <div className="h-full w-full flex items-center justify-center text-zinc-700 text-xs">No image</div>
                 )}
                 {/* Rating badge */}
-                <div className="absolute right-2 top-2 flex items-center gap-1 rounded-lg bg-black/70 px-2 py-1 text-[10px] font-black text-yellow-400 backdrop-blur-md">
-                  <svg className="h-2.5 w-2.5 fill-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  {item.vote_average?.toFixed(1) ?? "NR"}
-                </div>
+                {!isMusic && (
+                  <div className="absolute right-2 top-2 flex items-center gap-1 rounded-lg bg-black/70 px-2 py-1 text-[10px] font-black text-yellow-400 backdrop-blur-md">
+                    <svg className="h-2.5 w-2.5 fill-yellow-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    {item.vote_average?.toFixed(1) ?? "NR"}
+                  </div>
+                )}
                 {/* Hover overlay */}
                 <div className="poster-overlay">
-                  <p className="text-xs font-black text-white leading-tight">{getTitle(item)}</p>
-                  <p className="text-[10px] text-zinc-500 mt-0.5">{getYear(item)}</p>
+                  <p className="text-xs font-black text-white leading-tight line-clamp-2">{displayTitle}</p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5 line-clamp-1">{displaySub}</p>
                 </div>
               </div>
               {/* Title below */}
               <div className="mt-2.5 px-0.5">
-                <p className="truncate text-xs font-bold text-zinc-300 transition group-hover:text-white">{getTitle(item)}</p>
-                <p className="text-[10px] text-zinc-600 mt-0.5">{getYear(item)}</p>
+                <p className="truncate text-xs font-bold text-zinc-300 transition group-hover:text-white">{displayTitle}</p>
+                <p className="text-[10px] text-zinc-600 mt-0.5 truncate">{displaySub}</p>
               </div>
             </Link>
           );
@@ -380,7 +391,17 @@ function CategoriesBento() {
             key={cat.label}
             to={cat.href}
             className="group relative overflow-hidden rounded-2xl"
-            style={{ aspectRatio: "16/9", border: "1px solid var(--border)" }}
+            style={{ 
+              aspectRatio: "16/9", 
+              border: "1px solid rgba(255,255,255,0.08)",
+              transition: "box-shadow 0.5s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = `0 20px 50px -10px ${cat.accent}66`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = "none";
+            }}
           >
             <img
               src={resolveImg(cat.backdrop, 'w780')}
@@ -431,7 +452,7 @@ function Marquee() {
 /* ── MAIN PAGE ──────────────────────────────────────────────────────────── */
 export default function HomePage() {
   const [trending, setTrending] = useState({ movies: [], tv: [] });
-  const [topRated, setTopRated] = useState([]);
+  const [trendingMusic, setTrendingMusic] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -440,10 +461,13 @@ export default function HomePage() {
         const results = data.results ?? [];
         setTrending({
           movies: results.slice(0, 10),
-          tv: [], // Cannot fetch TV trending without backend changes
+          tv: [],
         });
-        setTopRated([...results].sort((a, b) => b.vote_average - a.vote_average).slice(0, 10));
       })
+      .catch(() => {});
+
+    api.getMusicCharts()
+      .then((d) => setTrendingMusic((d?.feed?.entry ?? []).slice(0, 10)))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -475,7 +499,7 @@ export default function HomePage() {
           <>
             <TrendingRail title="Trending Movies" items={trending.movies} type="movie" />
             <CategoriesBento />
-            <TrendingRail title="Popular Picks" items={topRated} type="movie" />
+            <TrendingRail title="Trending Music" items={trendingMusic} type="music" />
           </>
         )}
       </div>
