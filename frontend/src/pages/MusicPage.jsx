@@ -53,7 +53,7 @@ function Hero({ items }) {
     <div className="glass-panel" style={{
       position: "relative",
       overflow: "hidden",
-      minHeight: 420,
+      height: 420,
       borderRadius: 30,
       display: "flex",
       alignItems: "stretch",

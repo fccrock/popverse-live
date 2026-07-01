@@ -56,21 +56,23 @@ async function getAlbumDetails(req, res) {
 async function searchMusic(req, res) {
   try {
     const q = encodeURIComponent(req.query.q || "");
-    const type = req.query.type || "album"; // album or song
+    const typeParam = req.query.type || "album";
+    // iTunes uses 'song' not 'track' — map accordingly
+    const entity = typeParam === "track" ? "song" : typeParam;
 
-    // Search both US and India stores in parallel for better coverage
-    const [usData, inData] = await Promise.all([
-      itunesFetch(`/search?term=${q}&media=music&entity=${type}&limit=15&country=us`).catch(() => ({ results: [] })),
-      itunesFetch(`/search?term=${q}&media=music&entity=${type}&limit=15&country=in`).catch(() => ({ results: [] })),
+    // Search US, India, and UK stores in parallel for broadest coverage
+    const [usData, inData, gbData] = await Promise.all([
+      itunesFetch(`/search?term=${q}&media=music&entity=${entity}&limit=15&country=us`).catch(() => ({ results: [] })),
+      itunesFetch(`/search?term=${q}&media=music&entity=${entity}&limit=15&country=in`).catch(() => ({ results: [] })),
+      itunesFetch(`/search?term=${q}&media=music&entity=${entity}&limit=10&country=gb`).catch(() => ({ results: [] })),
     ]);
 
-    const usResults  = usData.results  ?? [];
-    const inResults  = inData.results  ?? [];
+    const allResults = [...(inData.results ?? []), ...(usData.results ?? []), ...(gbData.results ?? [])];
 
-    // Merge and deduplicate by trackId / collectionId
+    // Deduplicate by trackId / collectionId
     const seen = new Set();
     const merged = [];
-    for (const item of [...inResults, ...usResults]) {
+    for (const item of allResults) {
       const key = item.trackId ?? item.collectionId;
       if (key && !seen.has(key)) { seen.add(key); merged.push(item); }
     }
