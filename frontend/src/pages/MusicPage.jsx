@@ -31,13 +31,7 @@ const MOOD_ICONS = {
   Romance: <svg viewBox="0 0 24 24" fill="currentColor" width={18} height={18}><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>,
 };
 
-const PLAYLISTS = [
-  { label: "Today's Top Hits", count: 50,  img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&h=200&fit=crop&q=80" },
-  { label: "Chill Vibes",      count: 80,  img: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=200&h=200&fit=crop&q=80" },
-  { label: "Rap Caviar",       count: 100, img: "https://i.scdn.co/image/ab6761610000e5eb8d8ac7290d0fe2d12fb6e4d9" },
-  { label: "All Out 2010s",    count: 120, img: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop&q=80" },
-  { label: "Acoustic Hits",    count: 60,  img: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=200&h=200&fit=crop&q=80" },
-];
+// PLAYLISTS replaced by live public collections from API
 
 /* ═══════════════════════════════════════════════════════════════════
    HERO — massive 420px height, huge typography
@@ -265,22 +259,34 @@ function ChartRow({ item, rank }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   PLAYLIST ROW — right panel
+   COLLECTION ROW — right panel (live public collections)
 ═══════════════════════════════════════════════════════════════════ */
-function PlaylistRow({ pl }) {
+function CollectionRow({ collection }) {
+  const coverImg = collection.items?.[0]?.posterPath
+    ?? collection.coverImage
+    ?? null;
+
+  // Build a cover from the first item's poster if available
+  const imgSrc = coverImg
+    ? (coverImg.startsWith('http') ? coverImg : `https://image.tmdb.org/t/p/w200${coverImg}`)
+    : `https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&h=200&fit=crop&q=80`;
+
+  const itemCount = collection.items?.length ?? collection.itemCount ?? 0;
+  const likes = collection.likeCount ?? collection.likes ?? 0;
+
   return (
-    <div className="list-row cursor-pointer">
+    <Link to={`/collections/${collection.id}`} className="list-row" style={{ textDecoration: 'none' }}>
       <div style={{ width: 48, height: 48, borderRadius: 10, overflow: "hidden", flexShrink: 0 }}>
-        <img src={pl.img} alt={pl.label} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <img src={imgSrc} alt={collection.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pl.label}</p>
-        <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.55)", margin: 0 }}>{pl.count} songs</p>
+        <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{collection.name}</p>
+        <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.55)", margin: 0 }}>{itemCount} items · ♥ {likes}</p>
       </div>
-      <button className="play-btn-circle">
+      <button className="play-btn-circle" onClick={e => e.preventDefault()}>
         <svg width={10} height={10} fill="currentColor" viewBox="0 0 24 24" style={{ marginLeft: 2 }}><path d="M8 5v14l11-7z" /></svg>
       </button>
-    </div>
+    </Link>
   );
 }
 
@@ -303,9 +309,12 @@ function SHead({ title, viewAll = true }) {
 /* ═══════════════════════════════════════════════════════════════════
    PAGE
 ═══════════════════════════════════════════════════════════════════ */
+const API = import.meta.env.VITE_API_BASE_URL ?? "";
+
 export default function MusicPage() {
-  const [charts,   setCharts  ] = useState([]);
-  const [releases, setReleases] = useState([]);
+  const [charts,      setCharts     ] = useState([]);
+  const [releases,    setReleases   ] = useState([]);
+  const [publicCols,  setPublicCols ] = useState([]);
   const scrollRef = useRef(null);
 
   const scrollNewReleases = (direction) => {
@@ -319,6 +328,10 @@ export default function MusicPage() {
   useEffect(() => {
     api.getMusicCharts().then(d => setCharts(d?.feed?.entry ?? [])).catch(() => {});
     api.getMusicNewReleases().then(d => setReleases(d?.feed?.entry ?? [])).catch(() => {});
+    fetch(`${API}/api/collections/public`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setPublicCols(Array.isArray(data) ? data.slice(0, 5) : []))
+      .catch(() => {});
   }, []);
 
   /* ── Cinematic background ── */
@@ -395,6 +408,7 @@ export default function MusicPage() {
           gap: 40px;
           max-width: 1800px;
           margin: 0 auto;
+          align-items: start;
         }
 
         /* ── Glassmorphism Core ── */
@@ -587,8 +601,20 @@ export default function MusicPage() {
             </div>
 
             <div className="glass-panel animate-up delay-1" style={{ padding: "28px 0 16px", height: "fit-content" }}>
-              <div style={{ padding: "0 24px" }}><SHead title="Popular Playlists" viewAll={false} /></div>
-              {PLAYLISTS.map((pl, i) => <PlaylistRow key={i} pl={pl} />)}
+              <div style={{ padding: "0 24px" }}><SHead title="Popular Collections" viewAll={false} /></div>
+              {publicCols.length === 0 ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="list-row">
+                    <div style={{ width: 48, height: 48, borderRadius: 10, background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ height: 12, width: '70%', borderRadius: 6, background: 'rgba(255,255,255,0.06)', marginBottom: 8 }} />
+                      <div style={{ height: 10, width: '40%', borderRadius: 6, background: 'rgba(255,255,255,0.04)' }} />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                publicCols.map((col) => <CollectionRow key={col.id} collection={col} />)
+              )}
             </div>
 
           </div>
