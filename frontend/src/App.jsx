@@ -18,8 +18,6 @@ import MovieDetailPage from "./pages/MovieDetailPage";
 import TvDetailPage from "./pages/TvDetailPage";
 import PersonPage from "./pages/PersonPage";
 import SearchPage from "./pages/SearchPage";
-import WelcomePage from "./pages/WelcomePage";
-import MediaDetailPage from "./pages/MediaDetailPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import CommunityPage from "./pages/CommunityPage";
 import ClubDetailPage from "./pages/ClubDetailPage";
