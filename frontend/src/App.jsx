@@ -18,7 +18,9 @@ import MovieDetailPage from "./pages/MovieDetailPage";
 import TvDetailPage from "./pages/TvDetailPage";
 import PersonPage from "./pages/PersonPage";
 import SearchPage from "./pages/SearchPage";
-
+import WelcomePage from "./pages/WelcomePage";
+import MediaDetailPage from "./pages/MediaDetailPage";
+import ComingSoonPage from "./pages/ComingSoonPage";
 import CommunityPage from "./pages/CommunityPage";
 import ClubDetailPage from "./pages/ClubDetailPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -96,6 +98,16 @@ export default function App() {
               <Route path="/anime" element={
                 <Layout>
                   <AnimePage />
+                </Layout>
+              } />
+              <Route path="/games" element={
+                <Layout>
+                  <ComingSoonPage />
+                </Layout>
+              } />
+              <Route path="/books" element={
+                <Layout>
+                  <ComingSoonPage />
                 </Layout>
               } />
               <Route path="/music" element={

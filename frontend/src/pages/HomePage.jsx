@@ -69,11 +69,10 @@ const resolveImg = (path, tmdbSize = "original") => {
   return path;
 };
 
-/* ── GENRE CATEGORIES ── */
 const CATEGORIES = [
-  { label: "Cinema", sub: "Movies & TV Shows", href: "/cinema", accent: "#8b5cf6", backdrop: "/rAiYTfKGqDCRIIqo664sY9XaajA.jpg" },
-  { label: "Music",  sub: "Artists & Albums",  href: "/music",  accent: "#f97316", backdrop: "/images/KSHAMA.jpg" },
-  { label: "Games",  sub: "Play & Discover",   href: "/games",  accent: "#c2820a", backdrop: "/images/RDR_2_Artwork_OfficialArt.jpg" },
+  { label: "Cinema", sub: "Movies & TV Shows", href: "/cinema", accent: "#8b5cf6", backdrop: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1920&q=80" },
+  { label: "Music",  sub: "Artists & Albums",  href: "/music",  accent: "#f97316", backdrop: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1920&q=80" },
+  { label: "Games",  sub: "Play & Discover",   href: "/games",  accent: "#c2820a", backdrop: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1920&q=80" },
   { label: "Books",  sub: "Read & Explore",    href: "/books",  accent: "#06b6d4", backdrop: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1920&q=80" },
 ];
 
