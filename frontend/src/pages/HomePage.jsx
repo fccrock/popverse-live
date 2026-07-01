@@ -71,10 +71,10 @@ const resolveImg = (path, tmdbSize = "original") => {
 
 /* ── GENRE CATEGORIES ── */
 const CATEGORIES = [
-  { label: "Cinema",    sub: "Hollywood & Beyond", href: "/cinema",           accent: "#8b5cf6", backdrop: "/rAiYTfKGqDCRIIqo664sY9XaajA.jpg" },
-  { label: "TV Series", sub: "Binge-worthy Shows",  href: "/search?type=tv",   accent: "#f43f5e", backdrop: "/etj8E2o0Bud0HkONVQPjyCkIvpv.jpg" },
-  { label: "Anime",     sub: "Japanese Animation",  href: "/search?type=anime",accent: "#06b6d4", backdrop: "/sSuHKHnYBVqnBP8M7cDAbK3wNKE.jpg" },
-  { label: "Discover",  sub: "Find Something New",  href: "/search",           accent: "#f59e0b", backdrop: "/4HodYYKEIsGOdinkGi2Ucz6X9i0.jpg" },
+  { label: "Cinema", sub: "Movies & TV Shows", href: "/cinema", accent: "#8b5cf6", backdrop: "/rAiYTfKGqDCRIIqo664sY9XaajA.jpg" },
+  { label: "Music",  sub: "Artists & Albums",  href: "/music",  accent: "#f97316", backdrop: "/images/KSHAMA.jpg" },
+  { label: "Games",  sub: "Play & Discover",   href: "/games",  accent: "#c2820a", backdrop: "/images/RDR_2_Artwork_OfficialArt.jpg" },
+  { label: "Books",  sub: "Read & Explore",    href: "/books",  accent: "#06b6d4", backdrop: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1920&q=80" },
 ];
 
 /* ── MARQUEE TICKER ── */
@@ -375,16 +375,16 @@ function CategoriesBento() {
         <h2 className="text-xl font-black tracking-tight text-white sm:text-2xl">Browse Categories</h2>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {CATEGORIES.map((cat, idx) => (
           <Link
             key={cat.label}
             to={cat.href}
             className="group relative overflow-hidden rounded-2xl"
-            style={{ aspectRatio: idx === 0 ? "1/1" : "1/1", border: "1px solid var(--border)" }}
+            style={{ aspectRatio: "16/9", border: "1px solid var(--border)" }}
           >
             <img
-              src={`https://image.tmdb.org/t/p/w780${cat.backdrop}`}
+              src={resolveImg(cat.backdrop, 'w780')}
               alt=""
               className="absolute inset-0 h-full w-full object-cover opacity-50 transition-all duration-500 group-hover:scale-105 group-hover:opacity-70"
             />
