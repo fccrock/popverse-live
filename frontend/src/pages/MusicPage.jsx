@@ -272,7 +272,7 @@ function CollectionRow({ collection }) {
     : `https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&h=200&fit=crop&q=80`;
 
   const itemCount = collection.items?.length ?? collection.itemCount ?? 0;
-  const likes = collection.likeCount ?? collection.likes ?? 0;
+  const likes = collection.likeCount ?? (Array.isArray(collection.likes) ? collection.likes.length : (collection.likes ?? 0));
 
   return (
     <Link to={`/collections/${collection.id}`} className="list-row" style={{ textDecoration: 'none' }}>
