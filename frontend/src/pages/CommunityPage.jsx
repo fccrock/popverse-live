@@ -55,7 +55,7 @@ function CategoryBadge({ category }) {
 function UserBubble({ username, size = "sm" }) {
   const colors = ["bg-violet-500", "bg-rose-500", "bg-emerald-500", "bg-sky-500", "bg-amber-500", "bg-fuchsia-500", "bg-teal-500"];
   const hash = [...username].reduce((a, c) => a + c.charCodeAt(0), 0);
-  const cls = size === "sm" ? "h-7 w-7 text-[10px]" : "h-9 w-9 text-xs";
+  const cls = size === "xs" ? "h-5 w-5 text-[8px]" : size === "sm" ? "h-7 w-7 text-[10px]" : "h-9 w-9 text-xs";
   return (
     <div className={`grid ${cls} shrink-0 place-items-center rounded-full font-bold text-white ${colors[hash % colors.length]}`}>
       {username[0].toUpperCase()}
@@ -485,18 +485,20 @@ export default function CommunityPage() {
             </div>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filteredClubs.map((club, i) => (
-                <Link key={club.id} to={`/community/${club.slug}`} className="group card animate-fade-up overflow-hidden" style={{ animationDelay: `${i * 60}ms` }}>
-                  <div className="relative aspect-[16/8] overflow-hidden">
+                <Link key={club.id} to={`/community/${club.slug}`} className="group animate-fade-up" style={{ animationDelay: `${i * 60}ms` }}>
+                  <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-zinc-900 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300">
                     <img src={club.coverImage} alt={club.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#101016] via-[#101016]/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#101016]/40 via-transparent to-transparent" />
                     <div className="absolute bottom-3 left-4"><CategoryBadge category={club.category} /></div>
                   </div>
-                  <div className="p-5">
-                    <h3 className="text-lg font-bold text-white tracking-tight group-hover:text-violet-300 transition-colors duration-200">{club.name}</h3>
-                    <p className="mt-1.5 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{club.description}</p>
-                    <div className="mt-4 flex items-center justify-between">
-                      <MemberAvatars members={club.members} />
-                      <span className="text-xs font-semibold text-zinc-600">{club.members.length} {club.members.length === 1 ? "member" : "members"}</span>
+                  <div className="pt-3 px-0">
+                    <h3 className="text-base font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors duration-200">{club.name}</h3>
+                    <p className="mt-1 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{club.description}</p>
+                    <div className="mt-2.5 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <MemberAvatars members={club.members} />
+                        <span className="text-xs text-zinc-500">{club.members.length} {club.members.length === 1 ? "member" : "members"}</span>
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -550,7 +552,15 @@ export default function CommunityPage() {
             {colSubView === "discover" && (
               collectionsLoading ? (
                 <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {[1,2,3].map(i => <div key={i} className="rounded-2xl border border-white/[0.06] overflow-hidden animate-pulse"><div className="aspect-[16/8] bg-white/[0.04]" /><div className="p-5 space-y-3"><div className="h-4 w-3/4 rounded bg-white/[0.04]" /><div className="h-3 w-full rounded bg-white/[0.03]" /></div></div>)}
+                  {[1,2,3].map(i => (
+                    <div key={i} className="animate-pulse">
+                      <div className="aspect-[16/9] rounded-2xl bg-white/[0.03] border border-white/[0.06]" />
+                      <div className="pt-3 space-y-2">
+                        <div className="h-4 w-2/3 rounded bg-white/[0.04]" />
+                        <div className="h-3 w-1/2 rounded bg-white/[0.03]" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -560,12 +570,12 @@ export default function CommunityPage() {
                   return (
                     <div
                       key={col.id}
-                      className="group card animate-fade-up overflow-hidden cursor-pointer"
+                      className="group animate-fade-up cursor-pointer"
                       style={{ animationDelay: `${i * 60}ms` }}
                       onClick={() => navigate(`/collection/${col.id}`)}
                     >
                       {/* Poster Mosaic or Cover Image */}
-                      <div className="relative aspect-[16/8] overflow-hidden bg-zinc-900">
+                      <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-zinc-900 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300">
                         {col.coverImage && col.coverImage.startsWith("gradient:") ? (
                           (() => {
                             const [from, to] = col.coverImage.replace("gradient:", "").split("|");
@@ -586,13 +596,7 @@ export default function CommunityPage() {
                         ) : (
                           <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 to-zinc-900" />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#101016] via-[#101016]/20 to-transparent" />
-
-                        {/* Item count badge */}
-                        <div className="absolute bottom-3 left-4 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-xl">
-                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-2.625 0V5.625m0 0A1.125 1.125 0 014.5 4.5h15a1.125 1.125 0 011.125 1.125v12.75" /></svg>
-                          {items.length} titles
-                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#101016]/40 via-transparent to-transparent" />
 
                         {/* ── SAVE BUTTON ── */}
                         {isAuthenticated && (
@@ -613,27 +617,30 @@ export default function CommunityPage() {
                       </div>
 
                       {/* Content */}
-                      <div className="p-5">
+                      <div className="pt-3 px-0">
+                        {/* Tags */}
                         {(col.tags || []).length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mb-3">
+                          <div className="flex flex-wrap gap-1.5 mb-2">
                             {(col.tags || []).slice(0, 3).map((t) => (
                               <span key={t} className="tag text-[10px]">{t}</span>
                             ))}
                           </div>
                         )}
-                        <h3 className="text-lg font-bold text-white tracking-tight group-hover:text-violet-300 transition-colors duration-200">
+                        <h3 className="text-base font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors duration-200">
                           {col.title || col.name}
                         </h3>
                         {col.description && (
-                          <p className="mt-1.5 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{col.description}</p>
+                          <p className="mt-1 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{col.description}</p>
                         )}
-                        <div className="mt-4 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <UserBubble username={creatorName} />
-                            <Link to={`/profile/${creatorName}`} className="text-sm font-semibold text-zinc-400 hover:text-violet-300 transition" onClick={e => e.stopPropagation()}>
-                              @{creatorName}
-                            </Link>
-                          </div>
+                        <div className="mt-2.5 flex items-center gap-2 text-xs text-zinc-400">
+                          <UserBubble username={creatorName} size="xs" />
+                          <Link to={`/profile/${creatorName}`} className="font-semibold text-zinc-400 hover:text-violet-400 transition" onClick={e => e.stopPropagation()}>
+                            @{creatorName}
+                          </Link>
+                          <span>·</span>
+                          <span>{items.length} {items.length === 1 ? "Item" : "Items"}</span>
+                          <span>·</span>
+                          <span>{(col.likeCount ?? col.likes?.length ?? 0)} {(col.likeCount ?? col.likes?.length ?? 0) === 1 ? "like" : "likes"}</span>
                         </div>
                       </div>
                     </div>
@@ -680,8 +687,8 @@ export default function CommunityPage() {
                     const isPublicBadge = col.isPublic;
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
-                      <div key={col.id} className="group card animate-fade-up overflow-hidden cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/8] overflow-hidden bg-zinc-900">
+                      <div key={col.id} className="group animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
+                        <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-zinc-900 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300">
                           {gradient ? (
                             <div className="h-full w-full" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
@@ -697,20 +704,19 @@ export default function CommunityPage() {
                               ))}
                             </div>
                           ) : <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 to-zinc-900" />}
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#101016] via-[#101016]/20 to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#101016]/40 via-transparent to-transparent" />
                           <div className="absolute top-3 right-3">
                             <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${isPublicBadge ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20" : "bg-zinc-800 text-zinc-400 border border-zinc-700"}`}>
                               {isPublicBadge ? "Public" : "Private"}
                             </span>
                           </div>
-                          <div className="absolute bottom-3 left-4 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-xl">
-                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-2.625 0V5.625m0 0A1.125 1.125 0 014.5 4.5h15a1.125 1.125 0 011.125 1.125v12.75" /></svg>
-                            {(col.items||[]).length} titles
-                          </div>
                         </div>
-                        <div className="p-5">
-                          <h3 className="text-lg font-bold text-white tracking-tight group-hover:text-violet-300 transition-colors">{col.name}</h3>
-                          {col.description && <p className="mt-1.5 text-sm text-zinc-500 line-clamp-2">{col.description}</p>}
+                        <div className="pt-3 px-0">
+                          <h3 className="text-base font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors">{col.title || col.name}</h3>
+                          {col.description && <p className="mt-1 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{col.description}</p>}
+                          <div className="mt-2 flex items-center gap-2 text-xs text-zinc-400">
+                            <span>{(col.items||[]).length} {(col.items||[]).length === 1 ? "Item" : "Items"}</span>
+                          </div>
                         </div>
                       </div>
                     );
@@ -737,8 +743,8 @@ export default function CommunityPage() {
                     const creatorName = col.createdBy || col.user?.username || "Unknown";
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
-                      <div key={col.id} className="group card animate-fade-up overflow-hidden cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/8] overflow-hidden bg-zinc-900">
+                      <div key={col.id} className="group animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
+                        <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-zinc-900 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300">
                           {gradient ? (
                             <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
@@ -746,22 +752,24 @@ export default function CommunityPage() {
                           ) : items.length > 0 ? (
                             <div className="absolute inset-0 flex">{items.slice(0,4).map(item => <div key={item.mediaId} className="relative flex-1 overflow-hidden"><img src={item.posterPath?.startsWith("http") ? item.posterPath : `https://image.tmdb.org/t/p/w342${item.posterPath}`} className="h-full w-full object-cover" alt="" /></div>)}</div>
                           ) : <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 to-zinc-900" />}
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#101016] via-[#101016]/20 to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#101016]/40 via-transparent to-transparent" />
                           <button onClick={e => { e.stopPropagation(); toggleSaveCollection(col.id); }} className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold backdrop-blur-md border bg-violet-600 text-white border-violet-500 shadow-lg">
                             <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                             Saved
                           </button>
-                          <div className="absolute bottom-3 left-4 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-xl">
-                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-2.625 0V5.625m0 0A1.125 1.125 0 014.5 4.5h15a1.125 1.125 0 011.125 1.125v12.75" /></svg>
-                            {items.length} titles
-                          </div>
                         </div>
-                        <div className="p-5">
-                          <h3 className="text-lg font-bold text-white tracking-tight group-hover:text-violet-300 transition-colors">{col.title || col.name}</h3>
-                          {col.description && <p className="mt-1.5 text-sm text-zinc-500 line-clamp-2">{col.description}</p>}
-                          <div className="mt-3 flex items-center gap-2">
-                            <UserBubble username={creatorName} />
-                            <Link to={`/profile/${creatorName}`} className="text-sm font-semibold text-zinc-400 hover:text-violet-300 transition" onClick={e => e.stopPropagation()}>@{creatorName}</Link>
+                        <div className="pt-3 px-0">
+                          <h3 className="text-base font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors">{col.title || col.name}</h3>
+                          {col.description && <p className="mt-1 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{col.description}</p>}
+                          <div className="mt-2.5 flex items-center gap-2 text-xs text-zinc-400">
+                            <UserBubble username={creatorName} size="xs" />
+                            <Link to={`/profile/${creatorName}`} className="font-semibold text-zinc-400 hover:text-violet-400 transition" onClick={e => e.stopPropagation()}>
+                              @{creatorName}
+                            </Link>
+                            <span>·</span>
+                            <span>{items.length} {items.length === 1 ? "Item" : "Items"}</span>
+                            <span>·</span>
+                            <span>{(col.likeCount ?? col.likes?.length ?? 0)} {(col.likeCount ?? col.likes?.length ?? 0) === 1 ? "like" : "likes"}</span>
                           </div>
                         </div>
                       </div>
