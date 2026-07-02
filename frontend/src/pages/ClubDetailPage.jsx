@@ -594,7 +594,7 @@ export default function ClubDetailPage() {
                       Admin
                     </span>
                   )}
-                  {currentUsername && currentUsername.toLowerCase() === club.createdBy.toLowerCase() && (
+                  {currentUsername && (currentUsername.toLowerCase() === club.createdBy.toLowerCase() || role === "admin") && (
                     <button 
                       onClick={async () => {
                         if (window.confirm("Are you sure you want to completely delete this club? This action cannot be undone.")) {
