@@ -14,6 +14,7 @@ export default {
       },
       boxShadow: {
         'glow-violet': '0 0 30px rgba(124,58,237,0.3)',
+        'glow-violet-strong': '0 0 40px rgba(124,58,237,0.6)',
         'glow-rose':   '0 0 30px rgba(244,63,94,0.3)',
       },
       animation: {
