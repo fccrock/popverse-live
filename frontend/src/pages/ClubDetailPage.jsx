@@ -196,33 +196,49 @@ function FeedTab({ club, isMember }) {
                   )}
                 </div>
 
-                {/* Replies thread - flat list, reply on any pre-fills @mention */}
+                {/* Replies - flat list with @mention highlighting */}
                 {replies.length > 0 && (
-                  <div className="mt-4 space-y-3 border-l-2 border-white/[0.07] pl-4">
-                    {replies.map(r => (
-                      <div key={r.id} className="flex items-start gap-2.5">
-                        <UserBubble username={r.author} size="sm" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <Link to={`/profile/${r.author}`} className="text-xs font-bold text-white hover:text-violet-300 transition">{r.author}</Link>
-                            <span className="text-xs text-zinc-600">{timeAgo(r.timestamp)}</span>
+                  <div className="mt-3 space-y-2.5">
+                    {replies.map(r => {
+                      // Parse @mention in content
+                      const content = r.content || "";
+                      const mentionMatch = content.match(/^@(\S+)\s*(.*)$/s);
+                      const mentionedUser = mentionMatch ? mentionMatch[1] : null;
+                      const restContent = mentionMatch ? mentionMatch[2] : content;
+
+                      return (
+                        <div key={r.id} className="flex items-start gap-2.5">
+                          <UserBubble username={r.author} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <Link to={`/profile/${r.author}`} className="text-xs font-bold text-white hover:text-violet-300 transition">{r.author}</Link>
+                              {mentionedUser && (
+                                <span className="flex items-center gap-1 text-[10px] text-zinc-500">
+                                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                                  <Link to={`/profile/${mentionedUser}`} className="font-semibold text-sky-500 hover:text-sky-400 transition">@{mentionedUser}</Link>
+                                </span>
+                              )}
+                              <span className="text-xs text-zinc-600">{timeAgo(r.timestamp)}</span>
+                            </div>
+                            <p className="text-[13px] text-zinc-400 mt-0.5 leading-relaxed">
+                              {mentionedUser ? restContent : content}
+                            </p>
+                            {isMember && (
+                              <button
+                                onClick={() => openReply(post.id, r.id, `@${r.author} `)}
+                                className="mt-1 text-[11px] font-semibold text-zinc-600 hover:text-violet-400 transition uppercase tracking-wide"
+                              >
+                                Reply
+                              </button>
+                            )}
                           </div>
-                          <p className="text-[13px] text-zinc-400 mt-0.5 leading-relaxed">{r.content}</p>
-                          {isMember && (
-                            <button
-                              onClick={() => openReply(post.id, r.id, `@${r.author} `)}
-                              className="mt-1 text-[11px] font-semibold text-zinc-600 hover:text-violet-400 transition uppercase tracking-wide"
-                            >
-                              Reply
-                            </button>
-                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
 
-                {/* Reply input - opens for any reply target */}
+                {/* Reply input */}
                 {replyingTo?.postId === post.id && (
                   <div className="mt-3 flex items-center gap-2">
                     <UserBubble username={currentUsername || "?"} size="sm" linkTo={false} />
