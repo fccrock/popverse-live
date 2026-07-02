@@ -485,19 +485,19 @@ export default function CommunityPage() {
             </div>
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filteredClubs.map((club, i) => (
-                <Link key={club.id} to={`/community/${club.slug}`} className="group animate-fade-up" style={{ animationDelay: `${i * 60}ms` }}>
-                  <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-zinc-900 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300">
+                <Link key={club.id} to={`/community/${club.slug}`} className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all duration-300 animate-fade-up" style={{ animationDelay: `${i * 60}ms` }}>
+                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-900">
                     <img src={club.coverImage} alt={club.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#101016]/40 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     <div className="absolute bottom-3 left-4"><CategoryBadge category={club.category} /></div>
                   </div>
-                  <div className="pt-3 px-0">
+                  <div className="flex flex-col flex-1 p-4">
                     <h3 className="text-base font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors duration-200">{club.name}</h3>
-                    <p className="mt-1 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{club.description}</p>
-                    <div className="mt-2.5 flex items-center justify-between">
+                    <p className="mt-1 text-[13px] text-zinc-400 line-clamp-2 leading-relaxed flex-1">{club.description}</p>
+                    <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/[0.04]">
                       <div className="flex items-center gap-2">
                         <MemberAvatars members={club.members} />
-                        <span className="text-xs text-zinc-500">{club.members.length} {club.members.length === 1 ? "member" : "members"}</span>
+                        <span className="text-xs font-medium text-zinc-500">{club.members.length} {club.members.length === 1 ? "member" : "members"}</span>
                       </div>
                     </div>
                   </div>
@@ -565,17 +565,16 @@ export default function CommunityPage() {
               ) : (
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {(activeTag === "all" ? discoverCollections : discoverCollections.filter(c => (c.tags||[]).includes(activeTag))).map((col, i) => {
-                  const items = col.items || [];
                   const creatorName = col.createdBy || col.user?.username || "Unknown";
                   return (
                     <div
                       key={col.id}
-                      className="group animate-fade-up cursor-pointer"
+                      className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all duration-300 animate-fade-up cursor-pointer"
                       style={{ animationDelay: `${i * 60}ms` }}
                       onClick={() => navigate(`/collection/${col.id}`)}
                     >
                       {/* Poster Mosaic or Cover Image */}
-                      <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-zinc-900 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300">
+                      <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-900">
                         {col.coverImage && col.coverImage.startsWith("gradient:") ? (
                           (() => {
                             const [from, to] = col.coverImage.replace("gradient:", "").split("|");
@@ -583,9 +582,9 @@ export default function CommunityPage() {
                           })()
                         ) : col.coverImage ? (
                           <img src={col.coverImage} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" alt="" />
-                        ) : items.length > 0 ? (
+                        ) : (col.items || []).length > 0 ? (
                           <div className="absolute inset-0 flex">
-                            {items.slice(0, 4).map((item) => (
+                            {(col.items || []).slice(0, 4).map((item) => (
                               <div key={item.mediaId || item.id} className="relative flex-1 overflow-hidden">
                                 <img
                                   src={item.posterPath?.startsWith("http") ? item.posterPath : `https://image.tmdb.org/t/p/w342${item.posterPath}`}
@@ -596,7 +595,7 @@ export default function CommunityPage() {
                         ) : (
                           <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 to-zinc-900" />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#101016]/40 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
                         {/* ── SAVE BUTTON ── */}
                         {isAuthenticated && (
@@ -617,7 +616,7 @@ export default function CommunityPage() {
                       </div>
 
                       {/* Content */}
-                      <div className="pt-3 px-0">
+                      <div className="flex flex-col flex-1 p-4">
                         {/* Tags */}
                         {(col.tags || []).length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mb-2">
@@ -630,17 +629,18 @@ export default function CommunityPage() {
                           {col.title || col.name}
                         </h3>
                         {col.description && (
-                          <p className="mt-1 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{col.description}</p>
+                          <p className="mt-1 text-[13px] text-zinc-400 line-clamp-2 leading-relaxed flex-1">{col.description}</p>
                         )}
-                        <div className="mt-2.5 flex items-center gap-2 text-xs text-zinc-400">
-                          <UserBubble username={creatorName} size="xs" />
-                          <Link to={`/profile/${creatorName}`} className="font-semibold text-zinc-400 hover:text-violet-400 transition" onClick={e => e.stopPropagation()}>
-                            @{creatorName}
-                          </Link>
-                          <span>·</span>
-                          <span>{items.length} {items.length === 1 ? "Item" : "Items"}</span>
-                          <span>·</span>
-                          <span>{(col.likeCount ?? col.likes?.length ?? 0)} {(col.likeCount ?? col.likes?.length ?? 0) === 1 ? "like" : "likes"}</span>
+                        <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/[0.04]">
+                          <div className="flex items-center gap-2 text-xs text-zinc-400">
+                            <UserBubble username={creatorName} size="xs" />
+                            <Link to={`/profile/${creatorName}`} className="font-semibold text-zinc-400 hover:text-violet-400 transition" onClick={e => e.stopPropagation()}>
+                              @{creatorName}
+                            </Link>
+                            <span>·</span>
+                            <span>{col.items?.length || 0} items</span>
+                          </div>
+                          <span className="text-xs text-zinc-600">{(col.likeCount ?? col.likes?.length ?? 0)} likes</span>
                         </div>
                       </div>
                     </div>
@@ -687,35 +687,37 @@ export default function CommunityPage() {
                     const isPublicBadge = col.isPublic;
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
-                      <div key={col.id} className="group animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-zinc-900 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300">
+                      <div key={col.id} className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all duration-300 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
+                        <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-900">
                           {gradient ? (
-                            <div className="h-full w-full" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
+                            <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
-                            <img src={col.coverImage} className="h-full w-full object-cover" alt="" />
+                            <img src={col.coverImage} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" alt="" />
                           ) : (col.items||[]).length > 0 ? (
                             <div className="absolute inset-0 flex">
                               {(col.items||[]).slice(0,4).map(item => (
                                 <div key={item.mediaId} className="relative flex-1 overflow-hidden">
                                   <img
                                     src={item.posterPath?.startsWith("http") ? item.posterPath : `https://image.tmdb.org/t/p/w342${item.posterPath}`}
-                                    className="h-full w-full object-cover" alt="" />
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" alt="" />
                                 </div>
                               ))}
                             </div>
                           ) : <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 to-zinc-900" />}
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#101016]/40 via-transparent to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                           <div className="absolute top-3 right-3">
                             <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${isPublicBadge ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20" : "bg-zinc-800 text-zinc-400 border border-zinc-700"}`}>
                               {isPublicBadge ? "Public" : "Private"}
                             </span>
                           </div>
                         </div>
-                        <div className="pt-3 px-0">
+                        <div className="flex flex-col flex-1 p-4">
                           <h3 className="text-base font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors">{col.title || col.name}</h3>
-                          {col.description && <p className="mt-1 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{col.description}</p>}
-                          <div className="mt-2 flex items-center gap-2 text-xs text-zinc-400">
-                            <span>{(col.items||[]).length} {(col.items||[]).length === 1 ? "Item" : "Items"}</span>
+                          {col.description && <p className="mt-1 text-[13px] text-zinc-400 line-clamp-2 leading-relaxed flex-1">{col.description}</p>}
+                          <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/[0.04]">
+                            <div className="flex items-center gap-2 text-xs text-zinc-400">
+                              <span>{(col.items||[]).length} {(col.items||[]).length === 1 ? "Item" : "Items"}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -743,33 +745,35 @@ export default function CommunityPage() {
                     const creatorName = col.createdBy || col.user?.username || "Unknown";
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
-                      <div key={col.id} className="group animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-zinc-900 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300">
+                      <div key={col.id} className="group flex flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all duration-300 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
+                        <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-900">
                           {gradient ? (
                             <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
                             <img src={col.coverImage} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" alt="" />
                           ) : items.length > 0 ? (
-                            <div className="absolute inset-0 flex">{items.slice(0,4).map(item => <div key={item.mediaId} className="relative flex-1 overflow-hidden"><img src={item.posterPath?.startsWith("http") ? item.posterPath : `https://image.tmdb.org/t/p/w342${item.posterPath}`} className="h-full w-full object-cover" alt="" /></div>)}</div>
+                            <div className="absolute inset-0 flex">{items.slice(0,4).map(item => <div key={item.mediaId} className="relative flex-1 overflow-hidden"><img src={item.posterPath?.startsWith("http") ? item.posterPath : `https://image.tmdb.org/t/p/w342${item.posterPath}`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" alt="" /></div>)}</div>
                           ) : <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 to-zinc-900" />}
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#101016]/40 via-transparent to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                           <button onClick={e => { e.stopPropagation(); toggleSaveCollection(col.id); }} className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold backdrop-blur-md border bg-violet-600 text-white border-violet-500 shadow-lg">
                             <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                             Saved
                           </button>
                         </div>
-                        <div className="pt-3 px-0">
+                        <div className="flex flex-col flex-1 p-4">
                           <h3 className="text-base font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors">{col.title || col.name}</h3>
-                          {col.description && <p className="mt-1 text-sm text-zinc-500 line-clamp-2 leading-relaxed">{col.description}</p>}
-                          <div className="mt-2.5 flex items-center gap-2 text-xs text-zinc-400">
-                            <UserBubble username={creatorName} size="xs" />
-                            <Link to={`/profile/${creatorName}`} className="font-semibold text-zinc-400 hover:text-violet-400 transition" onClick={e => e.stopPropagation()}>
-                              @{creatorName}
-                            </Link>
-                            <span>·</span>
-                            <span>{items.length} {items.length === 1 ? "Item" : "Items"}</span>
-                            <span>·</span>
-                            <span>{(col.likeCount ?? col.likes?.length ?? 0)} {(col.likeCount ?? col.likes?.length ?? 0) === 1 ? "like" : "likes"}</span>
+                          {col.description && <p className="mt-1 text-[13px] text-zinc-400 line-clamp-2 leading-relaxed flex-1">{col.description}</p>}
+                          <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/[0.04]">
+                            <div className="flex items-center gap-2 text-xs text-zinc-400">
+                              <UserBubble username={creatorName} size="xs" />
+                              <Link to={`/profile/${creatorName}`} className="font-semibold text-zinc-400 hover:text-violet-400 transition" onClick={e => e.stopPropagation()}>
+                                @{creatorName}
+                              </Link>
+                              <span>·</span>
+                              <span>{items.length} {items.length === 1 ? "Item" : "Items"}</span>
+                              <span>·</span>
+                              <span>{(col.likeCount ?? col.likes?.length ?? 0)} {(col.likeCount ?? col.likes?.length ?? 0) === 1 ? "like" : "likes"}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
