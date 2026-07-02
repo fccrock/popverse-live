@@ -196,41 +196,53 @@ function FeedTab({ club, isMember }) {
                   )}
                 </div>
 
-                {/* Replies - flat list with @mention highlighting */}
+                {/* Replies - curved thread with @mention highlighting */}
                 {replies.length > 0 && (
-                  <div className="mt-3 border-l-2 border-white/[0.08] ml-4 pl-4 space-y-3">
-                    {replies.map(r => {
+                  <div className="mt-4 ml-4 pl-5 space-y-3">
+                    {replies.map((r, i) => {
+                      const isLast = i === replies.length - 1;
                       // Parse @mention in content
                       const content = r.content || "";
-                      const mentionMatch = content.match(/^@(\S+)\s*(.*)$/s);
-                      const mentionedUser = mentionMatch ? mentionMatch[1] : null;
-                      const restContent = mentionMatch ? mentionMatch[2] : content;
-
+                      const mentionMatch = content.match(/^@(\w+)\s+(.*)/);
+                      let replyTo = null;
+                      let actualContent = content;
+                      if (mentionMatch) {
+                        replyTo = mentionMatch[1];
+                        actualContent = mentionMatch[2];
+                      }
+                      
                       return (
-                        <div key={r.id} className="flex items-start gap-2.5">
-                          <UserBubble username={r.author} size="sm" />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <Link to={`/profile/${r.author}`} className="text-xs font-bold text-white hover:text-violet-300 transition">{r.author}</Link>
-                              {mentionedUser && (
-                                <span className="flex items-center gap-1 text-[10px] text-zinc-500">
-                                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
-                                  <Link to={`/profile/${mentionedUser}`} className="font-semibold text-sky-500 hover:text-sky-400 transition">@{mentionedUser}</Link>
-                                </span>
-                              )}
-                              <span className="text-xs text-zinc-600">{timeAgo(r.timestamp)}</span>
+                        <div key={r.id} className="relative">
+                          {/* Thread Lines */}
+                          <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
+                            isLast ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
+                          }`} />
+                          {!isLast && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+
+                          <div className="relative z-10 flex items-start gap-3">
+                            <UserBubble username={r.author} size="sm" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 text-xs">
+                                <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
+                                {replyTo && (
+                                  <span className="text-zinc-500 font-medium flex items-center gap-1">
+                                    <span className="inline-block -scale-x-100 opacity-60">↳</span>
+                                    <Link to={`/profile/${replyTo}`} className="text-sky-400 hover:text-sky-300">@{replyTo}</Link>
+                                  </span>
+                                )}
+                                <span className="text-zinc-600">{timeAgo(r.timestamp)}</span>
+                              </div>
+                              <p className="mt-0.5 text-[13px] text-zinc-300">{actualContent}</p>
+                              
+                              <div className="mt-1.5 flex items-center gap-4">
+                                {isMember && (
+                                  <button onClick={() => { openReply(post.id, r.id, `@${r.author} `); }} className="text-[10px] font-bold text-zinc-500 hover:text-violet-400 uppercase tracking-wide">Reply</button>
+                                )}
+                                {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
+                                  <button onClick={() => { if(window.confirm("Delete reply?")) deleteReply(post.id, r.id); }} className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 uppercase tracking-wide">Delete</button>
+                                )}
+                              </div>
                             </div>
-                            <p className="text-[13px] text-zinc-400 mt-0.5 leading-relaxed">
-                              {mentionedUser ? restContent : content}
-                            </p>
-                            {isMember && (
-                              <button
-                                onClick={() => openReply(post.id, r.id, `@${r.author} `)}
-                                className="mt-1 text-[11px] font-semibold text-zinc-600 hover:text-violet-400 transition uppercase tracking-wide"
-                              >
-                                Reply
-                              </button>
-                            )}
                           </div>
                         </div>
                       );
@@ -407,13 +419,21 @@ function DiscussionsTab({ club, isMember }) {
                 </div>
               )}
 
-              {/* Replies list — YouTube-style thread with left border */}
+              {/* Replies list — YouTube-style curved thread */}
               {d.replies.length > 0 && (
-                <div className="border-l-2 border-white/[0.08] ml-4 pl-4 space-y-4">
-                  {d.replies.map((r) => (
-                    <div key={r.id}>
+                <div className="mt-4 ml-4 pl-5 space-y-4">
+                  {d.replies.map((r, i) => {
+                    const isLastL1 = i === d.replies.length - 1;
+                    return (
+                    <div key={r.id} className="relative">
+                      {/* Thread Lines L1 */}
+                      <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
+                        isLastL1 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
+                      }`} />
+                      {!isLastL1 && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+
                       {/* Level 1 reply */}
-                      <div className="flex items-start gap-3">
+                      <div className="relative z-10 flex items-start gap-3">
                         <UserBubble username={r.author} size="sm" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 text-xs">
@@ -442,11 +462,20 @@ function DiscussionsTab({ club, isMember }) {
                         </div>
                       </div>
 
-                      {/* Level 2 sub-replies — indented with secondary thread line */}
+                      {/* Level 2 sub-replies — curved thread lines */}
                       {r.replies && r.replies.length > 0 && (
-                        <div className="border-l-2 border-white/[0.05] ml-4 pl-4 mt-3 space-y-3">
-                          {r.replies.map((subR) => (
-                            <div key={subR.id} className="flex items-start gap-3">
+                        <div className="mt-3 ml-4 pl-5 space-y-3">
+                          {r.replies.map((subR, j) => {
+                            const isLastL2 = j === r.replies.length - 1;
+                            return (
+                            <div key={subR.id} className="relative">
+                              {/* Thread Lines L2 */}
+                              <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
+                                isLastL2 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
+                              }`} />
+                              {!isLastL2 && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+
+                              <div className="relative z-10 flex items-start gap-3">
                               <UserBubble username={subR.author} size="sm" />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 text-xs">
@@ -473,15 +502,20 @@ function DiscussionsTab({ club, isMember }) {
                                   )}
                                 </div>
                               </div>
+                              </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
 
                       {/* Sub-reply form (level 2) */}
                       {activeReply?.discussionId === d.id && activeReply?.parentId === r.id && (
-                        <div className="border-l-2 border-white/[0.05] ml-4 pl-4 mt-3">
-                          <form onSubmit={(e) => submitReply(e, d.id, r.id)} className="flex gap-3">
+                        <div className="relative mt-3 ml-4 pl-5">
+                          {/* Form thread curve */}
+                          <div className="absolute w-[20px] left-[-20px] top-[-24px] h-[40px] border-l-2 border-b-2 border-white/[0.15] rounded-bl-xl z-0" />
+                          
+                          <form onSubmit={(e) => submitReply(e, d.id, r.id)} className="relative z-10 flex gap-3">
                             <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
                             <div className="flex-1">
                               <input 
@@ -500,7 +534,8 @@ function DiscussionsTab({ club, isMember }) {
                         </div>
                       )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

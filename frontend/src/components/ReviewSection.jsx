@@ -202,15 +202,23 @@ function ReviewCard({
 
       {/* ── Threaded Replies ── */}
       {review.replies?.length > 0 && (
-        <div className="mt-4 border-l-2 border-white/[0.08] ml-4 pl-4 space-y-4">
-          {review.replies.map((reply) => {
+        <div className="mt-4 ml-5 pl-5 space-y-4">
+          {review.replies.map((reply, i) => {
+            const isLastL1 = i === review.replies.length - 1;
             const replyAuthor = reply.author?.username || "user";
             const isReplyingToLevel1 = activeReply?.reviewId === review.id && activeReply?.parentId === reply.id;
+            
             return (
-              <div key={reply.id}>
-                {/* Level 1 reply */}
-                <div className="flex items-start gap-3">
-                  <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[10px] font-black text-white`}>
+              <div key={reply.id} className="relative">
+                {/* Thread Lines L1 */}
+                <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
+                  isLastL1 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
+                }`} />
+                {!isLastL1 && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+
+                {/* Level 1 Reply Content */}
+                <div className="relative z-10 flex items-start gap-3">
+                  <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[11px] font-black text-white`}>
                     {replyAuthor.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -250,19 +258,27 @@ function ReviewCard({
 
                 {/* Level 2 sub-replies - secondary thread indent */}
                 {reply.replies && reply.replies.length > 0 && (
-                  <div className="border-l-2 border-white/[0.05] ml-4 pl-4 mt-3 space-y-3">
-                    {reply.replies.map((subR) => {
+                  <div className="mt-3 ml-4 pl-5 space-y-3">
+                    {reply.replies.map((subR, j) => {
+                      const isLastL2 = j === reply.replies.length - 1;
                       const subAuthor = subR.author?.username || "user";
                       return (
-                        <div key={subR.id} className="flex items-start gap-2">
-                          <div className={`grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[9px] font-black text-white`}>
-                            {subAuthor.slice(0, 2).toUpperCase()}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <Link to={`/profile/${subAuthor}`} className="text-[11px] font-bold text-zinc-300 hover:text-violet-300 transition">@{subAuthor}</Link>
-                              <span className="text-[9px] text-zinc-600">{timeAgo(subR.createdAt)}</span>
+                        <div key={subR.id} className="relative">
+                          {/* Thread Lines L2 */}
+                          <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
+                            isLastL2 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
+                          }`} />
+                          {!isLastL2 && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+
+                          <div className="relative z-10 flex items-start gap-3">
+                            <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[11px] font-black text-white`}>
+                              {subAuthor.slice(0, 2).toUpperCase()}
                             </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <Link to={`/profile/${subAuthor}`} className="text-[11px] font-bold text-zinc-300 hover:text-violet-300 transition">@{subAuthor}</Link>
+                                <span className="text-[9px] text-zinc-600">{timeAgo(subR.createdAt)}</span>
+                              </div>
                             <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
                             <div className="mt-1 flex items-center gap-3">
                               {isAuthenticated && (
@@ -284,6 +300,7 @@ function ReviewCard({
                                   Delete
                                 </button>
                               )}
+                            </div>
                             </div>
                           </div>
                         </div>
