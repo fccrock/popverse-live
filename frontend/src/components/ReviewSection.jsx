@@ -67,6 +67,7 @@ function ReviewCard({
 }) {
   const [revealed, setRevealed] = useState(false);
   const [replyText, setReplyText] = useState("");
+  const [showReplies, setShowReplies] = useState(false);
 
   const accentStar  = accent === "rose" ? "text-rose-400" : "text-violet-400";
   const accentBadge = accent === "rose"
@@ -89,6 +90,7 @@ function ReviewCard({
     onReply(review.id, replyText.trim(), activeReply?.parentId || null);
     setReplyText("");
     setActiveReply(null);
+    setShowReplies(true);
   }
 
   return (
@@ -98,11 +100,11 @@ function ReviewCard({
         {/* Left Column: Avatar & Thread Bridge */}
         <div className="w-9 shrink-0 flex flex-col items-center">
           <Link to={`/profile/${username}`} className="group relative z-10">
-            <div className={`grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-xs font-black text-white shadow-lg`}>
+            <div className={`grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-xs font-black text-white shadow-md transition-transform group-hover:scale-105 group-hover:shadow-lg`}>
               {username.slice(0, 2).toUpperCase()}
             </div>
           </Link>
-          {review.replies?.length > 0 && (
+          {review.replies?.length > 0 && showReplies && (
             <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-16px] z-0" />
           )}
         </div>
@@ -202,6 +204,7 @@ function ReviewCard({
                   } else {
                     setActiveReply({ reviewId: review.id, parentId: null });
                     setReplyText("");
+                    setShowReplies(true);
                   }
                 }}
                 className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-400 transition-colors"
@@ -216,8 +219,23 @@ function ReviewCard({
         </div>
       </div>
 
-      {/* ── Replies Row ── */}
+      {/* ── Replies Toggle ── */}
       {review.replies?.length > 0 && (
+        <div className="mt-1 pl-[48px]">
+          <button 
+            onClick={() => setShowReplies(!showReplies)}
+            className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${showReplies ? 'text-zinc-500 hover:text-zinc-400' : 'text-violet-400 hover:text-violet-300'}`}
+          >
+            <svg className={`h-4 w-4 transition-transform ${showReplies ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+            {showReplies ? 'Hide replies' : `Show ${review.replies.length} ${review.replies.length === 1 ? 'reply' : 'replies'}`}
+          </button>
+        </div>
+      )}
+
+      {/* ── Replies Row ── */}
+      {review.replies?.length > 0 && showReplies && (
         <div className="mt-4 pl-[48px]">
           <div className="space-y-4">
             {review.replies.map((reply, i) => {
@@ -230,8 +248,8 @@ function ReviewCard({
                   {/* Thread Lines L1 */}
                   <div className={`absolute border-white/[0.15] z-0 ${
                     isLastL1 ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
-                  }`} style={{ width: '30px', left: '-30px', top: '0px' }} />
-                  {!isLastL1 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '30px', left: '-30px', top: '16px' }} />}
+                  }`} style={{ width: '28px', left: '-28px', top: '0px' }} />
+                  {!isLastL1 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '28px', left: '-28px', top: '16px' }} />}
 
                   {/* Level 1 Split-Anchor Row */}
                   <div className="relative z-10 flex gap-3">

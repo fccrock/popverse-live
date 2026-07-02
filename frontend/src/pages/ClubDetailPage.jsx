@@ -47,6 +47,7 @@ function FeedTab({ club, isMember }) {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [posting, setPosting] = useState(false);
+  const [showRepliesFor, setShowRepliesFor] = useState({});
 
   const currentUsername = user?.preferredUsername;
 
@@ -63,15 +64,21 @@ function FeedTab({ club, isMember }) {
 
   async function handleReply(postId) {
     if (!replyText.trim()) return;
-    await addPostReply(club.id, postId, replyText.trim());
+    await addPostReply(club.id, postId, replyText.trim(), replyingTo.parentReplyId);
     setReplyText("");
     setReplyingTo(null);
+    setShowRepliesFor(prev => ({ ...prev, [postId]: true }));
   }
 
-  function openReply(postId, parentReplyId = null, prefill = "") {
-    setReplyingTo({ postId, parentReplyId });
-    setReplyText(prefill);
-  }
+  const openReply = (postId, replyId, prefill) => {
+    setReplyingTo({ postId, parentReplyId: replyId });
+    setReplyText(prefill || "");
+    setShowRepliesFor(prev => ({ ...prev, [postId]: true }));
+  };
+
+  const toggleReplies = (postId) => {
+    setShowRepliesFor(prev => ({ ...prev, [postId]: !prev[postId] }));
+  };
 
   return (
     <div className="space-y-4">
@@ -137,6 +144,7 @@ function FeedTab({ club, isMember }) {
         const isOwner = currentUsername && currentUsername.toLowerCase() === post.author.toLowerCase();
         const likedByMe = currentUsername && post.likes.includes(currentUsername);
         const replies = post.replies || [];
+        const showReplies = showRepliesFor[post.id];
 
         return (
           <div key={post.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 transition-all duration-200 hover:border-white/[0.1]">
@@ -145,7 +153,7 @@ function FeedTab({ club, isMember }) {
               {/* Left Column: Avatar & Bridge */}
               <div className="w-10 shrink-0 flex flex-col items-center">
                 <UserBubble username={post.author} />
-                {replies.length > 0 && (
+                {replies.length > 0 && showReplies && (
                   <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-16px] z-0" />
                 )}
               </div>
@@ -207,8 +215,23 @@ function FeedTab({ club, isMember }) {
               </div>
             </div>
 
-            {/* ── Replies Row ── */}
+            {/* ── Replies Toggle ── */}
             {replies.length > 0 && (
+              <div className="mt-1 pl-[52px]">
+                <button 
+                  onClick={() => toggleReplies(post.id)}
+                  className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${showReplies ? 'text-zinc-500 hover:text-zinc-400' : 'text-violet-400 hover:text-violet-300'}`}
+                >
+                  <svg className={`h-4 w-4 transition-transform ${showReplies ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
+                  {showReplies ? 'Hide replies' : `Show ${replies.length} ${replies.length === 1 ? 'reply' : 'replies'}`}
+                </button>
+              </div>
+            )}
+
+            {/* ── Replies Row ── */}
+            {replies.length > 0 && showReplies && (
               <div className="mt-4 pl-[52px]">
                 <div className="space-y-4">
                   {replies.map((r, i) => {
@@ -313,6 +336,7 @@ function DiscussionsTab({ club, isMember }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [expandedId, setExpandedId] = useState(null);
+  const [showRepliesFor, setShowRepliesFor] = useState({});
   
   // { discussionId, parentId }
   const [activeReply, setActiveReply] = useState(null);
@@ -333,7 +357,12 @@ function DiscussionsTab({ club, isMember }) {
     addReply(club.id, discussionId, replyText.trim(), parentId);
     setReplyText("");
     setActiveReply(null);
+    setShowRepliesFor(prev => ({ ...prev, [discussionId]: true }));
   }
+
+  const toggleReplies = (discussionId) => {
+    setShowRepliesFor(prev => ({ ...prev, [discussionId]: !prev[discussionId] }));
+  };
 
   return (
     <div className="space-y-4">
@@ -410,6 +439,21 @@ function DiscussionsTab({ club, isMember }) {
                   {/* Discussion body */}
                   <p className="pb-4 text-[14px] text-zinc-300 leading-relaxed">{d.content}</p>
 
+                  {/* ── Replies Toggle ── */}
+                  {d.replies.length > 0 && (
+                    <div className="pb-4">
+                      <button 
+                        onClick={() => toggleReplies(d.id)}
+                        className={`flex items-center gap-1.5 text-xs font-bold transition-colors ${showRepliesFor[d.id] ? 'text-zinc-500 hover:text-zinc-400' : 'text-violet-400 hover:text-violet-300'}`}
+                      >
+                        <svg className={`h-4 w-4 transition-transform ${showRepliesFor[d.id] ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                        {showRepliesFor[d.id] ? 'Hide replies' : `Show ${d.replies.length} ${d.replies.length === 1 ? 'reply' : 'replies'}`}
+                      </button>
+                    </div>
+                  )}
+
                   {/* Reply to thread button */}
                   {isMember && (
                     <div className="pb-4">
@@ -445,7 +489,7 @@ function DiscussionsTab({ club, isMember }) {
                   )}
 
                   {/* Replies Row */}
-                  {d.replies.length > 0 && (
+                  {d.replies.length > 0 && showRepliesFor[d.id] && (
                     <div className="mt-2 space-y-4">
                       {d.replies.map((r, i) => {
                         const isLast = i === d.replies.length - 1;
