@@ -486,8 +486,8 @@ export default function CommunityPage() {
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filteredClubs.map((club, i) => (
                 <Link key={club.id} to={`/community/${club.slug}`} className="group flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }}>
-                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md transition-transform duration-300 group-hover:scale-[1.02]">
-                    <img src={club.coverImage} alt={club.name} className="h-full w-full object-cover" />
+                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md">
+                    <img src={club.coverImage} alt={club.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
                   <div className="flex flex-col">
                     <h3 className="text-[17px] font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors duration-200">{club.name}</h3>
@@ -572,18 +572,18 @@ export default function CommunityPage() {
                       onClick={() => navigate(`/collection/${col.id}`)}
                     >
                       {/* Poster Mosaic or Cover Image */}
-                      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md transition-transform duration-300 group-hover:scale-[1.02]">
+                      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md">
                         {gradient ? (
-                          <div className="h-full w-full" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
+                          <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                         ) : col.coverImage ? (
-                          <img src={col.coverImage} className="h-full w-full object-cover" alt="" />
+                          <img src={col.coverImage} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" alt="" />
                         ) : items.length > 0 ? (
                           <div className="absolute inset-0 flex">
                             {items.slice(0, 4).map((item) => (
                               <div key={item.mediaId || item.id} className="relative flex-1 overflow-hidden">
                                 <img
                                   src={item.posterPath?.startsWith("http") ? item.posterPath : `https://image.tmdb.org/t/p/w342${item.posterPath}`}
-                                  className="h-full w-full object-cover" alt="" />
+                                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" alt="" />
                               </div>
                             ))}
                           </div>
@@ -668,18 +668,18 @@ export default function CommunityPage() {
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
                       <div key={col.id} className="group flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md transition-transform duration-300 group-hover:scale-[1.02]">
+                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md">
                           {gradient ? (
-                            <div className="h-full w-full" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
+                            <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
-                            <img src={col.coverImage} className="h-full w-full object-cover" alt="" />
+                            <img src={col.coverImage} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" alt="" />
                           ) : (col.items||[]).length > 0 ? (
                             <div className="absolute inset-0 flex">
                               {(col.items||[]).slice(0,4).map(item => (
                                 <div key={item.mediaId} className="relative flex-1 overflow-hidden">
                                   <img
                                     src={item.posterPath?.startsWith("http") ? item.posterPath : `https://image.tmdb.org/t/p/w342${item.posterPath}`}
-                                    className="h-full w-full object-cover" alt="" />
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" alt="" />
                                 </div>
                               ))}
                             </div>
@@ -724,18 +724,18 @@ export default function CommunityPage() {
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
                       <div key={col.id} className="group flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md transition-transform duration-300 group-hover:scale-[1.02]">
+                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md">
                           {gradient ? (
-                            <div className="h-full w-full" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
+                            <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
-                            <img src={col.coverImage} className="h-full w-full object-cover" alt="" />
+                            <img src={col.coverImage} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" alt="" />
                           ) : items.length > 0 ? (
                             <div className="absolute inset-0 flex">
                               {items.slice(0,4).map(item => (
                                 <div key={item.mediaId} className="relative flex-1 overflow-hidden">
                                   <img
                                     src={item.posterPath?.startsWith("http") ? item.posterPath : `https://image.tmdb.org/t/p/w342${item.posterPath}`}
-                                    className="h-full w-full object-cover" alt="" />
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" alt="" />
                                 </div>
                               ))}
                             </div>
