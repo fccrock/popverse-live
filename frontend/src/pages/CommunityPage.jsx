@@ -562,6 +562,8 @@ export default function CommunityPage() {
               <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {(activeTag === "all" ? discoverCollections : discoverCollections.filter(c => (c.tags||[]).includes(activeTag))).map((col, i) => {
                   const creatorName = col.createdBy || col.user?.username || "Unknown";
+                  const items = col.items || [];
+                  const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                   return (
                     <div
                       key={col.id}
