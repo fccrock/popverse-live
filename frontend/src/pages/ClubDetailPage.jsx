@@ -198,7 +198,7 @@ function FeedTab({ club, isMember }) {
 
                 {/* Replies - flat list with @mention highlighting */}
                 {replies.length > 0 && (
-                  <div className="mt-3 space-y-2.5">
+                  <div className="mt-3 border-l-2 border-white/[0.08] ml-4 pl-4 space-y-3">
                     {replies.map(r => {
                       // Parse @mention in content
                       const content = r.content || "";
@@ -407,9 +407,9 @@ function DiscussionsTab({ club, isMember }) {
                 </div>
               )}
 
-              {/* Replies list — clean indented layout, no absolute connector lines */}
+              {/* Replies list — YouTube-style thread with left border */}
               {d.replies.length > 0 && (
-                <div className="space-y-4">
+                <div className="border-l-2 border-white/[0.08] ml-4 pl-4 space-y-4">
                   {d.replies.map((r) => (
                     <div key={r.id}>
                       {/* Level 1 reply */}
@@ -442,9 +442,9 @@ function DiscussionsTab({ club, isMember }) {
                         </div>
                       </div>
 
-                      {/* Level 2 sub-replies — simple indented block, no connector lines */}
+                      {/* Level 2 sub-replies — indented with secondary thread line */}
                       {r.replies && r.replies.length > 0 && (
-                        <div className="ml-11 mt-3 space-y-3 border-l-2 border-white/[0.06] pl-4">
+                        <div className="border-l-2 border-white/[0.05] ml-4 pl-4 mt-3 space-y-3">
                           {r.replies.map((subR) => (
                             <div key={subR.id} className="flex items-start gap-3">
                               <UserBubble username={subR.author} size="sm" />
@@ -480,7 +480,7 @@ function DiscussionsTab({ club, isMember }) {
 
                       {/* Sub-reply form (level 2) */}
                       {activeReply?.discussionId === d.id && activeReply?.parentId === r.id && (
-                        <div className="ml-11 mt-3">
+                        <div className="border-l-2 border-white/[0.05] ml-4 pl-4 mt-3">
                           <form onSubmit={(e) => submitReply(e, d.id, r.id)} className="flex gap-3">
                             <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
                             <div className="flex-1">

@@ -202,7 +202,7 @@ function ReviewCard({
 
       {/* ── Threaded Replies ── */}
       {review.replies?.length > 0 && (
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 border-l-2 border-white/[0.08] ml-4 pl-4 space-y-4">
           {review.replies.map((reply) => {
             const replyAuthor = reply.author?.username || "user";
             const isReplyingToLevel1 = activeReply?.reviewId === review.id && activeReply?.parentId === reply.id;
@@ -248,13 +248,13 @@ function ReviewCard({
                   </div>
                 </div>
 
-                {/* Level 2 sub-replies - subtle bg tint, no lines */}
+                {/* Level 2 sub-replies - secondary thread indent */}
                 {reply.replies && reply.replies.length > 0 && (
-                  <div className="ml-10 mt-2 space-y-2">
+                  <div className="border-l-2 border-white/[0.05] ml-4 pl-4 mt-3 space-y-3">
                     {reply.replies.map((subR) => {
                       const subAuthor = subR.author?.username || "user";
                       return (
-                        <div key={subR.id} className="flex items-start gap-2 rounded-xl bg-white/[0.025] px-3 py-2">
+                        <div key={subR.id} className="flex items-start gap-2">
                           <div className={`grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[9px] font-black text-white`}>
                             {subAuthor.slice(0, 2).toUpperCase()}
                           </div>
