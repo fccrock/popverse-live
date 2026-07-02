@@ -486,7 +486,7 @@ export default function CommunityPage() {
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filteredClubs.map((club, i) => (
                 <Link key={club.id} to={`/community/${club.slug}`} className="group flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }}>
-                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md">
+                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md ring-1 ring-white/5 transition-all duration-500 group-hover:ring-violet-500/50 group-hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)] group-hover:-translate-y-1">
                     <img src={club.coverImage} alt={club.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
                   <div className="flex flex-col">
@@ -572,7 +572,7 @@ export default function CommunityPage() {
                       onClick={() => navigate(`/collection/${col.id}`)}
                     >
                       {/* Poster Mosaic or Cover Image */}
-                      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md">
+                      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md ring-1 ring-white/5 transition-all duration-500 group-hover:ring-violet-500/50 group-hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)] group-hover:-translate-y-1">
                         {gradient ? (
                           <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                         ) : col.coverImage ? (
@@ -668,7 +668,7 @@ export default function CommunityPage() {
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
                       <div key={col.id} className="group flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md">
+                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md ring-1 ring-white/5 transition-all duration-500 group-hover:ring-violet-500/50 group-hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)] group-hover:-translate-y-1">
                           {gradient ? (
                             <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
@@ -724,7 +724,7 @@ export default function CommunityPage() {
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
                       <div key={col.id} className="group flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md">
+                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 shadow-md ring-1 ring-white/5 transition-all duration-500 group-hover:ring-violet-500/50 group-hover:shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)] group-hover:-translate-y-1">
                           {gradient ? (
                             <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
