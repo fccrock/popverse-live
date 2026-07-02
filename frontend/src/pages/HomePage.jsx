@@ -318,7 +318,7 @@ function TrendingRail({ title, items, type }) {
               {/* Poster */}
               <div className={`poster-card ${isMusic ? "music-card" : ""}`} style={{ aspectRatio: isMusic ? "1/1" : "2/3" }}>
                 {/* Rank (Glassmorphism Overlay) */}
-                <div className={`absolute left-0 top-0 z-10 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-br-2xl backdrop-blur-md border-r border-b shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${isMusic ? 'bg-black/50 border-white/10' : 'bg-white/10 border-white/20'}`}>
+                <div className="absolute left-0 top-0 z-10 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-br-2xl bg-white/10 backdrop-blur-md border-r border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
                   <span className="text-xl sm:text-2xl font-black text-white drop-shadow-md">{idx + 1}</span>
                 </div>
                 
