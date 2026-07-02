@@ -140,9 +140,18 @@ function FeedTab({ club, isMember }) {
 
         return (
           <div key={post.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 transition-all duration-200 hover:border-white/[0.1]">
-            <div className="flex items-start gap-3">
-              <UserBubble username={post.author} />
-              <div className="min-w-0 flex-1">
+            {/* ── Parent Row ── */}
+            <div className="flex gap-3">
+              {/* Left Column: Avatar & Bridge */}
+              <div className="w-10 shrink-0 flex flex-col items-center">
+                <UserBubble username={post.author} />
+                {replies.length > 0 && (
+                  <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-16px] z-0" />
+                )}
+              </div>
+
+              {/* Right Column: Content */}
+              <div className="flex-1 min-w-0 pb-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Link to={`/profile/${post.author}`} className="text-sm font-bold text-white hover:text-violet-300 transition">{post.author}</Link>
@@ -195,80 +204,83 @@ function FeedTab({ club, isMember }) {
                     </button>
                   )}
                 </div>
+              </div>
+            </div>
 
-                {/* Replies - curved thread with @mention highlighting */}
-                {replies.length > 0 && (
-                  <div className="mt-4 ml-4 pl-5 space-y-3">
-                    {replies.map((r, i) => {
-                      const isLast = i === replies.length - 1;
-                      // Parse @mention in content
-                      const content = r.content || "";
-                      const mentionMatch = content.match(/^@(\w+)\s+(.*)/);
-                      let replyTo = null;
-                      let actualContent = content;
-                      if (mentionMatch) {
-                        replyTo = mentionMatch[1];
-                        actualContent = mentionMatch[2];
-                      }
-                      
-                      return (
-                        <div key={r.id} className="relative">
-                          {/* Thread Lines */}
-                          <div className={`absolute w-[68px] left-[-68px] top-[-24px] border-white/[0.15] z-0 ${
-                            isLast ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
-                          }`} />
-                          {!isLast && <div className="absolute w-[68px] left-[-68px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+            {/* ── Replies Row ── */}
+            {replies.length > 0 && (
+              <div className="mt-4 pl-[52px]">
+                <div className="space-y-4">
+                  {replies.map((r, i) => {
+                    const isLast = i === replies.length - 1;
+                    const content = r.content || "";
+                    const mentionMatch = content.match(/^@(\w+)\s+(.*)/);
+                    let replyTo = null;
+                    let actualContent = content;
+                    if (mentionMatch) {
+                      replyTo = mentionMatch[1];
+                      actualContent = mentionMatch[2];
+                    }
+                    
+                    return (
+                      <div key={r.id} className="relative">
+                        {/* Thread Lines */}
+                        <div className={`absolute border-white/[0.15] z-0 ${
+                          isLast ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
+                        }`} style={{ width: '32px', left: '-32px', top: '0px' }} />
+                        {!isLast && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '32px', left: '-32px', top: '16px' }} />}
 
-                          <div className="relative z-10 flex items-start gap-3">
+                        <div className="relative z-10 flex gap-3">
+                          <div className="w-8 shrink-0 flex flex-col items-center">
                             <UserBubble username={r.author} size="sm" />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 text-xs">
-                                <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
-                                {replyTo && (
-                                  <span className="text-zinc-500 font-medium flex items-center gap-1">
-                                    <span className="inline-block -scale-x-100 opacity-60">↳</span>
-                                    <Link to={`/profile/${replyTo}`} className="text-sky-400 hover:text-sky-300">@{replyTo}</Link>
-                                  </span>
-                                )}
-                                <span className="text-zinc-600">{timeAgo(r.timestamp)}</span>
-                              </div>
-                              <p className="mt-0.5 text-[13px] text-zinc-300">{actualContent}</p>
-                              
-                              <div className="mt-1.5 flex items-center gap-4">
-                                {isMember && (
-                                  <button onClick={() => { openReply(post.id, r.id, `@${r.author} `); }} className="text-[10px] font-bold text-zinc-500 hover:text-violet-400 uppercase tracking-wide">Reply</button>
-                                )}
-                                {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
-                                  <button onClick={() => { if(window.confirm("Delete reply?")) deleteReply(post.id, r.id); }} className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 uppercase tracking-wide">Delete</button>
-                                )}
-                              </div>
+                          </div>
+                          <div className="flex-1 min-w-0 pb-1">
+                            <div className="flex items-center gap-2 text-xs">
+                              <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
+                              {replyTo && (
+                                <span className="text-zinc-500 font-medium flex items-center gap-1">
+                                  <span className="inline-block -scale-x-100 opacity-60">↳</span>
+                                  <Link to={`/profile/${replyTo}`} className="text-sky-400 hover:text-sky-300">@{replyTo}</Link>
+                                </span>
+                              )}
+                              <span className="text-zinc-600">{timeAgo(r.timestamp)}</span>
+                            </div>
+                            <p className="mt-0.5 text-[13px] text-zinc-300 leading-relaxed">{actualContent}</p>
+                            
+                            <div className="mt-1 flex items-center gap-4">
+                              {isMember && (
+                                <button onClick={() => { openReply(post.id, r.id, `@${r.author} `); }} className="text-[10px] font-bold text-zinc-500 hover:text-violet-400 uppercase tracking-wide">Reply</button>
+                              )}
+                              {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
+                                <button onClick={() => { if(window.confirm("Delete reply?")) deleteReply(post.id, r.id); }} className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 uppercase tracking-wide">Delete</button>
+                              )}
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Reply input */}
-                {replyingTo?.postId === post.id && (
-                  <div className="mt-3 flex items-center gap-2">
-                    <UserBubble username={currentUsername || "?"} size="sm" linkTo={false} />
-                    <input
-                      type="text"
-                      className="input-field flex-1 py-1.5 text-sm"
-                      placeholder={replyingTo.parentReplyId ? `Replying in thread...` : "Write a reply..."}
-                      value={replyText}
-                      onChange={e => setReplyText(e.target.value)}
-                      onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleReply(post.id); } }}
-                      autoFocus
-                    />
-                    <button onClick={() => setReplyingTo(null)} className="text-xs text-zinc-500 hover:text-zinc-300">✕</button>
-                    <button onClick={() => handleReply(post.id)} disabled={!replyText.trim()} className="btn-v py-1.5 px-3 text-xs disabled:opacity-40">Send</button>
-                  </div>
-                )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Reply input */}
+            {replyingTo?.postId === post.id && (
+              <div className="mt-3 flex items-center gap-2">
+                <UserBubble username={currentUsername || "?"} size="sm" linkTo={false} />
+                <input
+                  type="text"
+                  className="input-field flex-1 py-1.5 text-sm"
+                  placeholder={replyingTo.parentReplyId ? `Replying in thread...` : "Write a reply..."}
+                  value={replyText}
+                  onChange={e => setReplyText(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleReply(post.id); } }}
+                  autoFocus
+                />
+                <button onClick={() => setReplyingTo(null)} className="text-xs text-zinc-500 hover:text-zinc-300">✕</button>
+                <button onClick={() => handleReply(post.id)} disabled={!replyText.trim()} className="btn-v py-1.5 px-3 text-xs disabled:opacity-40">Send</button>
+              </div>
+            )}
           </div>
         );
       })}
@@ -354,146 +366,124 @@ function DiscussionsTab({ club, isMember }) {
 
       {club.discussions.map((d) => (
         <div key={d.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] transition-all duration-200 hover:border-white/[0.1]">
+          {/* ── Parent Row ── */}
           <div className="flex w-full items-start gap-3 p-5">
-            <button className="flex flex-1 items-start gap-3 text-left" onClick={() => setExpandedId(expandedId === d.id ? null : d.id)}>
+            {/* Left Column: Avatar & Bridge */}
+            <div className="w-10 shrink-0 flex flex-col items-center">
               <UserBubble username={d.author} />
-              <div className="min-w-0 flex-1">
-                <h4 className="text-[15px] font-bold text-white leading-snug">{d.title}</h4>
-                <div className="mt-1.5 flex items-center gap-2 text-xs text-zinc-600">
-                  <Link to={`/profile/${d.author}`} className="font-semibold text-zinc-500 hover:text-violet-300 transition" onClick={e => e.stopPropagation()}>{d.author}</Link>
-                  <span>·</span>
-                  <span>{timeAgo(d.timestamp)}</span>
-                  <span>·</span>
-                  <span className="font-semibold text-zinc-500">{d.replies.length} {d.replies.length === 1 ? "reply" : "replies"}</span>
-                </div>
-              </div>
-              <svg className={`h-5 w-5 shrink-0 text-zinc-600 transition-transform duration-200 ${expandedId === d.id ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-            </button>
-            {currentUsername && currentUsername.toLowerCase() === d.author.toLowerCase() && (
-              <button
-                onClick={() => { if(window.confirm("Delete this discussion and all its replies?")) deleteDiscussion(club.id, d.id); }}
-                className="ml-2 grid h-8 w-8 shrink-0 place-items-center rounded-lg text-zinc-700 hover:bg-rose-500/10 hover:text-rose-400 transition"
-                title="Delete discussion"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-              </button>
-            )}
-          </div>
+              {expandedId === d.id && d.replies.length > 0 && (
+                <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-20px] z-0" />
+              )}
+            </div>
 
-          {expandedId === d.id && (
-            <div className="border-t border-white/[0.06] px-5 pb-5">
-              {/* Discussion body */}
-              <p className="py-4 text-[14px] text-zinc-300 leading-relaxed">{d.content}</p>
-
-              {/* Reply to thread button */}
-              {isMember && (
-                <div className="pb-4">
-                  <button 
-                    onClick={() => { setActiveReply({ discussionId: d.id, parentId: null }); setReplyText(""); }}
-                    className="text-[11px] font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wide bg-white/[0.05] hover:bg-white/[0.1] px-3 py-1.5 rounded-full"
-                  >
-                    Reply to Thread
+            {/* Right Column: Content */}
+            <div className="flex-1 min-w-0">
+              <div className="flex w-full items-start justify-between">
+                <button className="flex flex-col text-left flex-1 pb-1" onClick={() => setExpandedId(expandedId === d.id ? null : d.id)}>
+                  <h4 className="text-[15px] font-bold text-white leading-snug">{d.title}</h4>
+                  <div className="mt-1.5 flex items-center gap-2 text-xs text-zinc-600">
+                    <Link to={`/profile/${d.author}`} className="font-semibold text-zinc-500 hover:text-violet-300 transition" onClick={e => e.stopPropagation()}>{d.author}</Link>
+                    <span>·</span>
+                    <span>{timeAgo(d.timestamp)}</span>
+                    <span>·</span>
+                    <span className="font-semibold text-zinc-500">{d.replies.length} {d.replies.length === 1 ? "reply" : "replies"}</span>
+                  </div>
+                </button>
+                <div className="flex items-center gap-2 shrink-0 ml-4">
+                  {currentUsername && currentUsername.toLowerCase() === d.author.toLowerCase() && (
+                    <button
+                      onClick={() => { if(window.confirm("Delete this discussion and all its replies?")) deleteDiscussion(club.id, d.id); }}
+                      className="grid h-8 w-8 place-items-center rounded-lg text-zinc-700 hover:bg-rose-500/10 hover:text-rose-400 transition"
+                      title="Delete discussion"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  )}
+                  <button onClick={() => setExpandedId(expandedId === d.id ? null : d.id)}>
+                    <svg className={`h-5 w-5 text-zinc-600 transition-transform duration-200 ${expandedId === d.id ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                   </button>
                 </div>
-              )}
+              </div>
 
-              {/* Top-level reply form */}
-              {activeReply?.discussionId === d.id && activeReply?.parentId === null && (
-                <div className="mb-5">
-                  <form onSubmit={(e) => submitReply(e, d.id, null)} className="flex gap-3">
-                    <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
-                    <div className="flex-1">
-                      <input 
-                        className="w-full border-b border-white/[0.1] bg-transparent pb-1 pt-1 text-sm text-white placeholder-zinc-500 focus:border-violet-400 focus:outline-none transition-colors" 
-                        placeholder="Add a reply to the main thread..." 
-                        autoFocus
-                        value={replyText} 
-                        onChange={(e) => setReplyText(e.target.value)} 
-                      />
-                      <div className="mt-2 flex justify-end gap-2">
-                        <button type="button" onClick={() => setActiveReply(null)} className="rounded-full px-4 py-1.5 text-xs font-bold text-zinc-400 hover:bg-white/[0.05]">Cancel</button>
-                        <button type="submit" disabled={!replyText.trim()} className="rounded-full bg-violet-600 hover:bg-violet-500 px-4 py-1.5 text-xs font-bold text-white disabled:opacity-40">Reply</button>
-                      </div>
+              {expandedId === d.id && (
+                <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                  {/* Discussion body */}
+                  <p className="pb-4 text-[14px] text-zinc-300 leading-relaxed">{d.content}</p>
+
+                  {/* Reply to thread button */}
+                  {isMember && (
+                    <div className="pb-4">
+                      <button 
+                        onClick={() => { setActiveReply({ discussionId: d.id, parentId: null }); setReplyText(""); }}
+                        className="text-[11px] font-bold text-zinc-400 hover:text-white transition-colors uppercase tracking-wide bg-white/[0.05] hover:bg-white/[0.1] px-3 py-1.5 rounded-full"
+                      >
+                        Reply to Thread
+                      </button>
                     </div>
-                  </form>
-                </div>
-              )}
+                  )}
 
-              {/* Replies list — YouTube-style curved thread */}
-              {d.replies.length > 0 && (
-                <div className="mt-4 ml-4 pl-5 space-y-4">
-                  {d.replies.map((r, i) => {
-                    const isLast = i === d.replies.length - 1;
-                    return (
-                      <div key={r.id} className="relative">
-                        {/* Thread Lines L1 */}
-                        <div className={`absolute border-white/[0.15] z-0 ${
-                          isLast ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
-                        }`} style={{ width: '16px', left: '-16px', top: '-24px' }} />
-                        {!isLast && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '16px', left: '-16px', top: '16px' }} />}
-
-                        <div className="relative z-10 flex items-start gap-3">
-                          <UserBubble username={r.author} size="sm" />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 text-xs">
-                              <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
-                              <span className="text-zinc-500">{timeAgo(r.timestamp)}</span>
-                            </div>
-                          {renderReplyContent(r.content)}
-                          <div className="mt-2 flex items-center gap-4">
-                            {isMember && (
-                              <button 
-                                onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${r.author} `); }}
-                                className="text-[11px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide"
-                              >
-                                Reply
-                              </button>
-                            )}
-                            {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
-                              <button
-                                onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, r.id); }}
-                                className="text-[11px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                              >
-                                Delete
-                              </button>
-                            )}
+                  {/* Top-level reply form */}
+                  {activeReply?.discussionId === d.id && activeReply?.parentId === null && (
+                    <div className="mb-5">
+                      <form onSubmit={(e) => submitReply(e, d.id, null)} className="flex gap-3">
+                        <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
+                        <div className="flex-1">
+                          <input 
+                            className="w-full border-b border-white/[0.1] bg-transparent pb-1 pt-1 text-sm text-white placeholder-zinc-500 focus:border-violet-400 focus:outline-none transition-colors" 
+                            placeholder="Add a reply to the main thread..." 
+                            autoFocus
+                            value={replyText} 
+                            onChange={(e) => setReplyText(e.target.value)} 
+                          />
+                          <div className="mt-2 flex justify-end gap-2">
+                            <button type="button" onClick={() => setActiveReply(null)} className="rounded-full px-4 py-1.5 text-xs font-bold text-zinc-400 hover:bg-white/[0.05]">Cancel</button>
+                            <button type="submit" disabled={!replyText.trim()} className="rounded-full bg-violet-600 hover:bg-violet-500 px-4 py-1.5 text-xs font-bold text-white disabled:opacity-40">Reply</button>
                           </div>
                         </div>
-                      </div>
+                      </form>
+                    </div>
+                  )}
 
-                      {/* Level 2 sub-replies — curved thread lines */}
-                      {r.replies && r.replies.length > 0 && (
-                        <div className="mt-3 ml-4 pl-5 space-y-3">
-                          {r.replies.map((subR, j) => {
-                            const isLastL2 = j === r.replies.length - 1;
-                            return (
-                            <div key={subR.id} className="relative">
-                              {/* Thread Lines L2 */}
-                              <div className={`absolute border-white/[0.15] z-0 ${
-                                isLastL2 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
-                              }`} style={{ width: '64px', left: '-64px', top: '-24px' }} />
-                              {!isLastL2 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '64px', left: '-64px', top: '16px' }} />}
+                  {/* Replies Row */}
+                  {d.replies.length > 0 && (
+                    <div className="mt-2 space-y-4">
+                      {d.replies.map((r, i) => {
+                        const isLast = i === d.replies.length - 1;
+                        return (
+                          <div key={r.id} className="relative">
+                            {/* Thread Lines L1 */}
+                            <div className={`absolute border-white/[0.15] z-0 ${
+                              isLast ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
+                            }`} style={{ width: '32px', left: '-32px', top: '0px' }} />
+                            {!isLast && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '32px', left: '-32px', top: '16px' }} />}
 
-                              <div className="relative z-10 flex items-start gap-3">
-                              <UserBubble username={subR.author} size="sm" />
-                              <div className="flex-1 min-w-0">
+                            <div className="relative z-10 flex gap-3">
+                              {/* L1 Left Column: Avatar & Bridge */}
+                              <div className="w-8 shrink-0 flex flex-col items-center">
+                                <UserBubble username={r.author} size="sm" />
+                                {r.replies?.length > 0 && (
+                                  <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-12px] z-0" />
+                                )}
+                              </div>
+                              {/* L1 Right Column: Content */}
+                              <div className="flex-1 min-w-0 pb-1">
                                 <div className="flex items-center gap-2 text-xs">
-                                  <Link to={`/profile/${subR.author}`} className="font-bold text-white hover:text-violet-300 transition">@{subR.author}</Link>
-                                  <span className="text-zinc-500">{timeAgo(subR.timestamp)}</span>
+                                  <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
+                                  <span className="text-zinc-500">{timeAgo(r.timestamp)}</span>
                                 </div>
-                                {renderReplyContent(subR.content)}
+                                {renderReplyContent(r.content)}
                                 <div className="mt-2 flex items-center gap-4">
                                   {isMember && (
                                     <button 
-                                      onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${subR.author} `); }}
+                                      onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${r.author} `); }}
                                       className="text-[11px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide"
                                     >
                                       Reply
                                     </button>
                                   )}
-                                  {currentUsername && currentUsername.toLowerCase() === subR.author.toLowerCase() && (
+                                  {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
                                     <button
-                                      onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, subR.id); }}
+                                      onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, r.id); }}
                                       className="text-[11px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
                                     >
                                       Delete
@@ -501,44 +491,87 @@ function DiscussionsTab({ club, isMember }) {
                                   )}
                                 </div>
                               </div>
-                              </div>
                             </div>
-                            );
-                          })}
-                        </div>
-                      )}
 
-                      {/* Sub-reply form (level 2) */}
-                      {activeReply?.discussionId === d.id && activeReply?.parentId === r.id && (
-                        <div className="relative mt-3 ml-4 pl-5">
-                          {/* Form thread curve */}
-                          <div className="absolute w-[64px] left-[-64px] top-[-24px] h-[40px] border-l-2 border-b-2 border-white/[0.15] rounded-bl-xl z-0" />
-                          
-                          <form onSubmit={(e) => submitReply(e, d.id, r.id)} className="relative z-10 flex gap-3">
-                            <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
-                            <div className="flex-1">
-                              <input 
-                                className="w-full border-b border-white/[0.1] bg-transparent pb-1 pt-1 text-sm text-white placeholder-zinc-500 focus:border-violet-400 focus:outline-none transition-colors" 
-                                placeholder={`Reply to ${r.author}...`} 
-                                autoFocus
-                                value={replyText} 
-                                onChange={(e) => setReplyText(e.target.value)} 
-                              />
-                              <div className="mt-2 flex justify-end gap-2">
-                                <button type="button" onClick={() => setActiveReply(null)} className="rounded-full px-4 py-1.5 text-xs font-bold text-zinc-400 hover:bg-white/[0.05]">Cancel</button>
-                                <button type="submit" disabled={!replyText.trim()} className="rounded-full bg-violet-600 hover:bg-violet-500 px-4 py-1.5 text-xs font-bold text-white disabled:opacity-40">Reply</button>
+                            {/* Level 2 sub-replies */}
+                            {r.replies && r.replies.length > 0 && (
+                              <div className="mt-3 pl-[44px] space-y-3">
+                                {r.replies.map((subR, j) => {
+                                  const isLastL2 = j === r.replies.length - 1;
+                                  return (
+                                    <div key={subR.id} className="relative">
+                                      {/* Thread Lines L2 */}
+                                      <div className={`absolute border-white/[0.15] z-0 ${
+                                        isLastL2 ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
+                                      }`} style={{ width: '28px', left: '-28px', top: '0px' }} />
+                                      {!isLastL2 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '28px', left: '-28px', top: '16px' }} />}
+
+                                      <div className="relative z-10 flex gap-3">
+                                        <div className="w-8 shrink-0 flex flex-col items-center">
+                                          <UserBubble username={subR.author} size="sm" />
+                                        </div>
+                                        <div className="flex-1 min-w-0 pb-1">
+                                          <div className="flex items-center gap-2 text-xs">
+                                            <Link to={`/profile/${subR.author}`} className="font-bold text-white hover:text-violet-300 transition">@{subR.author}</Link>
+                                            <span className="text-zinc-500">{timeAgo(subR.timestamp)}</span>
+                                          </div>
+                                          {renderReplyContent(subR.content)}
+                                          <div className="mt-2 flex items-center gap-4">
+                                            {isMember && (
+                                              <button 
+                                                onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${subR.author} `); }}
+                                                className="text-[11px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide"
+                                              >
+                                                Reply
+                                              </button>
+                                            )}
+                                            {currentUsername && currentUsername.toLowerCase() === subR.author.toLowerCase() && (
+                                              <button
+                                                onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, subR.id); }}
+                                                className="text-[11px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
+                                              >
+                                                Delete
+                                              </button>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            </div>
-                          </form>
-                        </div>
-                      )}
+                            )}
+
+                            {/* Reply form for level 1 reply */}
+                            {activeReply?.discussionId === d.id && activeReply?.parentId === r.id && (
+                              <div className="mt-3 pl-[44px]">
+                                <form onSubmit={(e) => submitReply(e, d.id, r.id)} className="flex gap-3">
+                                  <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
+                                  <div className="flex-1">
+                                    <input 
+                                      className="w-full border-b border-white/[0.1] bg-transparent pb-1 pt-1 text-sm text-white placeholder-zinc-500 focus:border-violet-400 focus:outline-none transition-colors" 
+                                      placeholder="Add a reply..." 
+                                      autoFocus
+                                      value={replyText} 
+                                      onChange={(e) => setReplyText(e.target.value)} 
+                                    />
+                                    <div className="mt-2 flex justify-end gap-2">
+                                      <button type="button" onClick={() => setActiveReply(null)} className="rounded-full px-4 py-1.5 text-xs font-bold text-zinc-400 hover:bg-white/[0.05]">Cancel</button>
+                                      <button type="submit" disabled={!replyText.trim()} className="rounded-full bg-violet-600 hover:bg-violet-500 px-4 py-1.5 text-xs font-bold text-white disabled:opacity-40">Reply</button>
+                                    </div>
+                                  </div>
+                                </form>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                    );
-                  })}
+                  )}
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       ))}
     </div>

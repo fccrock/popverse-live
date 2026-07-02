@@ -93,258 +93,288 @@ function ReviewCard({
 
   return (
     <article className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-5 shadow-xl shadow-black/10 backdrop-blur-sm transition-all duration-200 hover:border-white/[0.10] hover:bg-white/[0.04]">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <Link to={`/profile/${username}`} className="flex items-center gap-3 group">
-          <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-xs font-black text-white shadow-lg`}>
-            {username.slice(0, 2).toUpperCase()}
-          </div>
-          <div>
-            <p className="text-sm font-black text-white group-hover:text-violet-300 transition">@{username}</p>
-            <p className="text-[11px] text-zinc-600">{timeAgo(review.createdAt || review.timestamp)}</p>
-          </div>
-        </Link>
-
-        <div className="flex shrink-0 items-center gap-2.5">
-          {review.isSpoiler && (
-            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${accentBadge}`}>
-              Spoiler
-            </span>
-          )}
-          <div className="flex items-center gap-0.5">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <span key={s} className={`text-sm ${s <= review.rating ? accentStar : "text-zinc-800"}`}>★</span>
-            ))}
-          </div>
-          {currentUsername && currentUsername.toLowerCase() === username.toLowerCase() && (
-            <button
-              onClick={() => onDelete(review.id)}
-              className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold text-zinc-600 transition-all hover:bg-rose-500/10 hover:text-rose-400 border border-transparent hover:border-rose-500/15"
-              title="Delete review"
-            >
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Delete
-            </button>
+      {/* ── Parent Row ── */}
+      <div className="flex gap-3">
+        {/* Left Column: Avatar & Thread Bridge */}
+        <div className="w-9 shrink-0 flex flex-col items-center">
+          <Link to={`/profile/${username}`} className="group relative z-10">
+            <div className={`grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-xs font-black text-white shadow-lg`}>
+              {username.slice(0, 2).toUpperCase()}
+            </div>
+          </Link>
+          {review.replies?.length > 0 && (
+            <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-16px] z-0" />
           )}
         </div>
-      </div>
 
-      {/* Body */}
-      <div className="relative mt-4">
-        {review.isSpoiler && !revealed ? (
-          <div className="relative overflow-hidden rounded-xl">
-            <p className="select-none text-sm leading-7 text-zinc-300 blur-[4px]">{review.text}</p>
-            <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 backdrop-blur-[2px]">
-              <button
-                onClick={() => setRevealed(true)}
-                className="rounded-xl border border-white/15 bg-black/70 px-4 py-2 text-xs font-black text-white backdrop-blur transition hover:bg-white/10"
-              >
-                Show Spoilers
-              </button>
+        {/* Right Column: Content */}
+        <div className="flex-1 min-w-0 pb-2">
+          {/* Header Info */}
+          <div className="flex items-start justify-between">
+            <div>
+              <Link to={`/profile/${username}`} className="group">
+                <p className="text-sm font-black text-white group-hover:text-violet-300 transition">@{username}</p>
+              </Link>
+              <p className="text-[11px] text-zinc-600">{timeAgo(review.createdAt || review.timestamp)}</p>
+            </div>
+            
+            {/* Badges/Rating/Delete */}
+            <div className="flex shrink-0 items-center gap-2.5">
+              {review.isSpoiler && (
+                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide ${accentBadge}`}>
+                  Spoiler
+                </span>
+              )}
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <span key={s} className={`text-sm ${s <= review.rating ? accentStar : "text-zinc-800"}`}>★</span>
+                ))}
+              </div>
+              {currentUsername && currentUsername.toLowerCase() === username.toLowerCase() && (
+                <button
+                  onClick={() => onDelete(review.id)}
+                  className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold text-zinc-600 transition-all hover:bg-rose-500/10 hover:text-rose-400 border border-transparent hover:border-rose-500/15"
+                  title="Delete review"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete
+                </button>
+              )}
             </div>
           </div>
-        ) : (
-          <div>
-            <p className="text-sm leading-7 text-zinc-400">{review.text}</p>
-            {review.isSpoiler && revealed && (
+
+          {/* Body */}
+          <div className="relative mt-2">
+            {review.isSpoiler && !revealed ? (
+              <div className="relative overflow-hidden rounded-xl">
+                <p className="select-none text-sm leading-7 text-zinc-300 blur-[4px]">{review.text}</p>
+                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 backdrop-blur-[2px]">
+                  <button
+                    onClick={() => setRevealed(true)}
+                    className="rounded-xl border border-white/15 bg-black/70 px-4 py-2 text-xs font-black text-white backdrop-blur transition hover:bg-white/10"
+                  >
+                    Show Spoilers
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm leading-7 text-zinc-400">{review.text}</p>
+                {review.isSpoiler && revealed && (
+                  <button
+                    onClick={() => setRevealed(false)}
+                    className="mt-2 text-xs font-bold text-zinc-600 transition hover:text-zinc-400"
+                  >
+                    Hide spoiler
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Footer: Likes & Reply button */}
+          <div className="mt-3 flex items-center gap-4">
+            {/* Like Button */}
+            <button
+              onClick={() => {
+                if (!isAuthenticated) return;
+                onLike(review.id);
+              }}
+              className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${
+                iLiked ? accentStar : "text-zinc-600 hover:text-zinc-400"
+              }`}
+            >
+              <svg className="h-4 w-4" fill={iLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
+              {(review.likes?.length || 0) > 0 && review.likes.length}
+            </button>
+
+            {/* Reply Button */}
+            {isAuthenticated && (
               <button
-                onClick={() => setRevealed(false)}
-                className="mt-2 text-xs font-bold text-zinc-600 transition hover:text-zinc-400"
+                onClick={() => {
+                  if (isReplyingToThis && activeReply?.parentId === null) {
+                    setActiveReply(null);
+                    setReplyText("");
+                  } else {
+                    setActiveReply({ reviewId: review.id, parentId: null });
+                    setReplyText("");
+                  }
+                }}
+                className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-400 transition-colors"
               >
-                Hide spoiler
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                {(review.replies?.length || 0) > 0 && review.replies.length} Reply
               </button>
             )}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Footer: Likes & Reply button */}
-      <div className="mt-4 flex items-center gap-4">
-        {/* Like Button */}
-        <button
-          onClick={() => {
-            if (!isAuthenticated) return;
-            onLike(review.id);
-          }}
-          className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${
-            iLiked ? accentStar : "text-zinc-600 hover:text-zinc-400"
-          }`}
-        >
-          <svg className="h-4 w-4" fill={iLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-          </svg>
-          {(review.likes?.length || 0) > 0 && review.likes.length}
-        </button>
-
-        {/* Reply Button */}
-        {isAuthenticated && (
-          <button
-            onClick={() => {
-              if (isReplyingToThis && activeReply?.parentId === null) {
-                setActiveReply(null);
-                setReplyText("");
-              } else {
-                setActiveReply({ reviewId: review.id, parentId: null });
-                setReplyText("");
-              }
-            }}
-            className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 hover:text-zinc-400 transition-colors"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-            </svg>
-            {(review.replies?.length || 0) > 0 && review.replies.length} Reply
-          </button>
-        )}
-      </div>
-
-      {/* ── Threaded Replies ── */}
+      {/* ── Replies Row ── */}
       {review.replies?.length > 0 && (
-        <div className="mt-4 ml-5 pl-5 space-y-4">
-          {review.replies.map((reply, i) => {
-            const isLastL1 = i === review.replies.length - 1;
-            const replyAuthor = reply.author?.username || "user";
-            const isReplyingToLevel1 = activeReply?.reviewId === review.id && activeReply?.parentId === reply.id;
-            
-            return (
-              <div key={reply.id} className="relative">
-                {/* Thread Lines L1 */}
-                <div className={`absolute border-white/[0.15] z-0 ${
-                  isLastL1 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
-                }`} style={{ width: '20px', left: '-20px', top: '-24px' }} />
-                {!isLastL1 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '20px', left: '-20px', top: '16px' }} />}
+        <div className="mt-4 pl-[48px]">
+          <div className="space-y-4">
+            {review.replies.map((reply, i) => {
+              const isLastL1 = i === review.replies.length - 1;
+              const replyAuthor = reply.author?.username || "user";
+              const isReplyingToLevel1 = activeReply?.reviewId === review.id && activeReply?.parentId === reply.id;
+              
+              return (
+                <div key={reply.id} className="relative">
+                  {/* Thread Lines L1 */}
+                  <div className={`absolute border-white/[0.15] z-0 ${
+                    isLastL1 ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
+                  }`} style={{ width: '30px', left: '-30px', top: '0px' }} />
+                  {!isLastL1 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '30px', left: '-30px', top: '16px' }} />}
 
-                {/* Level 1 Reply Content */}
-                <div className="relative z-10 flex items-start gap-3">
-                  <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[11px] font-black text-white`}>
-                    {replyAuthor.slice(0, 2).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Link to={`/profile/${replyAuthor}`} className="text-[12px] font-bold text-zinc-200 hover:text-violet-300 transition">@{replyAuthor}</Link>
-                      <span className="text-[10px] text-zinc-600">{timeAgo(reply.createdAt)}</span>
-                    </div>
-                    <p className="mt-0.5 text-[13px] text-zinc-400 leading-relaxed">{reply.content}</p>
-                    <div className="mt-1 flex items-center gap-3">
-                      {isAuthenticated && (
-                        <button
-                          onClick={() => {
-                            if (isReplyingToLevel1) {
-                              setActiveReply(null);
-                              setReplyText("");
-                            } else {
-                              setActiveReply({ reviewId: review.id, parentId: reply.id });
-                              setReplyText(`@${replyAuthor} `);
-                            }
-                          }}
-                          className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-wide"
-                        >
-                          Reply
-                        </button>
-                      )}
-                      {currentUsername && currentUsername.toLowerCase() === replyAuthor.toLowerCase() && (
-                        <button
-                          onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, reply.id); }}
-                          className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                        >
-                          Delete
-                        </button>
+                  {/* Level 1 Split-Anchor Row */}
+                  <div className="relative z-10 flex gap-3">
+                    {/* L1 Left Column: Avatar & Bridge */}
+                    <div className="w-8 shrink-0 flex flex-col items-center">
+                      <div className={`grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[11px] font-black text-white shadow-md`}>
+                        {replyAuthor.slice(0, 2).toUpperCase()}
+                      </div>
+                      {reply.replies?.length > 0 && (
+                        <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-12px] z-0" />
                       )}
                     </div>
+
+                    {/* L1 Right Column: Content */}
+                    <div className="flex-1 min-w-0 pb-1">
+                      <div className="flex items-center gap-2">
+                        <Link to={`/profile/${replyAuthor}`} className="text-[12px] font-bold text-zinc-200 hover:text-violet-300 transition">@{replyAuthor}</Link>
+                        <span className="text-[10px] text-zinc-600">{timeAgo(reply.createdAt)}</span>
+                      </div>
+                      <p className="mt-0.5 text-[13px] text-zinc-400 leading-relaxed">{reply.content}</p>
+                      <div className="mt-1 flex items-center gap-3">
+                        {isAuthenticated && (
+                          <button
+                            onClick={() => {
+                              if (isReplyingToLevel1) {
+                                setActiveReply(null);
+                                setReplyText("");
+                              } else {
+                                setActiveReply({ reviewId: review.id, parentId: reply.id });
+                                setReplyText(`@${replyAuthor} `);
+                              }
+                            }}
+                            className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-wide"
+                          >
+                            Reply
+                          </button>
+                        )}
+                        {currentUsername && currentUsername.toLowerCase() === replyAuthor.toLowerCase() && (
+                          <button
+                            onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, reply.id); }}
+                            className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                {/* Level 2 sub-replies - secondary thread indent */}
-                {reply.replies && reply.replies.length > 0 && (
-                  <div className="mt-3 ml-4 pl-5 space-y-3">
-                    {reply.replies.map((subR, j) => {
-                      const isLastL2 = j === reply.replies.length - 1;
-                      const subAuthor = subR.author?.username || "user";
-                      return (
-                        <div key={subR.id} className="relative">
-                          {/* Thread Lines L2 */}
-                          <div className={`absolute border-white/[0.15] z-0 ${
-                            isLastL2 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
-                          }`} style={{ width: '64px', left: '-64px', top: '-24px' }} />
-                          {!isLastL2 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '64px', left: '-64px', top: '16px' }} />}
+                  {/* Level 2 Replies Row */}
+                  {reply.replies && reply.replies.length > 0 && (
+                    <div className="mt-3 pl-[44px]">
+                      <div className="space-y-3">
+                        {reply.replies.map((subR, j) => {
+                          const isLastL2 = j === reply.replies.length - 1;
+                          const subAuthor = subR.author?.username || "user";
+                          return (
+                            <div key={subR.id} className="relative">
+                              {/* Thread Lines L2 */}
+                              <div className={`absolute border-white/[0.15] z-0 ${
+                                isLastL2 ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
+                              }`} style={{ width: '28px', left: '-28px', top: '0px' }} />
+                              {!isLastL2 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '28px', left: '-28px', top: '16px' }} />}
 
-                          <div className="relative z-10 flex items-start gap-3">
-                            <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[11px] font-black text-white`}>
-                              {subAuthor.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <Link to={`/profile/${subAuthor}`} className="text-[11px] font-bold text-zinc-300 hover:text-violet-300 transition">@{subAuthor}</Link>
-                                <span className="text-[9px] text-zinc-600">{timeAgo(subR.createdAt)}</span>
+                              <div className="relative z-10 flex gap-3">
+                                <div className="w-8 shrink-0 flex flex-col items-center">
+                                  <div className={`grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[11px] font-black text-white shadow-sm`}>
+                                    {subAuthor.slice(0, 2).toUpperCase()}
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0 pb-1">
+                                  <div className="flex items-center gap-2">
+                                    <Link to={`/profile/${subAuthor}`} className="text-[11px] font-bold text-zinc-300 hover:text-violet-300 transition">@{subAuthor}</Link>
+                                    <span className="text-[9px] text-zinc-600">{timeAgo(subR.createdAt)}</span>
+                                  </div>
+                                  <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
+                                  <div className="mt-1 flex items-center gap-3">
+                                    {isAuthenticated && (
+                                      <button
+                                        onClick={() => {
+                                          setActiveReply({ reviewId: review.id, parentId: reply.id });
+                                          setReplyText(`@${subAuthor} `);
+                                        }}
+                                        className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
+                                      >
+                                        Reply
+                                      </button>
+                                    )}
+                                    {currentUsername && currentUsername.toLowerCase() === subAuthor.toLowerCase() && (
+                                      <button
+                                        onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
+                                        className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
+                                      >
+                                        Delete
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                            <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
-                            <div className="mt-1 flex items-center gap-3">
-                              {isAuthenticated && (
-                                <button
-                                  onClick={() => {
-                                    setActiveReply({ reviewId: review.id, parentId: reply.id });
-                                    setReplyText(`@${subAuthor} `);
-                                  }}
-                                  className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
-                                >
-                                  Reply
-                                </button>
-                              )}
-                              {currentUsername && currentUsername.toLowerCase() === subAuthor.toLowerCase() && (
-                                <button
-                                  onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
-                                  className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                                >
-                                  Delete
-                                </button>
-                              )}
                             </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
-                {/* Reply form for level 1 reply */}
-                {isReplyingToLevel1 && (
-                  <form onSubmit={handleSubmitReply} className="mt-3 ml-10 flex gap-2">
-                    <input
-                      type="text"
-                      autoFocus
-                      value={replyText}
-                      onChange={e => setReplyText(e.target.value)}
-                      className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
-                      placeholder={`Replying to @${replyAuthor}...`}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => { setActiveReply(null); setReplyText(""); }}
-                      className="shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-zinc-400 hover:bg-white/[0.05] transition"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!replyText.trim()}
-                      className={`shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}
-                    >
-                      Reply
-                    </button>
-                  </form>
-                )}
-              </div>
-            );
-          })}
+                  {/* Reply form for level 1 reply */}
+                  {isReplyingToLevel1 && (
+                    <form onSubmit={handleSubmitReply} className="mt-3 ml-10 flex gap-2">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={replyText}
+                        onChange={e => setReplyText(e.target.value)}
+                        className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
+                        placeholder={`Replying to @${replyAuthor}...`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => { setActiveReply(null); setReplyText(""); }}
+                        className="shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-zinc-400 hover:bg-white/[0.05] transition"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!replyText.trim()}
+                        className={`shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}
+                      >
+                        Reply
+                      </button>
+                    </form>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
       {/* Main "Reply to review" form */}
       {isReplyingToThis && activeReply?.parentId === null && (
-        <form onSubmit={handleSubmitReply} className="mt-3 flex gap-2">
+        <form onSubmit={handleSubmitReply} className="mt-4 ml-[48px] flex gap-2">
           <input
             type="text"
             autoFocus
