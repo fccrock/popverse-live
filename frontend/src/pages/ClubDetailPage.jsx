@@ -196,86 +196,40 @@ function FeedTab({ club, isMember }) {
                   )}
                 </div>
 
-                {/* Replies thread */}
+                {/* Replies thread - flat list, reply on any pre-fills @mention */}
                 {replies.length > 0 && (
                   <div className="mt-4 space-y-3 border-l-2 border-white/[0.07] pl-4">
                     {replies.map(r => (
-                      <div key={r.id}>
-                        <div className="flex items-start gap-2.5">
-                          <UserBubble username={r.author} size="sm" />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <Link to={`/profile/${r.author}`} className="text-xs font-bold text-white hover:text-violet-300 transition">{r.author}</Link>
-                              <span className="text-xs text-zinc-600">{timeAgo(r.timestamp)}</span>
-                            </div>
-                            <p className="text-[13px] text-zinc-400 mt-0.5 leading-relaxed">{r.content}</p>
-                            {isMember && (
-                              <button
-                                onClick={() => openReply(post.id, r.id, `@${r.author} `)}
-                                className="mt-1 text-[11px] font-semibold text-zinc-600 hover:text-violet-400 transition uppercase tracking-wide"
-                              >
-                                Reply
-                              </button>
-                            )}
+                      <div key={r.id} className="flex items-start gap-2.5">
+                        <UserBubble username={r.author} size="sm" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <Link to={`/profile/${r.author}`} className="text-xs font-bold text-white hover:text-violet-300 transition">{r.author}</Link>
+                            <span className="text-xs text-zinc-600">{timeAgo(r.timestamp)}</span>
                           </div>
+                          <p className="text-[13px] text-zinc-400 mt-0.5 leading-relaxed">{r.content}</p>
+                          {isMember && (
+                            <button
+                              onClick={() => openReply(post.id, r.id, `@${r.author} `)}
+                              className="mt-1 text-[11px] font-semibold text-zinc-600 hover:text-violet-400 transition uppercase tracking-wide"
+                            >
+                              Reply
+                            </button>
+                          )}
                         </div>
-
-                        {/* Sub-replies indented further */}
-                        {r.replies && r.replies.length > 0 && (
-                          <div className="mt-2 ml-10 space-y-2 border-l-2 border-white/[0.05] pl-3">
-                            {r.replies.map(sr => (
-                              <div key={sr.id} className="flex items-start gap-2">
-                                <UserBubble username={sr.author} size="sm" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <Link to={`/profile/${sr.author}`} className="text-xs font-bold text-white hover:text-violet-300 transition">{sr.author}</Link>
-                                    <span className="text-xs text-zinc-600">{timeAgo(sr.timestamp)}</span>
-                                  </div>
-                                  <p className="text-[13px] text-zinc-400 mt-0.5 leading-relaxed">{sr.content}</p>
-                                  {isMember && (
-                                    <button
-                                      onClick={() => openReply(post.id, r.id, `@${sr.author} `)}
-                                      className="mt-1 text-[11px] font-semibold text-zinc-600 hover:text-violet-400 transition uppercase tracking-wide"
-                                    >
-                                      Reply
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Inline reply form for this reply */}
-                        {replyingTo?.postId === post.id && replyingTo?.parentReplyId === r.id && (
-                          <div className="mt-2 ml-10 flex items-center gap-2">
-                            <UserBubble username={currentUsername || "?"} size="sm" linkTo={false} />
-                            <input
-                              type="text"
-                              className="input-field flex-1 py-1.5 text-sm"
-                              placeholder={`Reply to ${r.author}...`}
-                              value={replyText}
-                              onChange={e => setReplyText(e.target.value)}
-                              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleReply(post.id); } }}
-                              autoFocus
-                            />
-                            <button onClick={() => setReplyingTo(null)} className="text-xs text-zinc-500 hover:text-zinc-300">✕</button>
-                            <button onClick={() => handleReply(post.id)} disabled={!replyText.trim()} className="btn-v py-1.5 px-3 text-xs disabled:opacity-40">Send</button>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
                 )}
 
-                {/* Top-level reply form */}
-                {replyingTo?.postId === post.id && replyingTo?.parentReplyId === null && (
+                {/* Reply input - opens for any reply target */}
+                {replyingTo?.postId === post.id && (
                   <div className="mt-3 flex items-center gap-2">
                     <UserBubble username={currentUsername || "?"} size="sm" linkTo={false} />
                     <input
                       type="text"
                       className="input-field flex-1 py-1.5 text-sm"
-                      placeholder="Write a reply..."
+                      placeholder={replyingTo.parentReplyId ? `Replying in thread...` : "Write a reply..."}
                       value={replyText}
                       onChange={e => setReplyText(e.target.value)}
                       onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleReply(post.id); } }}

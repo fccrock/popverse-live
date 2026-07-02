@@ -200,124 +200,125 @@ function ReviewCard({
         )}
       </div>
 
-      {/* ── Threaded Replies (like Club Discussion) ── */}
+      {/* ── Threaded Replies ── */}
       {review.replies?.length > 0 && (
-        <div className="mt-4 space-y-1">
+        <div className="mt-4 space-y-4 border-l-2 border-white/[0.07] pl-4">
           {review.replies.map((reply) => {
             const replyAuthor = reply.author?.username || "user";
             const isReplyingToLevel1 = activeReply?.reviewId === review.id && activeReply?.parentId === reply.id;
             return (
-              <div key={reply.id} className="relative flex items-start px-3 py-2">
-                {/* Connector line */}
-                <div className="absolute left-[14px] top-0 h-[28px] w-[20px] rounded-bl-xl border-b-[2px] border-l-[2px] border-white/[0.08]" />
-
-                <div className="ml-[38px] flex flex-1 flex-col relative z-10">
-                  {/* Level 1 reply header */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-[12px] font-bold text-zinc-200">@{replyAuthor}</span>
-                    <span className="text-[10px] text-zinc-600">{timeAgo(reply.createdAt)}</span>
+              <div key={reply.id}>
+                {/* Level 1 reply */}
+                <div className="flex items-start gap-3">
+                  <div className={`grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[10px] font-black text-white`}>
+                    {replyAuthor.slice(0, 2).toUpperCase()}
                   </div>
-                  <p className="mt-0.5 text-[13px] text-zinc-400 leading-relaxed">{reply.content}</p>
-
-                  {/* Action row */}
-                  <div className="mt-1 flex items-center gap-3">
-                    {isAuthenticated && (
-                      <button
-                        onClick={() => {
-                          if (isReplyingToLevel1) {
-                            setActiveReply(null);
-                            setReplyText("");
-                          } else {
-                            setActiveReply({ reviewId: review.id, parentId: reply.id });
-                            setReplyText(`@${replyAuthor} `);
-                          }
-                        }}
-                        className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-wide"
-                      >
-                        Reply
-                      </button>
-                    )}
-                    {currentUsername && currentUsername.toLowerCase() === replyAuthor.toLowerCase() && (
-                      <button
-                        onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, reply.id); }}
-                        className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                      >
-                        Delete
-                      </button>
-                    )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Link to={`/profile/${replyAuthor}`} className="text-[12px] font-bold text-zinc-200 hover:text-violet-300 transition">@{replyAuthor}</Link>
+                      <span className="text-[10px] text-zinc-600">{timeAgo(reply.createdAt)}</span>
+                    </div>
+                    <p className="mt-0.5 text-[13px] text-zinc-400 leading-relaxed">{reply.content}</p>
+                    <div className="mt-1 flex items-center gap-3">
+                      {isAuthenticated && (
+                        <button
+                          onClick={() => {
+                            if (isReplyingToLevel1) {
+                              setActiveReply(null);
+                              setReplyText("");
+                            } else {
+                              setActiveReply({ reviewId: review.id, parentId: reply.id });
+                              setReplyText(`@${replyAuthor} `);
+                            }
+                          }}
+                          className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-wide"
+                        >
+                          Reply
+                        </button>
+                      )}
+                      {currentUsername && currentUsername.toLowerCase() === replyAuthor.toLowerCase() && (
+                        <button
+                          onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, reply.id); }}
+                          className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </div>
+                </div>
 
-                  {/* Level 2 Sub-Replies */}
-                  {reply.replies && reply.replies.length > 0 && (
-                    <div className="relative mt-2 space-y-1">
-                      <div className="absolute left-[-16px] top-[-8px] bottom-[10px] w-[2px] bg-white/[0.07]" />
-                      {reply.replies.map((subR) => {
-                        const subAuthor = subR.author?.username || "user";
-                        return (
-                          <div key={subR.id} className="relative flex items-start py-1.5">
-                            <div className="absolute left-[-16px] top-0 h-[24px] w-[20px] rounded-bl-xl border-b-[2px] border-l-[2px] border-white/[0.08]" />
-                            <div className="ml-[14px] flex flex-1 flex-col relative z-10">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold text-zinc-300">@{subAuthor}</span>
-                                <span className="text-[9px] text-zinc-600">{timeAgo(subR.createdAt)}</span>
-                              </div>
-                              <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
-                              <div className="mt-1 flex items-center gap-3">
-                                {isAuthenticated && (
-                                  <button
-                                    onClick={() => {
-                                      setActiveReply({ reviewId: review.id, parentId: reply.id });
-                                      setReplyText(`@${subAuthor} `);
-                                    }}
-                                    className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
-                                  >
-                                    Reply
-                                  </button>
-                                )}
-                                {currentUsername && currentUsername.toLowerCase() === subAuthor.toLowerCase() && (
-                                  <button
-                                    onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
-                                    className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                                  >
-                                    Delete
-                                  </button>
-                                )}
-                              </div>
+                {/* Level 2 sub-replies - clean indent, no connector lines */}
+                {reply.replies && reply.replies.length > 0 && (
+                  <div className="ml-10 mt-3 space-y-3 border-l-2 border-white/[0.05] pl-3">
+                    {reply.replies.map((subR) => {
+                      const subAuthor = subR.author?.username || "user";
+                      return (
+                        <div key={subR.id} className="flex items-start gap-2">
+                          <div className={`grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[9px] font-black text-white`}>
+                            {subAuthor.slice(0, 2).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <Link to={`/profile/${subAuthor}`} className="text-[11px] font-bold text-zinc-300 hover:text-violet-300 transition">@{subAuthor}</Link>
+                              <span className="text-[9px] text-zinc-600">{timeAgo(subR.createdAt)}</span>
+                            </div>
+                            <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
+                            <div className="mt-1 flex items-center gap-3">
+                              {isAuthenticated && (
+                                <button
+                                  onClick={() => {
+                                    setActiveReply({ reviewId: review.id, parentId: reply.id });
+                                    setReplyText(`@${subAuthor} `);
+                                  }}
+                                  className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
+                                >
+                                  Reply
+                                </button>
+                              )}
+                              {currentUsername && currentUsername.toLowerCase() === subAuthor.toLowerCase() && (
+                                <button
+                                  onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
+                                  className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
+                                >
+                                  Delete
+                                </button>
+                              )}
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-                  {/* Reply form for level 1 reply */}
-                  {isReplyingToLevel1 && (
-                    <form onSubmit={handleSubmitReply} className="mt-2 flex gap-2">
-                      <input
-                        type="text"
-                        autoFocus
-                        value={replyText}
-                        onChange={e => setReplyText(e.target.value)}
-                        className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
-                        placeholder={`Replying to @${replyAuthor}...`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => { setActiveReply(null); setReplyText(""); }}
-                        className="shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-zinc-400 hover:bg-white/[0.05] transition"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={!replyText.trim()}
-                        className={`shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}
-                      >
-                        Reply
-                      </button>
-                    </form>
-                  )}
-                </div>
+                {/* Reply form for level 1 reply */}
+                {isReplyingToLevel1 && (
+                  <form onSubmit={handleSubmitReply} className="mt-3 ml-10 flex gap-2">
+                    <input
+                      type="text"
+                      autoFocus
+                      value={replyText}
+                      onChange={e => setReplyText(e.target.value)}
+                      className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
+                      placeholder={`Replying to @${replyAuthor}...`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => { setActiveReply(null); setReplyText(""); }}
+                      className="shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-zinc-400 hover:bg-white/[0.05] transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!replyText.trim()}
+                      className={`shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}
+                    >
+                      Reply
+                    </button>
+                  </form>
+                )}
               </div>
             );
           })}
