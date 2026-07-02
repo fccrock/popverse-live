@@ -211,10 +211,10 @@ function ReviewCard({
             return (
               <div key={reply.id} className="relative">
                 {/* Thread Lines L1 */}
-                <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
+                <div className={`absolute w-[72px] left-[-72px] top-[-24px] border-white/[0.15] z-0 ${
                   isLastL1 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
                 }`} />
-                {!isLastL1 && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+                {!isLastL1 && <div className="absolute w-[72px] left-[-72px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
 
                 {/* Level 1 Reply Content */}
                 <div className="relative z-10 flex items-start gap-3">
@@ -265,10 +265,10 @@ function ReviewCard({
                       return (
                         <div key={subR.id} className="relative">
                           {/* Thread Lines L2 */}
-                          <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
+                          <div className={`absolute w-[64px] left-[-64px] top-[-24px] border-white/[0.15] z-0 ${
                             isLastL2 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
                           }`} />
-                          {!isLastL2 && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+                          {!isLastL2 && <div className="absolute w-[64px] left-[-64px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
 
                           <div className="relative z-10 flex items-start gap-3">
                             <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[11px] font-black text-white`}>

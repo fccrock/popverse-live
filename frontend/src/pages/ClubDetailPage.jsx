@@ -214,10 +214,10 @@ function FeedTab({ club, isMember }) {
                       return (
                         <div key={r.id} className="relative">
                           {/* Thread Lines */}
-                          <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
+                          <div className={`absolute w-[68px] left-[-68px] top-[-24px] border-white/[0.15] z-0 ${
                             isLast ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
                           }`} />
-                          {!isLast && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+                          {!isLast && <div className="absolute w-[68px] left-[-68px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
 
                           <div className="relative z-10 flex items-start gap-3">
                             <UserBubble username={r.author} size="sm" />
@@ -423,23 +423,22 @@ function DiscussionsTab({ club, isMember }) {
               {d.replies.length > 0 && (
                 <div className="mt-4 ml-4 pl-5 space-y-4">
                   {d.replies.map((r, i) => {
-                    const isLastL1 = i === d.replies.length - 1;
+                    const isLast = i === d.replies.length - 1;
                     return (
-                    <div key={r.id} className="relative">
-                      {/* Thread Lines L1 */}
-                      <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
-                        isLastL1 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
-                      }`} />
-                      {!isLastL1 && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+                      <div key={r.id} className="relative">
+                        {/* Thread Lines L1 */}
+                        <div className={`absolute w-[68px] left-[-68px] top-[-24px] border-white/[0.15] z-0 ${
+                          isLast ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
+                        }`} />
+                        {!isLast && <div className="absolute w-[68px] left-[-68px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
 
-                      {/* Level 1 reply */}
-                      <div className="relative z-10 flex items-start gap-3">
-                        <UserBubble username={r.author} size="sm" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 text-xs">
-                            <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
-                            <span className="text-zinc-500">{timeAgo(r.timestamp)}</span>
-                          </div>
+                        <div className="relative z-10 flex items-start gap-3">
+                          <UserBubble username={r.author} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 text-xs">
+                              <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
+                              <span className="text-zinc-500">{timeAgo(r.timestamp)}</span>
+                            </div>
                           {renderReplyContent(r.content)}
                           <div className="mt-2 flex items-center gap-4">
                             {isMember && (
@@ -470,10 +469,10 @@ function DiscussionsTab({ club, isMember }) {
                             return (
                             <div key={subR.id} className="relative">
                               {/* Thread Lines L2 */}
-                              <div className={`absolute w-[20px] left-[-20px] top-[-24px] border-white/[0.15] z-0 ${
+                              <div className={`absolute w-[64px] left-[-64px] top-[-24px] border-white/[0.15] z-0 ${
                                 isLastL2 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
                               }`} />
-                              {!isLastL2 && <div className="absolute w-[20px] left-[-20px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
+                              {!isLastL2 && <div className="absolute w-[64px] left-[-64px] top-[16px] border-t-2 border-white/[0.15] z-0" />}
 
                               <div className="relative z-10 flex items-start gap-3">
                               <UserBubble username={subR.author} size="sm" />
@@ -513,7 +512,7 @@ function DiscussionsTab({ club, isMember }) {
                       {activeReply?.discussionId === d.id && activeReply?.parentId === r.id && (
                         <div className="relative mt-3 ml-4 pl-5">
                           {/* Form thread curve */}
-                          <div className="absolute w-[20px] left-[-20px] top-[-24px] h-[40px] border-l-2 border-b-2 border-white/[0.15] rounded-bl-xl z-0" />
+                          <div className="absolute w-[64px] left-[-64px] top-[-24px] h-[40px] border-l-2 border-b-2 border-white/[0.15] rounded-bl-xl z-0" />
                           
                           <form onSubmit={(e) => submitReply(e, d.id, r.id)} className="relative z-10 flex gap-3">
                             <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
