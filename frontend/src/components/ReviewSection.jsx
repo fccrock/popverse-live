@@ -213,8 +213,8 @@ function ReviewCard({
                 {/* Thread Lines L1 */}
                 <div className={`absolute border-white/[0.15] z-0 ${
                   isLastL1 ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
-                }`} style={{ width: '76px', left: '-76px', top: '-24px' }} />
-                {!isLastL1 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '76px', left: '-76px', top: '16px' }} />}
+                }`} style={{ width: '20px', left: '-20px', top: '-24px' }} />
+                {!isLastL1 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '20px', left: '-20px', top: '16px' }} />}
 
                 {/* Level 1 Reply Content */}
                 <div className="relative z-10 flex items-start gap-3">

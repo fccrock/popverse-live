@@ -429,8 +429,8 @@ function DiscussionsTab({ club, isMember }) {
                         {/* Thread Lines L1 */}
                         <div className={`absolute border-white/[0.15] z-0 ${
                           isLast ? 'h-[40px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
-                        }`} style={{ width: '72px', left: '-72px', top: '-24px' }} />
-                        {!isLast && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '72px', left: '-72px', top: '16px' }} />}
+                        }`} style={{ width: '16px', left: '-16px', top: '-24px' }} />
+                        {!isLast && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '16px', left: '-16px', top: '16px' }} />}
 
                         <div className="relative z-10 flex items-start gap-3">
                           <UserBubble username={r.author} size="sm" />
