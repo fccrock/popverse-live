@@ -192,94 +192,94 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen text-white" style={{ background: "var(--bg)" }}>
-      {/* Ambient bg - subtler */}
+      {/* Ambient bg */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.05),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[#050508]" />
+        <div className="absolute inset-0 bg-[#060608]" />
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 pt-32 pb-12 sm:px-6 lg:pt-40">
+      <div className="mx-auto max-w-[1100px] px-4 pt-28 lg:pt-32 pb-12 sm:px-6">
         
         {/* ── 1. Bento Box Header Grid ── */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-10">
           
-          {/* Main Identity Box (Spans 2 columns) */}
-          <div className="lg:col-span-2 relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/40 p-6 md:p-8 backdrop-blur-xl shadow-xl">
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-emerald-500 opacity-80" />
+          {/* Main Identity Box (Spans 8 columns on large screens) */}
+          <div className="lg:col-span-8 relative overflow-hidden rounded-3xl border border-white/5 bg-white/[0.02] p-6 md:p-8 backdrop-blur-xl shadow-2xl">
+            {/* Top gradient bar */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-emerald-500 opacity-70" />
             
-            <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start text-center sm:text-left">
-              {/* Avatar */}
+            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
+              {/* Avatar (Circular, as requested) */}
               <div className="relative shrink-0">
-                <div className="h-24 w-24 md:h-28 md:w-28 overflow-hidden rounded-2xl ring-2 ring-white/20 shadow-2xl shadow-black/50 bg-zinc-800">
+                <div className="h-28 w-28 md:h-32 md:w-32 overflow-hidden rounded-full ring-4 ring-white/10 shadow-xl bg-zinc-800">
                   <img src={profile.avatarUrl} alt={profile.displayName} className="h-full w-full object-cover" />
                 </div>
-                <span className="absolute -bottom-1.5 -right-1.5 h-5 w-5 rounded-full border-4 border-[#09090b] bg-emerald-500 shadow-lg" />
+                <span className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-4 border-[#09090b] bg-emerald-500 shadow-lg" />
               </div>
 
               {/* Info */}
-              <div className="flex-1 w-full min-w-0 mt-2 sm:mt-0">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <div className="flex items-center justify-center sm:justify-start gap-2">
-                      <h1 className="text-2xl font-black text-white truncate tracking-tight">{profile.displayName}</h1>
+              <div className="flex-1 min-w-0 w-full mt-2 md:mt-0 flex flex-col justify-center">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center justify-center md:justify-start gap-2">
+                      <h1 className="text-3xl font-black text-white truncate tracking-tight">{profile.displayName}</h1>
                       {profile.isVerified && (
-                        <svg className="h-5 w-5 text-violet-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="h-6 w-6 text-violet-400 shrink-0 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
                           <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
                         </svg>
                       )}
                     </div>
-                    <p className="text-sm text-violet-400 font-semibold mt-0.5">@{profile.username}</p>
+                    <p className="text-sm text-violet-400 font-bold mt-1 tracking-wide">@{profile.username}</p>
                   </div>
                   
                   {/* Action */}
-                  <div className="shrink-0 flex justify-center sm:justify-end">
+                  <div className="shrink-0 flex justify-center md:justify-end mt-2 md:mt-0">
                     {isOwnProfile ? (
-                      <button onClick={() => setIsEditOpen(true)} className="flex items-center justify-center h-10 px-5 rounded-xl border border-white/20 bg-white/10 text-sm font-bold text-white hover:bg-white/20 hover:scale-105 transition-all shadow-lg">
+                      <button onClick={() => setIsEditOpen(true)} className="flex items-center justify-center h-10 px-6 rounded-full border border-white/20 bg-white/10 text-sm font-bold text-white hover:bg-white/20 hover:scale-105 transition-all shadow-lg">
                         Edit Profile
                       </button>
                     ) : (
-                      <button onClick={handleFollowClick} className={`flex items-center justify-center h-10 min-w-[110px] rounded-xl text-sm font-bold transition-all shadow-lg hover:scale-105 ${isFollowingTarget ? "border border-white/20 bg-white/10 text-zinc-300 hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/40" : "bg-violet-600 text-white hover:bg-violet-500"}`}>
+                      <button onClick={handleFollowClick} className={`flex items-center justify-center h-10 min-w-[120px] rounded-full text-sm font-bold transition-all shadow-lg hover:scale-105 ${isFollowingTarget ? "border border-white/20 bg-white/10 text-zinc-300 hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/40" : "bg-violet-600 text-white hover:bg-violet-500"}`}>
                         {isFollowingTarget ? "Unfollow" : "Follow"}
                       </button>
                     )}
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-zinc-300 leading-relaxed max-w-2xl mx-auto sm:mx-0">
+                <p className="mt-5 text-sm text-zinc-300 leading-relaxed max-w-2xl mx-auto md:mx-0">
                   {profile.bio || "This user hasn't added a bio yet."}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Network & Meta Boxes */}
-          <div className="grid grid-cols-2 lg:grid-cols-1 lg:grid-rows-2 gap-4">
+          {/* Network & Meta Boxes (Spans 4 columns) */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
             
             {/* Network Box */}
-            <div className="rounded-3xl border border-white/10 bg-zinc-900/40 p-5 flex flex-col justify-center backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between px-2">
-                <button onClick={openFollowersModal} className="flex flex-col group text-center lg:text-left">
-                  <span className="text-2xl font-black text-white group-hover:text-violet-400 transition-colors">{profile.followers.length}</span>
-                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mt-1">Followers</span>
+            <div className="flex-1 rounded-3xl border border-white/5 bg-white/[0.02] p-6 flex flex-col justify-center backdrop-blur-xl shadow-xl transition-all hover:bg-white/[0.03]">
+              <div className="grid grid-cols-2 gap-4 divide-x divide-white/10">
+                <button onClick={openFollowersModal} className="flex flex-col items-center group">
+                  <span className="text-3xl font-black text-white group-hover:text-violet-400 transition-colors drop-shadow-md">{profile.followers?.length || 0}</span>
+                  <span className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-bold mt-1.5 group-hover:text-zinc-400">Followers</span>
                 </button>
-                <div className="h-10 w-px bg-white/10"></div>
-                <button onClick={openFollowingModal} className="flex flex-col group text-center lg:text-right">
-                  <span className="text-2xl font-black text-white group-hover:text-violet-400 transition-colors">{profile.following.length}</span>
-                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mt-1">Following</span>
+                <button onClick={openFollowingModal} className="flex flex-col items-center group">
+                  <span className="text-3xl font-black text-white group-hover:text-violet-400 transition-colors drop-shadow-md">{profile.following?.length || 0}</span>
+                  <span className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-bold mt-1.5 group-hover:text-zinc-400">Following</span>
                 </button>
               </div>
             </div>
 
             {/* Meta Box */}
-            <div className="rounded-3xl border border-white/10 bg-zinc-900/40 p-5 flex flex-col justify-center backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-center lg:justify-start gap-4">
-                <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
-                  <svg className="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="rounded-3xl border border-white/5 bg-white/[0.02] p-5 flex flex-col justify-center backdrop-blur-xl shadow-xl transition-all hover:bg-white/[0.03]">
+              <div className="flex items-center justify-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                  <svg className="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <div>
-                  <span className="block text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Joined</span>
-                  <span className="block text-sm font-semibold text-zinc-300 mt-1">{profile.joinDate}</span>
+                <div className="flex flex-col">
+                  <span className="text-[11px] uppercase tracking-[0.15em] text-zinc-500 font-bold">Joined</span>
+                  <span className="text-base font-black text-white mt-0.5">{profile.joinDate}</span>
                 </div>
               </div>
             </div>
