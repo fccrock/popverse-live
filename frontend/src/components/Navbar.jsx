@@ -47,18 +47,38 @@ export default function Navbar({ accent = "violet" }) {
       <div id="nav-backdrop" className="absolute inset-0 -z-10 border-b border-white/[0.06] bg-black/30 backdrop-blur-2xl" />
       <div className="mx-auto flex max-w-[1840px] items-center justify-between gap-5 px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link className="group flex min-w-fit items-center transition-opacity hover:opacity-90" to="/">
-          <img
-            src="/images/pop.png"
-            alt="Popverse Icon"
-            style={{ height: '44px', width: 'auto', mixBlendMode: 'screen', objectFit: 'contain', transition: 'transform 0.3s ease' }}
-            className="group-hover:scale-105"
-          />
-          <img
-            src="/images/popverse.png"
-            alt="Popverse"
-            style={{ height: '44px', width: 'auto', mixBlendMode: 'screen', objectFit: 'contain', marginLeft: '-8px' }}
-          />
+        <Link
+          className="group flex min-w-fit items-center gap-1 transition-opacity hover:opacity-90"
+          to="/"
+        >
+          {/* pop.png has black bg - show it large, the dark matches navbar */}
+          <div style={{ height: '48px', width: '48px', overflow: 'hidden', borderRadius: '10px', flexShrink: 0 }}>
+            <img
+              src="/images/pop.png"
+              alt="Popverse Icon"
+              style={{
+                height: '100%',
+                width: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+                transition: 'transform 0.3s ease',
+              }}
+              className="group-hover:scale-110"
+            />
+          </div>
+          {/* popverse.png text logo */}
+          <div style={{ height: '28px', overflow: 'hidden', flexShrink: 0 }}>
+            <img
+              src="/images/popverse.png"
+              alt="Popverse"
+              style={{
+                height: '280%',
+                width: 'auto',
+                objectFit: 'contain',
+                marginTop: '-65%',
+              }}
+            />
+          </div>
         </Link>
 
         {/* Nav links */}
