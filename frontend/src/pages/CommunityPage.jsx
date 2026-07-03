@@ -487,7 +487,7 @@ export default function CommunityPage() {
               {filteredClubs.map((club, i) => (
                 <Link key={club.id} to={`/community/${club.slug}`} className="group relative flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }}>
                   <div className="relative aspect-[16/9] w-full rounded-2xl premium-glow transition-transform duration-500 group-hover:-translate-y-1">
-                    <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                    <div className="absolute inset-0 overflow-hidden rounded-2xl safari-corners">
                       <img src={club.coverImage} alt={club.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     </div>
                   </div>
@@ -575,7 +575,7 @@ export default function CommunityPage() {
                     >
                       {/* Poster Mosaic or Cover Image */}
                       <div className="relative aspect-[16/9] w-full rounded-2xl premium-glow transition-transform duration-500 group-hover:-translate-y-1">
-                        <div className="absolute inset-0 overflow-hidden rounded-2xl bg-zinc-900">
+                        <div className="absolute inset-0 overflow-hidden rounded-2xl bg-zinc-900 safari-corners">
                         {gradient ? (
                           <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                         ) : col.coverImage ? (
@@ -673,7 +673,7 @@ export default function CommunityPage() {
                     return (
                       <div key={col.id} className="group relative flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
                         <div className="relative aspect-[16/9] w-full rounded-2xl premium-glow transition-transform duration-500 group-hover:-translate-y-1">
-                          <div className="absolute inset-0 overflow-hidden rounded-2xl bg-zinc-900">
+                          <div className="absolute inset-0 overflow-hidden rounded-2xl bg-zinc-900 safari-corners">
                           {gradient ? (
                             <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
@@ -731,7 +731,7 @@ export default function CommunityPage() {
                     return (
                       <div key={col.id} className="group relative flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
                         <div className="relative aspect-[16/9] w-full rounded-2xl premium-glow transition-transform duration-500 group-hover:-translate-y-1">
-                          <div className="absolute inset-0 overflow-hidden rounded-2xl bg-zinc-900">
+                          <div className="absolute inset-0 overflow-hidden rounded-2xl bg-zinc-900 safari-corners">
                           {gradient ? (
                             <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
