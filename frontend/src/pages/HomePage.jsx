@@ -412,12 +412,16 @@ function CategoriesBento() {
             <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#050507] to-transparent" />
 
             {/* Content */}
-            <div className="absolute inset-0 flex flex-col justify-end p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: cat.accent }}>{cat.sub}</p>
-              <h3 className="mt-1 text-lg font-black text-white leading-tight">{cat.label}</h3>
-              <div className="mt-2 flex items-center gap-1.5 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 translate-x-[-4px]">
-                <span className="text-[11px] font-semibold text-zinc-400">Explore</span>
-                <svg className="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            <div className="absolute inset-0 flex flex-col justify-end p-5">
+              <div className="flex items-end justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: cat.accent }}>{cat.sub}</p>
+                  <h3 className="mt-1 text-xl font-black text-white leading-tight">{cat.label}</h3>
+                </div>
+                <div className="flex items-center gap-1.5 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 translate-x-[-4px]">
+                  <span className="text-[12px] font-semibold text-zinc-300">Explore</span>
+                  <svg className="h-4 w-4 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                </div>
               </div>
             </div>
           </Link>
