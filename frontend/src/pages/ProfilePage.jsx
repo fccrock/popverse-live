@@ -210,7 +210,7 @@ export default function ProfilePage() {
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left flex-1">
               {/* Profile Avatar */}
               <div className="relative shrink-0">
-                <div className="h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-2xl ring-2 ring-violet-500/40 ring-offset-2 ring-offset-[#0b0d16] shadow-2xl shadow-violet-900/20">
+                <div className="h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-full ring-2 ring-violet-500/40 ring-offset-2 ring-offset-[#0b0d16] shadow-2xl shadow-violet-900/20">
                   <img
                     src={profile.avatarUrl}
                     alt={profile.displayName}
@@ -218,7 +218,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 {/* Online indicator */}
-                <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-[#0b0d16] bg-emerald-500 shadow-lg shadow-emerald-500/30" />
+                <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-[#0b0d16] bg-emerald-500 shadow-lg shadow-emerald-500/30" />
               </div>
 
               {/* Profile Details */}
@@ -407,53 +407,51 @@ export default function ProfilePage() {
                 ) : (
                   userCollections.map((col) => {
                     const itemCount = col.items?.length || 0;
-                    const cardContent = (
-                      <>
-                        {/* Public badge for own profile */}
+                    const bgImage = col.coverImage || (itemCount > 0 && col.items[0].posterPath ? posterUrl(col.items[0].posterPath) : null);
+                    
+                    return (
+                      <Link
+                        key={col.id}
+                        to={`/collection/${col.id}`}
+                        className="group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-zinc-900 shadow-xl shadow-black/30 transition-all hover:scale-[1.02] hover:border-violet-500/50 hover:shadow-violet-500/20"
+                        style={{ aspectRatio: "16/9" }}
+                      >
+                        {/* Background Image */}
+                        {bgImage ? (
+                          <img 
+                            src={bgImage} 
+                            alt={col.name || col.title} 
+                            className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-80" 
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-950 opacity-60 transition-opacity duration-700 group-hover:opacity-80" />
+                        )}
+
+                        {/* Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#050507] via-[#050507]/60 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
+
+                        {/* Public Badge */}
                         {isOwnProfile && col.isPublic && (
-                          <div className="absolute top-4 right-4">
-                            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">Public</span>
+                          <div className="absolute top-3 right-3 z-10">
+                            <span className="rounded-full bg-emerald-500/20 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+                              Public
+                            </span>
                           </div>
                         )}
-                        <div className="flex items-center justify-between mb-3 pr-16">
-                          <h3 className="text-sm font-black text-white truncate">{col.name || col.title}</h3>
-                        </div>
-                        <div className="flex gap-2 overflow-hidden h-16">
-                          {itemCount > 0 ? (
-                            col.items.slice(0, 5).map((item, idx) => (
-                              <div key={idx} className="w-12 rounded-xl overflow-hidden bg-zinc-900 shrink-0 border border-white/[0.06]">
-                                <img src={posterUrl(item.posterPath)} alt={item.title} className="h-full w-full object-cover" />
-                              </div>
-                            ))
-                          ) : (
-                            <div className="w-full flex items-center justify-center border border-dashed border-white/[0.08] rounded-xl text-[11px] text-zinc-700">Empty</div>
-                          )}
-                        </div>
-                        <p className="mt-3 text-[11px] text-zinc-600">{itemCount} {itemCount === 1 ? "title" : "titles"}</p>
-                      </>
-                    );
 
-                    if (isOwnProfile) {
-                      return (
-                        <Link
-                          key={col.id}
-                          to={`/collection/${col.id}`}
-                          className="block relative rounded-2xl border border-white/[0.06] bg-white/[0.025] p-5 shadow-lg shadow-black/10 transition-all hover:border-violet-500/30 hover:bg-white/[0.04]"
-                        >
-                          {cardContent}
-                        </Link>
-                      );
-                    } else {
-                      return (
-                        <Link
-                          key={col.id}
-                          to={`/collection/${col.id}`}
-                          className="block relative rounded-2xl border border-white/[0.06] bg-white/[0.025] p-5 shadow-lg shadow-black/10 transition-all hover:border-violet-500/30 hover:bg-white/[0.04]"
-                        >
-                          {cardContent}
-                        </Link>
-                      );
-                    }
+                        {/* Content (Bottom Left) */}
+                        <div className="absolute inset-0 flex flex-col justify-end p-5 z-10">
+                          <h3 className="text-xl font-black text-white leading-tight drop-shadow-md line-clamp-2">
+                            {col.name || col.title}
+                          </h3>
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="rounded-full bg-white/20 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm border border-white/20">
+                              {itemCount} {itemCount === 1 ? "Title" : "Titles"}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    );
                   })
                 )}
               </div>
