@@ -111,7 +111,7 @@ async function joinClub(req, res) {
             actorId: user.id,
             type: "CLUB_JOIN",
             message: `joined your club ${club.name}.`,
-            link: `/clubs/${club.slug}`
+            link: `/community/${club.slug}`
           }
         });
       }
@@ -244,7 +244,7 @@ async function createPostReply(req, res) {
           actorId: user.id,
           type: "POST_REPLY",
           message: `replied to your post in ${post.club.name}.`,
-          link: `/clubs/${post.club.slug}`
+          link: `/community/${post.club.slug}`
         }
       });
     }
@@ -300,7 +300,7 @@ async function likePost(req, res) {
             actorId: user.id,
             type: "POST_LIKE",
             message: `liked your post in ${post.club.name}.`,
-            link: `/clubs/${post.club.slug}`
+            link: `/community/${post.club.slug}`
           }
         });
       }
@@ -367,7 +367,7 @@ async function createReply(req, res) {
           actorId: user.id,
           type: "DISCUSSION_REPLY",
           message: `replied to your discussion "${discussion.title}".`,
-          link: `/clubs/${discussion.club.slug}`
+          link: `/community/${discussion.club.slug}`
         }
       });
     }

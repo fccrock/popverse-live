@@ -105,7 +105,7 @@ export default function NotificationDropdown({ username }) {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-[440px] origin-top-right rounded-xl border border-white/[0.08] bg-black/70 backdrop-blur-2xl shadow-2xl" style={{ zIndex: 100 }}>
+        <div className="absolute right-0 mt-3 w-[440px] origin-top-right rounded-xl border border-white/[0.08] bg-black/30 backdrop-blur-2xl shadow-2xl" style={{ zIndex: 100 }}>
           
           {/* Header */}
           <div className="flex items-center justify-between p-5 pb-3">
