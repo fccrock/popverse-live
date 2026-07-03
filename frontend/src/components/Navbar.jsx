@@ -44,7 +44,8 @@ export default function Navbar({ accent = "violet" }) {
 
   return (
     <nav className="fixed inset-x-0 top-0 z-50">
-      <div id="nav-backdrop" className="absolute inset-0 -z-10 border-b border-white/[0.06] bg-black/30 backdrop-blur-2xl" />
+      <div id="nav-backdrop" className="absolute inset-0 -z-10 border-b border-white/[0.06] bg-black/40 backdrop-blur-2xl" />
+      <div className="absolute inset-0 -z-10 opacity-[0.15] bg-[url('/images/theme.png')] bg-cover bg-center pointer-events-none" />
       <div className="mx-auto flex max-w-[1840px] items-center justify-between gap-5 px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link className="group flex min-w-fit items-center gap-3 transition-opacity hover:opacity-90" to="/">
