@@ -6,6 +6,8 @@ export default function NotificationDropdown({ username }) {
   const [activeTab, setActiveTab] = useState("All");
   const [notifications, setNotifications] = useState([]);
   const dropdownRef = useRef(null);
+  
+  const API = import.meta.env.VITE_API_BASE_URL || "";
 
   useEffect(() => {
     if (username) {
@@ -28,7 +30,7 @@ export default function NotificationDropdown({ username }) {
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/notifications/${username}`);
+      const res = await fetch(`${API}/api/notifications/${username}`);
       if (res.ok) {
         const data = await res.json();
         setNotifications(data);
@@ -40,7 +42,7 @@ export default function NotificationDropdown({ username }) {
 
   const markAllAsRead = async () => {
     try {
-      await fetch(`http://localhost:3000/api/notifications/${username}/read-all`, {
+      await fetch(`${API}/api/notifications/${username}/read-all`, {
         method: "PUT"
       });
       setNotifications(notifications.map(n => ({ ...n, isRead: true })));
@@ -51,7 +53,7 @@ export default function NotificationDropdown({ username }) {
 
   const markAsRead = async (id) => {
     try {
-      await fetch(`http://localhost:3000/api/notifications/${id}/read`, {
+      await fetch(`${API}/api/notifications/${id}/read`, {
         method: "PUT"
       });
       setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
@@ -103,14 +105,14 @@ export default function NotificationDropdown({ username }) {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-[400px] origin-top-right rounded-xl border border-white/[0.08] bg-black/70 backdrop-blur-2xl shadow-2xl" style={{ zIndex: 100 }}>
+        <div className="absolute right-0 mt-3 w-[440px] origin-top-right rounded-xl border border-white/[0.08] bg-black/70 backdrop-blur-2xl shadow-2xl" style={{ zIndex: 100 }}>
           
           {/* Header */}
-          <div className="flex items-center justify-between p-4 pb-2">
-            <h3 className="text-[17px] font-semibold text-white">Notifications</h3>
+          <div className="flex items-center justify-between p-5 pb-3">
+            <h3 className="text-[20px] font-bold text-white tracking-wide">Notifications</h3>
             <button 
               onClick={markAllAsRead}
-              className="text-white/40 hover:text-white transition-colors"
+              className="text-white/40 hover:text-white transition-colors p-1"
               title="Mark all as read"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,16 +142,16 @@ export default function NotificationDropdown({ username }) {
           </div>
 
           {/* Content Area */}
-          <div className="max-h-[400px] overflow-y-auto min-h-[250px] custom-scrollbar">
+          <div className="max-h-[400px] overflow-y-auto min-h-[300px] custom-scrollbar">
             {filteredNotifications.length === 0 ? (
-              <div className="flex h-[250px] flex-col items-center justify-center text-center">
-                <div className="mb-4 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-white/[0.04]">
-                  <svg className="h-7 w-7 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="flex h-[300px] flex-col items-center justify-center text-center">
+                <div className="mb-5 flex h-[88px] w-[88px] items-center justify-center rounded-full bg-white/[0.04]">
+                  <svg className="h-10 w-10 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path d="M15.8 17.5H8.2a2 2 0 0 1-1.8-2.9l.7-1.4V9.8a4.9 4.9 0 0 1 9.8 0v3.4l.7 1.4a2 2 0 0 1-1.8 2.9ZM10 20h4" strokeLinecap="round" strokeWidth="1.8" />
                   </svg>
                 </div>
-                <p className="text-[15px] font-medium text-white/90">No notifications here</p>
-                <p className="mt-1.5 text-sm text-white/40">Check back later for new updates.</p>
+                <p className="text-[16px] font-medium text-white/90">No notifications here</p>
+                <p className="mt-1 text-[14px] text-white/40">Check back later for new updates.</p>
               </div>
             ) : (
               <div className="flex flex-col">
