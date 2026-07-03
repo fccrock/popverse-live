@@ -48,16 +48,16 @@ export default function Navbar({ accent = "violet" }) {
       <div className="mx-auto flex max-w-[1840px] items-center justify-between gap-5 px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link className="group flex min-w-fit items-center gap-3 transition-opacity hover:opacity-90" to="/">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', height: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', height: '100%' }}>
             <img
               src="/images/pop.png"
               alt="Popverse Icon"
-              style={{ width: '44px', height: '44px', flexShrink: 0, objectFit: 'contain', display: 'block' }}
+              style={{ width: '52px', height: '52px', flexShrink: 0, objectFit: 'contain', display: 'block', imageRendering: 'auto' }}
             />
             <img
               src="/images/popverse.png"
               alt="Popverse"
-              style={{ height: '28px', width: 'auto', display: 'block', objectFit: 'contain' }}
+              style={{ height: '34px', width: 'auto', display: 'block', objectFit: 'contain', imageRendering: 'auto' }}
             />
           </div>
         </Link>
