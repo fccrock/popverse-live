@@ -304,9 +304,9 @@ export default function ProfilePage() {
           <div className="space-y-3">
             {/* TAB CONTENT: Reviews */}
             {activeTab === "reviews" && (
-              <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4">
                 {localReviews.length === 0 ? (
-                  <div className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-12 text-center">
+                  <div className="col-span-full rounded-2xl border border-white/[0.06] bg-white/[0.025] p-12 text-center">
                     <div className="mb-4 grid h-14 w-14 mx-auto place-items-center rounded-2xl border border-white/[0.07] bg-white/[0.04]">
                       <svg className="h-6 w-6 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
@@ -331,56 +331,50 @@ export default function ProfilePage() {
                     return (
                       <article 
                         key={rev.id}
-                        className="flex gap-4 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4 shadow-lg shadow-black/10 transition-all hover:border-white/[0.10] hover:bg-white/[0.04] backdrop-blur-sm"
+                        className="flex flex-col rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 shadow-xl shadow-black/20 transition-all hover:-translate-y-1 hover:border-white/[0.10] hover:bg-white/[0.03] backdrop-blur-sm"
                       >
-                        {/* Poster */}
-                        <Link 
-                          to={route}
-                          className="w-16 h-24 sm:w-20 sm:h-28 rounded-xl overflow-hidden shrink-0 border border-white/[0.07] bg-zinc-900 shadow-lg"
-                        >
-                          {media?.posterPath ? (
-                            <img
-                              src={posterUrl(media.posterPath)}
-                              alt={media.title}
-                              className="h-full w-full object-cover transition hover:scale-105 duration-300"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center text-[10px] text-zinc-700 font-medium">
-                              Loading...
-                            </div>
-                          )}
-                        </Link>
-
-                        {/* Review text and details */}
-                        <div className="flex-1 min-w-0 flex flex-col">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-violet-500">Reviewed</span>
-                              <Link to={route} className="text-base font-black hover:text-violet-400 transition mt-0.5 block text-white">
-                                {media?.title || "Loading..."}
-                              </Link>
-                              <span className="text-xs text-zinc-600 block mt-0.5">
-                                {media?.year || "..."} · {rev.mediaType === "movie" ? "Movie" : "TV Show"}
-                              </span>
-                            </div>
-                            
-                            {/* Rating */}
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <div className="flex gap-0.5">
-                                {[1, 2, 3, 4, 5].map((s) => (
-                                  <span key={s} className={`text-sm ${s <= rev.rating ? "text-violet-400" : "text-zinc-800"}`}>★</span>
-                                ))}
+                        {/* Top: Poster and Meta */}
+                        <div className="flex gap-4 mb-3">
+                          <Link 
+                            to={route}
+                            className="w-16 h-24 rounded-xl overflow-hidden shrink-0 border border-white/[0.07] bg-zinc-900 shadow-md"
+                          >
+                            {media?.posterPath ? (
+                              <img
+                                src={posterUrl(media.posterPath)}
+                                alt={media.title}
+                                className="h-full w-full object-cover transition hover:scale-105 duration-300"
+                              />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-[10px] text-zinc-700 font-medium">
+                                Loading...
                               </div>
-                              <span className="text-sm font-black text-violet-400">{rev.rating.toFixed(1)}</span>
-                            </div>
+                            )}
+                          </Link>
+
+                          <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-violet-500 mb-0.5">Reviewed</span>
+                            <Link to={route} className="text-base font-black hover:text-violet-400 transition block text-white leading-tight">
+                              {media?.title || "Loading..."}
+                            </Link>
+                            <span className="text-xs text-zinc-500 block mt-1">
+                              {media?.year || "..."} · {rev.mediaType === "movie" ? "Movie" : "TV Show"}
+                            </span>
                           </div>
+                          
+                          {/* Rating Badge */}
+                          <div className="shrink-0 flex items-center justify-center h-8 px-2 rounded-lg bg-violet-500/10 border border-violet-500/20">
+                            <span className="text-xs font-black text-violet-400">★ {rev.rating.toFixed(1)}</span>
+                          </div>
+                        </div>
 
-                          <p className="mt-2.5 text-sm text-zinc-400 leading-relaxed flex-1 line-clamp-3">
-                            {rev.text}
+                        {/* Bottom: Review text */}
+                        <div className="flex-1 flex flex-col">
+                          <p className="text-sm text-zinc-300/90 leading-relaxed line-clamp-3 italic bg-white/[0.02] p-3 rounded-xl border border-white/[0.04] flex-1">
+                            "{rev.text}"
                           </p>
-
-                          <div className="mt-2.5">
-                            <span className="text-[11px] text-zinc-700">
+                          <div className="mt-3 text-right">
+                            <span className="text-[10px] font-medium text-zinc-600 uppercase tracking-wider">
                               {new Date(rev.createdAt || rev.timestamp).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                             </span>
                           </div>
@@ -389,12 +383,12 @@ export default function ProfilePage() {
                     );
                   })
                 )}
-              </>
+              </div>
             )}
 
             {/* TAB CONTENT: Collections */}
             {activeTab === "collections" && (
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
                 {userCollections.length === 0 ? (
                   <div className="col-span-2 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-12 text-center">
                     <p className="text-base font-black text-zinc-500">
@@ -413,39 +407,39 @@ export default function ProfilePage() {
                       <Link
                         key={col.id}
                         to={`/collection/${col.id}`}
-                        className="group relative overflow-hidden rounded-2xl border border-white/[0.06] bg-zinc-900 shadow-xl shadow-black/30 transition-all hover:scale-[1.02] hover:border-violet-500/50 hover:shadow-violet-500/20"
-                        style={{ aspectRatio: "16/9" }}
+                        className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-zinc-900 shadow-xl shadow-black/30 transition-all hover:-translate-y-1 hover:border-violet-500/50 hover:shadow-violet-500/30"
+                        style={{ aspectRatio: "2/3" }}
                       >
                         {/* Background Image */}
                         {bgImage ? (
                           <img 
                             src={bgImage} 
                             alt={col.name || col.title} 
-                            className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-80" 
+                            className="absolute inset-0 h-full w-full object-cover opacity-70 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100" 
                           />
                         ) : (
-                          <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-950 opacity-60 transition-opacity duration-700 group-hover:opacity-80" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 opacity-60 transition-opacity duration-700 group-hover:opacity-80" />
                         )}
 
                         {/* Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#050507] via-[#050507]/60 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#050507] via-[#050507]/40 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
 
                         {/* Public Badge */}
                         {isOwnProfile && col.isPublic && (
-                          <div className="absolute top-3 right-3 z-10">
-                            <span className="rounded-full bg-emerald-500/20 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+                          <div className="absolute top-2 right-2 z-10">
+                            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.1em] text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
                               Public
                             </span>
                           </div>
                         )}
 
                         {/* Content (Bottom Left) */}
-                        <div className="absolute inset-0 flex flex-col justify-end p-5 z-10">
-                          <h3 className="text-xl font-black text-white leading-tight drop-shadow-md line-clamp-2">
+                        <div className="absolute inset-0 flex flex-col justify-end p-3 z-10">
+                          <h3 className="text-sm font-black text-white leading-tight drop-shadow-md line-clamp-2 mb-1.5">
                             {col.name || col.title}
                           </h3>
-                          <div className="mt-2 flex items-center gap-2">
-                            <span className="rounded-full bg-white/20 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm border border-white/20">
+                          <div className="flex items-center">
+                            <span className="rounded bg-black/40 backdrop-blur-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-300 border border-white/10">
                               {itemCount} {itemCount === 1 ? "Title" : "Titles"}
                             </span>
                           </div>
@@ -460,7 +454,7 @@ export default function ProfilePage() {
 
             {/* TAB CONTENT: Clubs */}
             {activeTab === "clubs" && (
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
                 {userClubs.length === 0 ? (
                   <div className="col-span-2 rounded-2xl border border-white/[0.06] bg-white/[0.025] p-12 text-center">
                     <p className="text-base font-black text-zinc-500">No clubs joined yet</p>
@@ -470,21 +464,23 @@ export default function ProfilePage() {
                     <Link
                       key={club.id}
                       to={`/community/${club.slug}`}
-                      className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-5 shadow-lg shadow-black/10 transition hover:bg-white/[0.05]"
+                      className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 shadow-md transition hover:-translate-y-0.5 hover:bg-white/[0.04] hover:border-white/[0.1] backdrop-blur-sm"
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="grid h-10 w-10 place-items-center rounded-xl bg-violet-500/15 shrink-0 overflow-hidden">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-lg bg-violet-500/15 shrink-0 overflow-hidden border border-white/10">
                           {club.coverImage ? (
                             <img src={club.coverImage} className="w-full h-full object-cover" alt="" />
                           ) : (
-                            <svg className="h-5 w-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                            </svg>
+                            <div className="h-full w-full flex items-center justify-center">
+                              <svg className="h-5 w-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                              </svg>
+                            </div>
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 flex flex-col justify-center">
                           <h3 className="text-sm font-black text-white truncate">{club.name}</h3>
-                          <p className="text-xs text-zinc-600 mt-0.5">{club.members.length} members</p>
+                          <p className="text-xs text-zinc-500 mt-0.5 font-medium">{club.members.length} member{club.members.length !== 1 ? 's' : ''}</p>
                         </div>
                       </div>
                     </Link>
