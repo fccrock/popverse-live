@@ -486,8 +486,10 @@ export default function CommunityPage() {
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filteredClubs.map((club, i) => (
                 <Link key={club.id} to={`/community/${club.slug}`} className="group relative flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }}>
-                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 premium-glow transition-all duration-500 group-hover:-translate-y-1">
-                    <img src={club.coverImage} alt={club.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <div className="relative aspect-[16/9] w-full rounded-2xl premium-glow transition-transform duration-500 group-hover:-translate-y-1">
+                    <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                      <img src={club.coverImage} alt={club.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    </div>
                   </div>
                   <div className="flex flex-col">
                     <h3 className="text-[17px] font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors duration-200">{club.name}</h3>
@@ -572,7 +574,8 @@ export default function CommunityPage() {
                       onClick={() => navigate(`/collection/${col.id}`)}
                     >
                       {/* Poster Mosaic or Cover Image */}
-                      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 premium-glow transition-all duration-500 group-hover:-translate-y-1">
+                      <div className="relative aspect-[16/9] w-full rounded-2xl premium-glow transition-transform duration-500 group-hover:-translate-y-1">
+                        <div className="absolute inset-0 overflow-hidden rounded-2xl bg-zinc-900">
                         {gradient ? (
                           <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                         ) : col.coverImage ? (
@@ -607,6 +610,7 @@ export default function CommunityPage() {
                             {savedCollectionIds.includes(col.id) ? "Saved" : "Save"}
                           </button>
                         )}
+                        </div>
                       </div>
 
                       {/* Content */}
@@ -668,7 +672,8 @@ export default function CommunityPage() {
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
                       <div key={col.id} className="group relative flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 premium-glow transition-all duration-500 group-hover:-translate-y-1">
+                        <div className="relative aspect-[16/9] w-full rounded-2xl premium-glow transition-transform duration-500 group-hover:-translate-y-1">
+                          <div className="absolute inset-0 overflow-hidden rounded-2xl bg-zinc-900">
                           {gradient ? (
                             <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
@@ -688,6 +693,7 @@ export default function CommunityPage() {
                             <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${isPublicBadge ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/20" : "bg-zinc-800 text-zinc-400 border border-zinc-700"}`}>
                               {isPublicBadge ? "Public" : "Private"}
                             </span>
+                          </div>
                           </div>
                         </div>
                         <div className="flex flex-col">
@@ -724,7 +730,8 @@ export default function CommunityPage() {
                     const gradient = col.coverImage?.startsWith("gradient:") ? col.coverImage.replace("gradient:", "").split("|") : null;
                     return (
                       <div key={col.id} className="group relative flex flex-col gap-3 animate-fade-up cursor-pointer" style={{ animationDelay: `${i * 60}ms` }} onClick={() => navigate(`/collection/${col.id}`)}>
-                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-zinc-900 premium-glow transition-all duration-500 group-hover:-translate-y-1">
+                        <div className="relative aspect-[16/9] w-full rounded-2xl premium-glow transition-transform duration-500 group-hover:-translate-y-1">
+                          <div className="absolute inset-0 overflow-hidden rounded-2xl bg-zinc-900">
                           {gradient ? (
                             <div className="h-full w-full transition-transform duration-500 group-hover:scale-105" style={{ background: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})` }} />
                           ) : col.coverImage ? (
@@ -758,6 +765,7 @@ export default function CommunityPage() {
                             </button>
                           )}
                         </div>
+                      </div>
                         <div className="flex flex-col">
                           <h3 className="text-[17px] font-bold text-white tracking-tight group-hover:text-violet-400 transition-colors">{col.title || col.name}</h3>
                           <div className="mt-1 flex items-center gap-2 text-sm text-zinc-500 font-medium">
