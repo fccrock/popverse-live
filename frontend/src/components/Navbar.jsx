@@ -51,34 +51,17 @@ export default function Navbar({ accent = "violet" }) {
           className="group flex min-w-fit items-center gap-1 transition-opacity hover:opacity-90"
           to="/"
         >
-          {/* pop.png has black bg - show it large, the dark matches navbar */}
-          <div style={{ height: '48px', width: '48px', overflow: 'hidden', borderRadius: '10px', flexShrink: 0 }}>
-            <img
-              src="/images/pop.png"
-              alt="Popverse Icon"
-              style={{
-                height: '100%',
-                width: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center',
-                transition: 'transform 0.3s ease',
-              }}
-              className="group-hover:scale-110"
-            />
-          </div>
-          {/* popverse.png text logo */}
-          <div style={{ height: '28px', overflow: 'hidden', flexShrink: 0 }}>
-            <img
-              src="/images/popverse.png"
-              alt="Popverse"
-              style={{
-                height: '280%',
-                width: 'auto',
-                objectFit: 'contain',
-                marginTop: '-65%',
-              }}
-            />
-          </div>
+          <img
+            src="/images/pop.png"
+            alt="Popverse Icon"
+            style={{ height: '72px', width: 'auto', objectFit: 'contain', marginTop: '-12px', marginBottom: '-12px', transition: 'transform 0.3s ease' }}
+            className="group-hover:scale-105"
+          />
+          <img
+            src="/images/popverse.png"
+            alt="Popverse"
+            style={{ height: '64px', width: 'auto', objectFit: 'contain', marginTop: '-12px', marginBottom: '-12px' }}
+          />
         </Link>
 
         {/* Nav links */}
