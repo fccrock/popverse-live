@@ -47,11 +47,18 @@ export default function Navbar({ accent = "violet" }) {
       <div id="nav-backdrop" className="absolute inset-0 -z-10 border-b border-white/[0.06] bg-black/30 backdrop-blur-2xl" />
       <div className="mx-auto flex max-w-[1840px] items-center justify-between gap-5 px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link className="group flex min-w-fit items-center gap-3 transition-opacity hover:opacity-90" to="/">
-          <div className={`grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br ${a.logo} text-lg font-black shadow-lg transition-transform duration-300 group-hover:scale-105`}>
-            P
-          </div>
-          <span className="text-lg font-black tracking-widest text-white sm:text-xl">POPVERSE</span>
+        <Link className="group flex min-w-fit items-center transition-opacity hover:opacity-90" to="/">
+          <img
+            src="/images/pop.png"
+            alt="Popverse Icon"
+            style={{ height: '44px', width: 'auto', mixBlendMode: 'screen', objectFit: 'contain', transition: 'transform 0.3s ease' }}
+            className="group-hover:scale-105"
+          />
+          <img
+            src="/images/popverse.png"
+            alt="Popverse"
+            style={{ height: '44px', width: 'auto', mixBlendMode: 'screen', objectFit: 'contain', marginLeft: '-8px' }}
+          />
         </Link>
 
         {/* Nav links */}
