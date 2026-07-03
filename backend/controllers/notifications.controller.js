@@ -85,6 +85,27 @@ async function markAllAsRead(req, res) {
   }
 }
 
+// Clear all notifications for a user
+async function clearAllNotifications(req, res) {
+  try {
+    const { username } = req.params;
+    
+    const user = await prisma.user.findFirst({
+      where: { username: { equals: username, mode: "insensitive" } },
+    });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    await prisma.notification.deleteMany({
+      where: { userId: user.id }
+    });
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error clearing all notifications:", error);
+    res.status(500).json({ error: "Failed to clear notifications" });
+  }
+}
+
 // Delete a notification (optional if user wants to dismiss it)
 async function deleteNotification(req, res) {
   try {
@@ -101,5 +122,6 @@ module.exports = {
   getUserNotifications,
   markAsRead,
   markAllAsRead,
+  clearAllNotifications,
   deleteNotification,
 };

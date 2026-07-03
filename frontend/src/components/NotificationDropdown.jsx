@@ -40,14 +40,14 @@ export default function NotificationDropdown({ username }) {
     }
   };
 
-  const markAllAsRead = async () => {
+  const clearAllNotifications = async () => {
     try {
-      await fetch(`${API}/api/notifications/${username}/read-all`, {
-        method: "PUT"
+      await fetch(`${API}/api/notifications/${username}/clear-all`, {
+        method: "DELETE"
       });
-      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      setNotifications([]);
     } catch (err) {
-      console.error("Failed to mark all as read", err);
+      console.error("Failed to clear all notifications", err);
     }
   };
 
@@ -99,7 +99,9 @@ export default function NotificationDropdown({ username }) {
           <path d="M15.8 17.5H8.2a2 2 0 0 1-1.8-2.9l.7-1.4V9.8a4.9 4.9 0 0 1 9.8 0v3.4l.7 1.4a2 2 0 0 1-1.8 2.9ZM10 20h4" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-[#f43f5e] ring-2 ring-black/50" />
+          <span className="absolute right-1.5 top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#f43f5e] px-1 text-[10px] font-bold text-white ring-2 ring-black/50">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
         )}
       </button>
 
@@ -111,12 +113,12 @@ export default function NotificationDropdown({ username }) {
           <div className="flex items-center justify-between p-5 pb-3">
             <h3 className="text-[20px] font-bold text-white tracking-wide">Notifications</h3>
             <button 
-              onClick={markAllAsRead}
+              onClick={clearAllNotifications}
               className="text-white/40 hover:text-white transition-colors p-1"
-              title="Mark all as read"
+              title="Clear all notifications"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+              <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
           </div>

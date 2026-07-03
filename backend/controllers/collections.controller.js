@@ -251,7 +251,7 @@ async function toggleCollectionLike(req, res) {
             actorId: user.id,
             type: "COLLECTION_LIKE",
             message: `liked your collection "${collection.title}".`,
-            link: `/collections/${collectionId}`
+            link: `/collection/${collectionId}`
           }
         });
       }
