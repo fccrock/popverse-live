@@ -48,16 +48,16 @@ export default function Navbar({ accent = "violet" }) {
       <div className="absolute inset-0 -z-10 opacity-[0.15] bg-[url('/images/theme.png')] bg-cover bg-center pointer-events-none" />
       <div className="mx-auto flex max-w-[1840px] items-center justify-between gap-5 px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link className="group flex min-w-fit items-center gap-3 transition-opacity hover:opacity-90" to="/">
+        <Link className="group flex min-w-fit items-center transition-opacity hover:opacity-90" to="/">
           <img 
             src="/images/pop.png" 
             alt="Popverse Icon" 
-            className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" 
+            className="h-[80px] w-auto -my-5 -ml-2 object-contain transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_0_12px_rgba(139,92,246,0.3)]" 
           />
           <img 
             src="/images/popverse.png" 
             alt="Popverse" 
-            className="h-5 w-auto object-contain" 
+            className="h-[55px] w-auto -my-4 -ml-4 object-contain" 
           />
         </Link>
 
