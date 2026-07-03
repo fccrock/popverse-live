@@ -48,7 +48,7 @@ export default function Navbar({ accent = "violet" }) {
       <div className="mx-auto flex max-w-[1840px] items-center justify-between gap-5 px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link className="group flex min-w-fit items-center gap-3 transition-opacity hover:opacity-90" to="/">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', height: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', height: '100%' }}>
             <img
               src="/images/pop.png"
               alt="Popverse Icon"
@@ -57,7 +57,7 @@ export default function Navbar({ accent = "violet" }) {
             <img
               src="/images/popverse.png"
               alt="Popverse"
-              style={{ height: '34px', width: 'auto', display: 'block', objectFit: 'contain', imageRendering: 'auto' }}
+              style={{ height: '22px', width: 'auto', display: 'block', objectFit: 'contain', imageRendering: 'auto' }}
             />
           </div>
         </Link>
