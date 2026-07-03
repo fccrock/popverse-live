@@ -415,8 +415,8 @@ function CategoriesBento() {
             <div className="absolute inset-0 flex flex-col justify-end p-5">
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: cat.accent }}>{cat.sub}</p>
-                  <h3 className="mt-1 text-xl font-black text-white leading-tight">{cat.label}</h3>
+                  <h3 className="text-xl font-black text-white leading-tight">{cat.label}</h3>
+                  <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: cat.accent }}>{cat.sub}</p>
                 </div>
                 <div className="flex items-center gap-1.5 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 translate-x-[-4px]">
                   <span className="text-[12px] font-semibold text-zinc-300">Explore</span>
