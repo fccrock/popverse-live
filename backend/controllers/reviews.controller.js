@@ -163,6 +163,21 @@ async function toggleReviewLike(req, res) {
       await prisma.reviewLike.create({
         data: { reviewId, userId: user.id }
       });
+      
+      // Create notification
+      const review = await prisma.review.findUnique({ where: { id: reviewId }, select: { authorId: true, mediaId: true, mediaType: true } });
+      if (review && review.authorId !== user.id) {
+        await prisma.notification.create({
+          data: {
+            userId: review.authorId,
+            actorId: user.id,
+            type: "REVIEW_LIKE",
+            message: `liked your review.`,
+            link: `/${review.mediaType}/${review.mediaId}`
+          }
+        });
+      }
+
       res.json({ liked: true });
     }
   } catch (error) {
@@ -190,6 +205,21 @@ async function createReviewReply(req, res) {
       data: { content, reviewId, authorId: user.id, parentId: parentId || null },
       include: { author: true }
     });
+
+    // Create notification
+    const review = await prisma.review.findUnique({ where: { id: reviewId }, select: { authorId: true, mediaId: true, mediaType: true } });
+    if (review && review.authorId !== user.id) {
+      await prisma.notification.create({
+        data: {
+          userId: review.authorId,
+          actorId: user.id,
+          type: "REVIEW_REPLY",
+          message: `replied to your review.`,
+          link: `/${review.mediaType}/${review.mediaId}`
+        }
+      });
+    }
+
     res.json(reply);
   } catch (error) {
     console.error("Error creating review reply:", error);

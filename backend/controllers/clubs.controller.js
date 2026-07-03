@@ -100,6 +100,23 @@ async function joinClub(req, res) {
       },
     });
 
+    // Create notification
+    const club = await prisma.club.findUnique({ where: { id: clubId } });
+    if (club && club.createdBy !== user.username) {
+      const creator = await prisma.user.findUnique({ where: { username: club.createdBy } });
+      if (creator) {
+        await prisma.notification.create({
+          data: {
+            userId: creator.id,
+            actorId: user.id,
+            type: "CLUB_JOIN",
+            message: `joined your club ${club.name}.`,
+            link: `/clubs/${club.slug}`
+          }
+        });
+      }
+    }
+
     res.json(membership);
   } catch (error) {
     console.error("Error joining club:", error);
@@ -217,6 +234,20 @@ async function createPostReply(req, res) {
       data: { content, postId, authorId: user.id },
       include: { author: true }
     });
+
+    // Create notification
+    const post = await prisma.clubPost.findUnique({ where: { id: postId }, include: { club: true } });
+    if (post && post.authorId !== user.id) {
+      await prisma.notification.create({
+        data: {
+          userId: post.authorId,
+          actorId: user.id,
+          type: "POST_REPLY",
+          message: `replied to your post in ${post.club.name}.`,
+          link: `/clubs/${post.club.slug}`
+        }
+      });
+    }
     res.json(reply);
   } catch (error) {
     console.error("Error creating post reply:", error);
@@ -259,6 +290,21 @@ async function likePost(req, res) {
       await prisma.postLike.create({
         data: { postId, userId: user.id }
       });
+
+      // Create notification
+      const post = await prisma.clubPost.findUnique({ where: { id: postId }, include: { club: true } });
+      if (post && post.authorId !== user.id) {
+        await prisma.notification.create({
+          data: {
+            userId: post.authorId,
+            actorId: user.id,
+            type: "POST_LIKE",
+            message: `liked your post in ${post.club.name}.`,
+            link: `/clubs/${post.club.slug}`
+          }
+        });
+      }
+
       return res.json({ liked: true });
     }
   } catch (error) {
@@ -311,6 +357,20 @@ async function createReply(req, res) {
       },
       include: { author: true }
     });
+
+    // Create notification
+    const discussion = await prisma.clubDiscussion.findUnique({ where: { id: discussionId }, include: { club: true } });
+    if (discussion && discussion.authorId !== user.id) {
+      await prisma.notification.create({
+        data: {
+          userId: discussion.authorId,
+          actorId: user.id,
+          type: "DISCUSSION_REPLY",
+          message: `replied to your discussion "${discussion.title}".`,
+          link: `/clubs/${discussion.club.slug}`
+        }
+      });
+    }
 
     res.json(reply);
   } catch (error) {

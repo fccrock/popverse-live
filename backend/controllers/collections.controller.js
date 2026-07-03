@@ -241,6 +241,21 @@ async function toggleCollectionLike(req, res) {
       await prisma.collectionLike.create({
         data: { collectionId, userId: user.id }
       });
+
+      // Create notification
+      const collection = await prisma.collection.findUnique({ where: { id: collectionId } });
+      if (collection && collection.userId !== user.id) {
+        await prisma.notification.create({
+          data: {
+            userId: collection.userId,
+            actorId: user.id,
+            type: "COLLECTION_LIKE",
+            message: `liked your collection "${collection.title}".`,
+            link: `/collections/${collectionId}`
+          }
+        });
+      }
+
       res.json({ liked: true });
     }
   } catch (error) {

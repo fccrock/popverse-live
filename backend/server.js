@@ -9,6 +9,7 @@ const collectionsRoutes = require("./routes/collections");
 const usersRoutes = require("./routes/users");
 const reviewsRoutes = require("./routes/reviews");
 const uploadRoutes = require("./routes/upload");
+const notificationsRoutes = require("./routes/notifications");
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api/collections", collectionsRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/notifications", notificationsRoutes);
 
 // ── 404 handler ─────────────────────────────────────────────────────────────────
 app.use((_req, res) => {

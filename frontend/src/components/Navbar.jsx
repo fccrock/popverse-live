@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import GlobalSearch from "./GlobalSearch";
 import { useAuth } from "../context/AuthContext";
 import { useProfile } from "../context/ProfileContext";
+import NotificationDropdown from "./NotificationDropdown";
 
 const navRoutes = [
   { label: "Home",       href: "/" },
@@ -12,15 +13,6 @@ const navRoutes = [
   { label: "Books",      href: "/search?type=book" },
   { label: "Community", href: "/community" },
 ];
-
-function BellIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24">
-      <path d="M15.8 17.5H8.2a2 2 0 0 1-1.8-2.9l.7-1.4V9.8a4.9 4.9 0 0 1 9.8 0v3.4l.7 1.4a2 2 0 0 1-1.8 2.9ZM10 20h4"
-        stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-    </svg>
-  );
-}
 
 export default function Navbar({ accent = "violet" }) {
   const location = useLocation();
@@ -84,9 +76,7 @@ export default function Navbar({ accent = "violet" }) {
 
           {isAuthenticated ? (
             <>
-              <button aria-label="Notifications" className="hidden h-9 w-9 place-items-center rounded-xl text-zinc-400 transition-all duration-200 hover:bg-white/[0.08] hover:text-white sm:grid">
-                <BellIcon />
-              </button>
+              <NotificationDropdown username={user?.preferredUsername} />
               <div className="group relative">
                 <Link to="/profile/me" aria-label="Profile" className="relative block h-9 w-9 overflow-hidden rounded-full ring-2 ring-violet-500/50 ring-offset-2 ring-offset-black/80 transition-all duration-200 hover:ring-violet-400/80">
                   <img alt="" className="h-full w-full object-cover" src={avatar} />

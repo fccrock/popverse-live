@@ -36,6 +36,8 @@ model User {
 
   followers       UserFollows[] @relation("following")
   following       UserFollows[] @relation("follower")
+  notifications   Notification[] @relation("UserNotifications")
+  actions         Notification[] @relation("NotificationActor")
 }
 
 model UserFollows {
@@ -212,5 +214,18 @@ model ReviewReply {
   parentId  String?
   parent    ReviewReply?  @relation("ReviewReplyToReply", fields: [parentId], references: [id], onDelete: Cascade)
   replies   ReviewReply[] @relation("ReviewReplyToReply")
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  actorId   String
+  actor     User     @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  type      String   // REVIEW_LIKE, REVIEW_REPLY, CLUB_JOIN, POST_LIKE, POST_REPLY, COLLECTION_LIKE, DISCUSSION_REPLY
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
