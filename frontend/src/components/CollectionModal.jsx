@@ -70,9 +70,9 @@ function CreateCollectionPanel({ onBack, onCreated, mediaItem }) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-white/[0.06]">
+    <div className="flex flex-col" style={{ maxHeight: "inherit" }}>
+      {/* Header — pinned */}
+      <div className="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-white/[0.06] shrink-0">
         <button
           type="button"
           onClick={onBack}
@@ -80,20 +80,18 @@ function CreateCollectionPanel({ onBack, onCreated, mediaItem }) {
         >
           <IconArrowLeft />
         </button>
-        <div>
+        <div className="min-w-0">
           <h2 className="text-base font-black text-white leading-tight">Create New Collection</h2>
-          <p className="text-[11px] text-zinc-600 mt-0.5 truncate max-w-[24ch]">{mediaItem?.title} will be added</p>
+          <p className="text-[11px] text-zinc-600 mt-0.5 truncate">{mediaItem?.title} will be added</p>
         </div>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-5 pt-5 pb-6 flex-1">
+      {/* Scrollable form body */}
+      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 [scrollbar-width:thin] [scrollbar-color:rgba(124,58,237,0.25)_transparent]">
         {/* Name */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-500">
-              Collection Name
-            </label>
+            <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-500">Collection Name <span className="text-rose-400">*</span></label>
             <span className="text-[11px] text-zinc-700">{name.length}/50</span>
           </div>
           <input
@@ -126,9 +124,7 @@ function CreateCollectionPanel({ onBack, onCreated, mediaItem }) {
 
         {/* Visibility toggle */}
         <div>
-          <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-500 block mb-2">
-            Visibility
-          </label>
+          <label className="text-[11px] font-bold uppercase tracking-[0.15em] text-zinc-500 block mb-2">Visibility</label>
           <div className="flex gap-2">
             <button
               type="button"
@@ -163,16 +159,19 @@ function CreateCollectionPanel({ onBack, onCreated, mediaItem }) {
             {isPublic ? "Anyone can discover this collection." : "Only you can see this collection."}
           </p>
         </div>
+      </div>
 
-        {/* Submit */}
+      {/* Submit — pinned at bottom */}
+      <div className="px-5 pb-5 pt-3 border-t border-white/[0.06] shrink-0">
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           disabled={loading || !name.trim()}
-          className="mt-auto w-full rounded-xl bg-violet-600 py-3 text-sm font-black text-white shadow-lg shadow-violet-900/40 transition-all hover:bg-violet-500 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0"
+          className="w-full rounded-xl bg-violet-600 py-3 text-sm font-black text-white shadow-lg shadow-violet-900/40 transition-all hover:bg-violet-500 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0"
         >
           {loading ? "Creating…" : "Create Collection"}
         </button>
-      </form>
+      </div>
     </div>
   );
 }
@@ -234,8 +233,10 @@ export default function CollectionModal({ isOpen, onClose, mediaItem, accentColo
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="fixed z-[101] inset-x-4 bottom-0 mx-auto max-w-md overflow-hidden rounded-t-3xl border border-white/[0.08] bg-[#0c0d14] shadow-2xl shadow-black/80 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl">
+      {/* Modal — centered, max-height capped so it never overflows screen */}
+      <div className="fixed z-[101] inset-x-4 mx-auto max-w-md flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c0d14] shadow-2xl shadow-black/80"
+        style={{ top: "50%", transform: "translateY(-50%)", maxHeight: "min(90vh, 600px)" }}
+      >
 
         {/* ── VIEW: Collection List ── */}
         {view === "list" && (

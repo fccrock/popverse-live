@@ -12,23 +12,23 @@ export default function FollowListModal({ isOpen, onClose, list = [], title }) {
       {/* Modal Container */}
       <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/[0.08] bg-[#090b14]/98 shadow-2xl shadow-black/70 backdrop-blur-2xl animate-scale-in">
         
-        {/* X close button — top right */}
-        <button
-          onClick={onClose}
-          className="absolute top-3.5 right-3.5 z-10 flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 hover:bg-white/10 hover:text-white transition-all"
-          aria-label="Close"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        {/* Header */}
-        <div className="border-b border-white/[0.06] px-6 py-5 pr-12">
-          <h2 className="text-lg font-black text-white">{title}</h2>
-          <p className="mt-0.5 text-xs text-zinc-600">
-            {list.length} {list.length === 1 ? "person" : "people"} in this list
-          </p>
+        {/* Header with X on the right */}
+        <div className="flex items-start justify-between gap-3 border-b border-white/[0.06] px-6 py-5">
+          <div>
+            <h2 className="text-lg font-black text-white">{title}</h2>
+            <p className="mt-0.5 text-xs text-zinc-600">
+              {list.length} {list.length === 1 ? "person" : "people"} in this list
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 hover:bg-white/10 hover:text-white transition-all"
+            aria-label="Close"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
         {/* User list */}
