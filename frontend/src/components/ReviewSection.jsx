@@ -104,7 +104,10 @@ function ReviewCard({
               {username.slice(0, 2).toUpperCase()}
             </div>
           </Link>
-
+          {/* Vertical thread line grows down when replies are open */}
+          {review.replies?.length > 0 && showReplies && (
+            <div className="w-0.5 flex-1 mt-2 bg-white/[0.15] rounded-b" />
+          )}
         </div>
 
         {/* Right Column: Content */}
@@ -232,18 +235,32 @@ function ReviewCard({
         </div>
       )}
 
-      {/* ── Replies Row ── */}
+      {/* ── Replies Row ── YouTube connector style ── */}
       {review.replies?.length > 0 && showReplies && (
-        <div className="mt-3 pl-12">
-          <div className="border-l-2 border-violet-500/25 pl-4 space-y-4">
-            {review.replies.map((reply) => {
-              const replyAuthor = reply.author?.username || "user";
-              const isReplyingToLevel1 = activeReply?.reviewId === review.id && activeReply?.parentId === reply.id;
-              return (
-                <div key={reply.id}>
-                  <div className="flex gap-2.5">
+        <div>
+          {review.replies.map((reply, idx) => {
+            const replyAuthor = reply.author?.username || "user";
+            const isLast = idx === review.replies.length - 1;
+            const isReplyingToLevel1 = activeReply?.reviewId === review.id && activeReply?.parentId === reply.id;
+            return (
+              <div key={reply.id}>
+                {/* Each reply row: connector column + content */}
+                <div className="flex">
+                  {/* w-9 connector column – draws the L-shaped branch */}
+                  <div className="w-9 shrink-0 relative flex-shrink-0">
+                    {/* Vertical line: full height for non-last, half height for last */}
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-white/[0.15]"
+                      style={{ top: 0, bottom: isLast ? '50%' : 0 }}
+                    />
+                    {/* Horizontal branch to the reply avatar */}
+                    <div className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-white/[0.15]" style={{ left: '50%', right: 0 }} />
+                  </div>
+
+                  {/* Reply avatar + content */}
+                  <div className="flex flex-1 gap-2.5 py-3 min-w-0">
                     <div className={`w-7 h-7 shrink-0 grid place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[10px] font-black text-white`}>
-                      {replyAuthor.slice(0,2).toUpperCase()}
+                      {replyAuthor.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -270,15 +287,26 @@ function ReviewCard({
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {reply.replies && reply.replies.length > 0 && (
-                    <div className="mt-3 ml-9 border-l-2 border-white/[0.1] pl-4 space-y-3">
-                      {reply.replies.map((subR) => {
-                        const subAuthor = subR.author?.username || "user";
-                        return (
-                          <div key={subR.id} className="flex gap-2.5">
+                {/* L2 Sub-replies – nested under this L1 reply, same connector pattern */}
+                {reply.replies && reply.replies.length > 0 && (
+                  <div className="ml-9">{/* ml-9 = w-9, aligns under L1 reply's avatar */}
+                    {reply.replies.map((subR, j) => {
+                      const subAuthor = subR.author?.username || "user";
+                      const isLastL2 = j === reply.replies.length - 1;
+                      return (
+                        <div key={subR.id} className="flex">
+                          <div className="w-7 shrink-0 relative flex-shrink-0">
+                            <div
+                              className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-white/[0.10]"
+                              style={{ top: 0, bottom: isLastL2 ? '50%' : 0 }}
+                            />
+                            <div className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-white/[0.10]" style={{ left: '50%', right: 0 }} />
+                          </div>
+                          <div className="flex flex-1 gap-2 py-2 min-w-0">
                             <div className={`w-6 h-6 shrink-0 grid place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[9px] font-black text-white`}>
-                              {subAuthor.slice(0,2).toUpperCase()}
+                              {subAuthor.slice(0, 2).toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
@@ -288,41 +316,36 @@ function ReviewCard({
                               <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
                               <div className="mt-1 flex items-center gap-3">
                                 {isAuthenticated && (
-                                  <button
-                                    onClick={() => { setActiveReply({ reviewId: review.id, parentId: reply.id }); setReplyText(`@${subAuthor} `); }}
-                                    className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
-                                  >Reply</button>
+                                  <button onClick={() => { setActiveReply({ reviewId: review.id, parentId: reply.id }); setReplyText(`@${subAuthor} `); }} className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide">Reply</button>
                                 )}
                                 {currentUsername && currentUsername.toLowerCase() === subAuthor.toLowerCase() && (
-                                  <button
-                                    onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
-                                    className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                                  >Delete</button>
+                                  <button onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }} className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide">Delete</button>
                                 )}
                               </div>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-                  {isReplyingToLevel1 && (
-                    <form onSubmit={handleSubmitReply} className="mt-3 ml-9 flex gap-2">
-                      <input
-                        type="text" autoFocus value={replyText}
-                        onChange={e => setReplyText(e.target.value)}
-                        className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
-                        placeholder={`Replying to @${replyAuthor}...`}
-                      />
-                      <button type="button" onClick={() => { setActiveReply(null); setReplyText(""); }} className="shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-zinc-400 hover:bg-white/[0.05] transition">Cancel</button>
-                      <button type="submit" disabled={!replyText.trim()} className={`shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}>Reply</button>
-                    </form>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                {/* Inline reply form for this L1 reply */}
+                {isReplyingToLevel1 && (
+                  <form onSubmit={handleSubmitReply} className="mb-2 ml-9 flex gap-2">
+                    <input
+                      type="text" autoFocus value={replyText}
+                      onChange={e => setReplyText(e.target.value)}
+                      className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
+                      placeholder={`Replying to @${replyAuthor}...`}
+                    />
+                    <button type="button" onClick={() => { setActiveReply(null); setReplyText(""); }} className="shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-zinc-400 hover:bg-white/[0.05] transition">Cancel</button>
+                    <button type="submit" disabled={!replyText.trim()} className={`shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}>Reply</button>
+                  </form>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
