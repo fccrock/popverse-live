@@ -1,9 +1,10 @@
-// src/pages/ClubDetailPage.jsx
+﻿// src/pages/ClubDetailPage.jsx
 import { useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useClubs } from "../context/ClubsContext";
 import { useAuth } from "../context/AuthContext";
 import ImageUpload from "../components/ImageUpload";
+import ThreadedReplies from "../components/ThreadedReplies";
 
 const TABS = [
   { key: "feed", label: "Feed", icon: "M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" },
@@ -36,7 +37,7 @@ function UserBubble({ username, size = "sm", linkTo = true }) {
   return <Link to={`/profile/${username}`} className="shrink-0 hover:opacity-80 transition-opacity">{avatar}</Link>;
 }
 
-/* ── Feed Tab ── */
+/* â”€â”€ Feed Tab â”€â”€ */
 function FeedTab({ club, isMember }) {
   const { addPost, likePost, deletePost, addPostReply } = useClubs();
   const { isAuthenticated, user } = useAuth();
@@ -105,7 +106,7 @@ function FeedTab({ club, isMember }) {
                     <div className="mt-2 relative inline-block">
                       <img src={postImageUrl} alt="preview" className="h-24 rounded-lg object-cover" />
                       <button type="button" onClick={() => setPostImageUrl("")}
-                        className="absolute -top-1 -right-1 grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-white text-[10px]">✕</button>
+                        className="absolute -top-1 -right-1 grid h-5 w-5 place-items-center rounded-full bg-rose-500 text-white text-[10px]">âœ•</button>
                     </div>
                   )}
                 </div>
@@ -152,7 +153,7 @@ function FeedTab({ club, isMember }) {
               <div className="w-10 shrink-0 flex flex-col items-center">
                 <UserBubble username={post.author} />
                 {replies.length > 0 && showReplies && (
-                  <div className="w-0.5 flex-1 mt-2 bg-white/[0.15] rounded-b" />
+                  <div style={{ width: 2, flexGrow: 1, marginTop: 8, minHeight: 12, background: 'rgba(255,255,255,0.22)', borderRadius: 2 }} />
                 )}
               </div>
 
@@ -160,7 +161,7 @@ function FeedTab({ club, isMember }) {
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Link to={`/profile/${post.author}`} className="text-sm font-bold text-white hover:text-violet-300 transition">{post.author}</Link>
-                    <span className="text-xs text-zinc-600">·</span>
+                    <span className="text-xs text-zinc-600">Â·</span>
                     <span className="text-xs text-zinc-600">{timeAgo(post.timestamp)}</span>
                   </div>
                   {isOwner && (
@@ -226,40 +227,40 @@ function FeedTab({ club, isMember }) {
             )}
 
             {replies.length > 0 && showReplies && (
-              <div>
-                {replies.map((r, i) => {
-                  const isLast = i === replies.length - 1;
-                  return (
-                    <div key={r.id} className="flex">
-                      <div className="w-10 shrink-0 relative flex-shrink-0">
-                        <div className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-white/[0.15]" style={{ top: 0, bottom: isLast ? '50%' : 0 }} />
-                        <div className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-white/[0.15]" style={{ left: '50%', right: 0 }} />
-                      </div>
-                      <div className="flex flex-1 gap-2.5 py-3 min-w-0">
-                        <UserBubble username={r.author} size="sm" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap text-xs">
-                            <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
-                            <span className="text-zinc-600">{timeAgo(r.timestamp)}</span>
-                          </div>
-                          <p className="mt-0.5 text-[13px] text-zinc-300 leading-relaxed">{r.content}</p>
-                          <div className="mt-1 flex items-center gap-4">
-                            {isMember && <button onClick={() => { openReply(post.id, r.id, `@${r.author} `); }} className="text-[10px] font-bold text-zinc-500 hover:text-violet-400 uppercase tracking-wide">Reply</button>}
-                            {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && <button onClick={() => { if(window.confirm("Delete reply?")) deleteReply(club.id, post.id, r.id); }} className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 uppercase tracking-wide">Delete</button>}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <ThreadedReplies
+                replies={replies.map(r => ({ ...r, author: r.author, content: r.content, createdAt: r.timestamp }))}
+                connectorWidth={40}
+                avatarGrad="from-violet-600 to-fuchsia-600"
+                isAuthenticated={isMember && isAuthenticated}
+                currentUsername={currentUsername}
+                activeReplyId={replyingTo?.postId === post.id ? replyingTo.parentReplyId : null}
+                onReplyTo={(parentId, authorName) => openReply(post.id, parentId, `@${authorName} `)}
+                onDeleteReply={(replyId) => { if(window.confirm('Delete reply?')) deleteReply(club.id, post.id, replyId); }}
+                renderReplyForm={(_parentId) => (
+                  <div className="flex items-center gap-2 pb-2">
+                    <UserBubble username={currentUsername || '?'} size="sm" linkTo={false} />
+                    <input
+                      type="text"
+                      className="input-field flex-1 py-1.5 text-sm"
+                      placeholder="Reply..."
+                      value={replyText}
+                      onChange={e => setReplyText(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleReply(post.id); } }}
+                      autoFocus
+                    />
+                    <button onClick={() => setReplyingTo(null)} className="text-xs text-zinc-500 hover:text-zinc-300">âœ•</button>
+                    <button onClick={() => handleReply(post.id)} disabled={!replyText.trim()} className="btn-v py-1.5 px-3 text-xs disabled:opacity-40">Send</button>
+                  </div>
+                )}
+                timeAgoFn={timeAgo}
+              />
             )}
 
-            {replyingTo?.postId === post.id && (
+            {replyingTo?.postId === post.id && !replyingTo.parentReplyId && (
               <div className="mt-3 ml-12 flex items-center gap-2">
-                <UserBubble username={currentUsername || "?"} size="sm" linkTo={false} />
-                <input type="text" className="input-field flex-1 py-1.5 text-sm" placeholder="Reply..." value={replyText} onChange={e => setReplyText(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleReply(post.id); } }} autoFocus />
-                <button onClick={() => setReplyingTo(null)} className="text-xs text-zinc-500 hover:text-zinc-300">✕</button>
+                <UserBubble username={currentUsername || '?'} size="sm" linkTo={false} />
+                <input type="text" className="input-field flex-1 py-1.5 text-sm" placeholder="Reply..." value={replyText} onChange={e => setReplyText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleReply(post.id); } }} autoFocus />
+                <button onClick={() => setReplyingTo(null)} className="text-xs text-zinc-500 hover:text-zinc-300">âœ•</button>
                 <button onClick={() => handleReply(post.id)} disabled={!replyText.trim()} className="btn-v py-1.5 px-3 text-xs disabled:opacity-40">Send</button>
               </div>
             )}
@@ -346,7 +347,7 @@ function DiscussionsTab({ club, isMember }) {
                   <h4 className="text-[15px] font-bold text-white leading-snug">{d.title}</h4>
                   <div className="mt-1.5 flex items-center gap-2 text-xs text-zinc-600">
                     <Link to={`/profile/${d.author}`} className="font-semibold text-zinc-500 hover:text-violet-300 transition" onClick={e => e.stopPropagation()}>{d.author}</Link>
-                    <span>·</span>
+                    <span>Â·</span>
                     <span>{timeAgo(d.timestamp)}</span>
                   </div>
                 </button>
@@ -376,94 +377,46 @@ function DiscussionsTab({ club, isMember }) {
                     </div>
                   )}
 
-                  {/* Replies Row ─ YouTube connector style */}
+
+                  {/* â”€â”€ Replies: YouTube-style threading via ThreadedReplies â”€â”€ */}
                   {d.replies.length > 0 && (
-                    <div>
-                      {d.replies.map((r, i) => {
-                        const isLastL1 = i === d.replies.length - 1;
-                        return (
-                          <div key={r.id}>
-                            {/* L1 reply */}
-                            <div className="flex">
-                              <div className="w-10 shrink-0 relative flex-shrink-0">
-                                <div className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-white/[0.15]" style={{ top: 0, bottom: isLastL1 && (!r.replies?.length) ? '50%' : 0 }} />
-                                <div className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-white/[0.15]" style={{ left: '50%', right: 0 }} />
-                              </div>
-                              <div className="flex flex-1 gap-2.5 py-3 min-w-0">
-                                <UserBubble username={r.author} size="sm" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 text-xs flex-wrap">
-                                    <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
-                                    <span className="text-zinc-500">{timeAgo(r.timestamp)}</span>
-                                  </div>
-                                  {renderReplyContent(r.content)}
-                                  <div className="mt-2 flex items-center gap-4">
-                                    {isMember && (
-                                      <button onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${r.author} `); }} className="text-[11px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide">Reply</button>
-                                    )}
-                                    {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
-                                      <button onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, r.id); }} className="text-[11px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide">Delete</button>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
+                    <ThreadedReplies
+                      replies={d.replies.map(r => ({ ...r, createdAt: r.timestamp }))}
+                      connectorWidth={36}
+                      avatarGrad="from-violet-600 to-fuchsia-600"
+                      isAuthenticated={isMember}
+                      currentUsername={currentUsername}
+                      activeReplyId={activeReply?.discussionId === d.id ? activeReply?.parentId : null}
+                      onReplyTo={(parentId, authorName) => {
+                        setActiveReply({ discussionId: d.id, parentId });
+                        setReplyText(`@${authorName} `);
+                      }}
+                      onDeleteReply={(replyId) => {
+                        if (window.confirm('Delete this reply?')) deleteReply(club.id, d.id, replyId);
+                      }}
+                      renderReplyForm={(parentId) => (
+                        <form onSubmit={(e) => submitReply(e, d.id, parentId)} className="flex gap-3 py-2">
+                          <UserBubble username={currentUsername || 'Guest'} size="sm" linkTo={false} />
+                          <div className="flex-1">
+                            <input
+                              className="w-full border-b border-white/[0.1] bg-transparent pb-1 pt-1 text-sm text-white placeholder-zinc-500 focus:border-violet-400 focus:outline-none transition-colors"
+                              placeholder={`Replying...`}
+                              autoFocus
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                            />
+                            <div className="mt-2 flex justify-end gap-2">
+                              <button type="button" onClick={() => setActiveReply(null)} className="rounded-full px-4 py-1.5 text-xs font-bold text-zinc-400 hover:bg-white/[0.05]">Cancel</button>
+                              <button type="submit" disabled={!replyText.trim()} className="rounded-full bg-violet-600 hover:bg-violet-500 px-4 py-1.5 text-xs font-bold text-white disabled:opacity-40">Reply</button>
                             </div>
-
-                            {/* L2 sub-replies nested under L1 avatar */}
-                            {r.replies && r.replies.length > 0 && (
-                              <div className="ml-10">
-                                {r.replies.map((subR, j) => {
-                                  const isLastL2 = j === r.replies.length - 1;
-                                  return (
-                                    <div key={subR.id} className="flex">
-                                      <div className="w-8 shrink-0 relative flex-shrink-0">
-                                        <div className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-white/[0.10]" style={{ top: 0, bottom: isLastL2 ? '50%' : 0 }} />
-                                        <div className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-white/[0.10]" style={{ left: '50%', right: 0 }} />
-                                      </div>
-                                      <div className="flex flex-1 gap-2.5 py-2 min-w-0">
-                                        <UserBubble username={subR.author} size="sm" />
-                                        <div className="flex-1 min-w-0">
-                                          <div className="flex items-center gap-2 text-xs flex-wrap">
-                                            <Link to={`/profile/${subR.author}`} className="font-bold text-white hover:text-violet-300 transition">@{subR.author}</Link>
-                                            <span className="text-zinc-500">{timeAgo(subR.timestamp)}</span>
-                                          </div>
-                                          {renderReplyContent(subR.content)}
-                                          <div className="mt-2 flex items-center gap-4">
-                                            {isMember && (
-                                              <button onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${subR.author} `); }} className="text-[11px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide">Reply</button>
-                                            )}
-                                            {currentUsername && currentUsername.toLowerCase() === subR.author.toLowerCase() && (
-                                              <button onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, subR.id); }} className="text-[11px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide">Delete</button>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-
-                            {/* Reply form for this L1 reply */}
-                            {activeReply?.discussionId === d.id && activeReply?.parentId === r.id && (
-                              <div className="ml-10">
-                                <form onSubmit={(e) => submitReply(e, d.id, r.id)} className="flex gap-3 py-2">
-                                  <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
-                                  <div className="flex-1">
-                                    <input className="w-full border-b border-white/[0.1] bg-transparent pb-1 pt-1 text-sm text-white placeholder-zinc-500 focus:border-violet-400 focus:outline-none transition-colors" placeholder={`Replying to @${r.author}...`} autoFocus value={replyText} onChange={(e) => setReplyText(e.target.value)} />
-                                    <div className="mt-2 flex justify-end gap-2">
-                                      <button type="button" onClick={() => setActiveReply(null)} className="rounded-full px-4 py-1.5 text-xs font-bold text-zinc-400 hover:bg-white/[0.05]">Cancel</button>
-                                      <button type="submit" disabled={!replyText.trim()} className="rounded-full bg-violet-600 hover:bg-violet-500 px-4 py-1.5 text-xs font-bold text-white disabled:opacity-40">Reply</button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            )}
                           </div>
-                        );
-                      })}
-                    </div>
+                        </form>
+                      )}
+                      timeAgoFn={timeAgo}
+                    />
                   )}
+
+
 
                 </div>
               )}
@@ -475,7 +428,7 @@ function DiscussionsTab({ club, isMember }) {
   );
 }
 
-/* ── Members Tab ── */
+/* â”€â”€ Members Tab â”€â”€ */
 function MembersTab({ club }) {
   const roleBadge = {
     admin: "text-amber-400 bg-amber-500/10 border-amber-500/20",
@@ -501,7 +454,7 @@ function MembersTab({ club }) {
   );
 }
 
-/* ── Main Page ── */
+/* â”€â”€ Main Page â”€â”€ */
 export default function ClubDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -523,7 +476,7 @@ export default function ClubDetailPage() {
           <p className="text-lg font-bold text-white">Club not found</p>
           <p className="mt-2 text-sm text-zinc-500">This club may have been removed or the link is incorrect.</p>
           <Link to="/community" className="btn-ghost mt-6 inline-flex py-2.5 px-5 text-sm">
-            ← Back to Community
+            â† Back to Community
           </Link>
         </div>
       </div>
@@ -564,9 +517,9 @@ export default function ClubDetailPage() {
               <div className="mt-3 flex items-center gap-2 text-xs text-zinc-500">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
                 <span className="font-semibold">{club.members.length} {club.members.length === 1 ? "member" : "members"}</span>
-                <span>·</span>
+                <span>Â·</span>
                 <span>{club.feed.length} posts</span>
-                <span>·</span>
+                <span>Â·</span>
                 <span>{club.discussions.length} discussions</span>
               </div>
             </div>
