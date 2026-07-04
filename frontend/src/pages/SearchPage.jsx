@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../utils/api";
 
@@ -33,29 +34,62 @@ const sortOptions = [
   { label: "Release Date", value: "release_date" },
 ];
 
-/* ─── Custom glassmorphism dropdown ──────────────────────────── */
-function GlassSelect({ value, onChange, options, prefix = "" }) {
+/* ─── Custom glassmorphism dropdown (portal-based, always on top) ──────── */
+function GlassSelect({ value, onChange, options }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const [rect, setRect] = useState(null);
+  const btnRef = useRef(null);
+  const panelRef = useRef(null);
+
+  // Recalculate position whenever we open, or on scroll/resize
+  function recalc() {
+    if (btnRef.current) setRect(btnRef.current.getBoundingClientRect());
+  }
 
   useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    if (!open) return;
+    recalc();
+    window.addEventListener("scroll", recalc, true);
+    window.addEventListener("resize", recalc);
+    return () => {
+      window.removeEventListener("scroll", recalc, true);
+      window.removeEventListener("resize", recalc);
     };
+  }, [open]);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    function handler(e) {
+      if (
+        btnRef.current && !btnRef.current.contains(e.target) &&
+        panelRef.current && !panelRef.current.contains(e.target)
+      ) setOpen(false);
+    }
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [open]);
 
   const selected = options.find((o) => o.value === value);
 
+  const dropdownStyle = rect
+    ? {
+        position: "fixed",
+        top: rect.bottom + 6,
+        right: window.innerWidth - rect.right,
+        minWidth: Math.max(rect.width, 180),
+        zIndex: 99999,
+      }
+    : { display: "none" };
+
   return (
-    <div ref={ref} className="relative z-30">
+    <>
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen((p) => !p)}
+        onClick={() => { recalc(); setOpen(p => !p); }}
         className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] backdrop-blur-sm px-3 py-2 text-sm font-semibold text-zinc-300 hover:bg-white/[0.07] hover:border-white/[0.14] transition-all duration-150 whitespace-nowrap"
       >
-        {prefix && <span className="text-zinc-500">{prefix}</span>}
         {selected?.label ?? "Select"}
         <svg
           className={`h-3.5 w-3.5 text-zinc-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -65,8 +99,12 @@ function GlassSelect({ value, onChange, options, prefix = "" }) {
         </svg>
       </button>
 
-      {open && (
-        <div className="absolute right-0 top-full mt-2 min-w-[168px] rounded-2xl border border-white/[0.08] bg-[#0c0e1a]/95 backdrop-blur-2xl shadow-2xl shadow-black/60 overflow-hidden animate-fade-up">
+      {open && rect && createPortal(
+        <div
+          ref={panelRef}
+          style={dropdownStyle}
+          className="rounded-2xl border border-white/[0.10] bg-[#0c0e1a] backdrop-blur-2xl shadow-2xl shadow-black/80 overflow-hidden"
+        >
           {options.map((opt) => (
             <button
               key={opt.value}
@@ -81,9 +119,10 @@ function GlassSelect({ value, onChange, options, prefix = "" }) {
               {opt.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 }
 
