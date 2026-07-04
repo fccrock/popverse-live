@@ -384,19 +384,22 @@ export default function SearchPage() {
 
           {/* Sort + Filter controls */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-all duration-150 ${
-                showFilters
-                  ? "border-violet-500/40 bg-violet-500/10 text-violet-300"
-                  : "border-white/[0.08] bg-white/[0.04] backdrop-blur-sm text-zinc-300 hover:bg-white/[0.07]"
-              }`}
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              {showFilters ? "Hide" : "Filters"}
-            </button>
+            {/* Only show Filters button when NOT on Music tab */}
+            {!isMusic && (
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-all duration-150 ${
+                  showFilters
+                    ? "border-violet-500/40 bg-violet-500/10 text-violet-300"
+                    : "border-white/[0.08] bg-white/[0.04] backdrop-blur-sm text-zinc-300 hover:bg-white/[0.07]"
+                }`}
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                {showFilters ? "Hide" : "Filters"}
+              </button>
+            )}
 
             <GlassSelect
               value={sort}

@@ -225,38 +225,41 @@ function CreateCollectionModal({ onClose, onCreate }) {
             </div>
           </div>
 
-          {/* Row 3: Public toggle + Cover image URL inline */}
-          <div className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3">
-            <div className="flex-1 min-w-0">
-              <label className="block mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">Cover Image URL</label>
-              <input
-                className="w-full bg-transparent text-xs text-zinc-300 outline-none placeholder-zinc-600"
-                value={coverImageUrl}
-                onChange={e => setCoverImageUrl(e.target.value)}
-                placeholder="https://... (optional)"
-              />
+          {/* Row 3: Cover Image Upload */}
+          <div>
+            <label className="block mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">Cover Image</label>
+            <ImageUpload
+              currentImage={coverImageUrl}
+              onUploadComplete={setCoverImageUrl}
+              label="Upload Cover Image"
+            />
+          </div>
+
+          {/* Row 4: Public toggle */}
+          <div className="flex items-center justify-between rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-white">{isPublic ? "Public Collection" : "Private Collection"}</p>
+              <p className="text-[11px] text-zinc-600 mt-0.5">{isPublic ? "Visible to everyone in Community" : "Only you can see this"}</p>
             </div>
-            <div className="flex items-center gap-2.5 shrink-0 pl-3 border-l border-white/[0.06]">
-              <span className="text-xs font-semibold text-zinc-400">{isPublic ? "Public" : "Private"}</span>
-              <button
-                type="button"
-                onClick={() => setIsPublic(v => !v)}
-                style={{
-                  position: "relative", height: 22, width: 40, borderRadius: 11, border: "none", cursor: "pointer",
-                  backgroundColor: isPublic ? "#7c3aed" : "#3f3f46",
-                  transition: "background-color 0.2s", flexShrink: 0,
-                }}
-              >
-                <span style={{
-                  position: "absolute", top: 2, left: isPublic ? 20 : 2, height: 18, width: 18,
-                  borderRadius: "50%", backgroundColor: "white",
-                  transition: "left 0.2s", display: "block"
-                }} />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsPublic(v => !v)}
+              style={{
+                position: "relative", height: 22, width: 40, borderRadius: 11, border: "none", cursor: "pointer",
+                backgroundColor: isPublic ? "#7c3aed" : "#3f3f46",
+                transition: "background-color 0.2s", flexShrink: 0,
+              }}
+            >
+              <span style={{
+                position: "absolute", top: 2, left: isPublic ? 20 : 2, height: 18, width: 18,
+                borderRadius: "50%", backgroundColor: "white",
+                transition: "left 0.2s", display: "block"
+              }} />
+            </button>
           </div>
 
           {/* Actions */}
+
           <div className="flex gap-2 pt-1">
             <button type="button" onClick={onClose} className="flex-1 rounded-xl bg-white/5 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition">Cancel</button>
             <button type="submit" disabled={!name.trim()} className="flex-1 btn-v py-2.5 text-sm font-bold disabled:opacity-50">Create Collection</button>
