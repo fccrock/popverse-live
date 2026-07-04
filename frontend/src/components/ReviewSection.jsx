@@ -42,7 +42,7 @@ function StarSelector({ value, onChange, accent }) {
           }`}
           aria-label={`Rate ${star} stars`}
         >
-          â˜…
+          &#9733;
         </button>
       ))}
       {value > 0 && (
@@ -133,7 +133,7 @@ function ReviewCard({
               )}
               <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <span key={s} className={`text-sm ${s <= review.rating ? accentStar : 'text-zinc-800'}`}>â˜…</span>
+                  <span key={s} className={`text-sm ${s <= review.rating ? accentStar : 'text-zinc-800'}`}>&#9733;</span>
                 ))}
               </div>
               {currentUsername && currentUsername.toLowerCase() === username.toLowerCase() && (
@@ -476,7 +476,7 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
               <p className={`text-3xl font-black ${accentStar}`}>{avgRating.toFixed(1)}</p>
               <div className="mt-1 flex gap-0.5">
                 {[1,2,3,4,5].map((s) => (
-                  <span key={s} className={`text-xs ${s <= Math.round(avgRating) ? accentStar : "text-zinc-800"}`}>â˜…</span>
+                  <span key={s} className={`text-xs ${s <= Math.round(avgRating) ? accentStar : "text-zinc-800"}`}>&#9733;</span>
                 ))}
               </div>
             </div>
