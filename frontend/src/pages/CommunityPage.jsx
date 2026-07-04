@@ -172,45 +172,51 @@ function CreateCollectionModal({ onClose, onCreate }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="relative w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#0c0c12] shadow-2xl shadow-black/60 animate-scale-in overflow-hidden" onClick={(e) => e.stopPropagation()}>
-        {/* Header preview */}
-        <div className="h-24 relative" style={{
-          backgroundImage: coverImageUrl ? `url(${coverImageUrl})` : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundColor: coverImageUrl ? undefined : "#18181f"
-        }}>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c12]/60 to-transparent" />
-          <p className="absolute bottom-3 left-5 text-white font-black text-lg tracking-tight drop-shadow">{name || "New Collection"}</p>
-          <button onClick={onClose} className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full bg-black/30 text-white hover:bg-black/50 transition">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in p-4" onClick={onClose}>
+      <div
+        className="relative w-full max-w-xl rounded-2xl border border-white/[0.08] bg-[#0c0c12] shadow-2xl shadow-black/70 animate-scale-in overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Slim header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+          <div>
+            <h2 className="text-base font-black text-white tracking-tight">New Collection</h2>
+            <p className="text-[11px] text-zinc-600 mt-0.5">Curate your favourite titles</p>
+          </div>
+          <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-lg text-zinc-500 hover:bg-white/[0.06] hover:text-white transition">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
-        <form className="p-6 space-y-4" onSubmit={handleCreate}>
-          <div>
-            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Collection Name *</label>
-            <input className="input-field" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Peak A24 Cinema" required maxLength={60} autoFocus />
-          </div>
-          <div>
-            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Description</label>
-            <textarea className="input-field min-h-[60px] resize-none" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What's the vibe?" maxLength={200} />
+        <form onSubmit={handleCreate} className="p-5 space-y-4">
+          {/* Row 1: Name + Description side by side */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block mb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">Name *</label>
+              <input
+                className="input-field text-sm py-2"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="e.g. Peak A24 Cinema"
+                required maxLength={60} autoFocus
+              />
+            </div>
+            <div>
+              <label className="block mb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">Description</label>
+              <input
+                className="input-field text-sm py-2"
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="What's the vibe?"
+                maxLength={120}
+              />
+            </div>
           </div>
 
-          {/* Cover Image Upload Only */}
+          {/* Row 2: Tags */}
           <div>
-            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Cover Image</label>
-            <ImageUpload
-              currentImage={coverImageUrl}
-              onUploadComplete={setCoverImageUrl}
-              label="Upload Cover Image"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Tags</label>
-            <div className="flex flex-wrap gap-2">
+            <label className="block mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">Tags</label>
+            <div className="flex flex-wrap gap-1.5">
               {TAG_OPTIONS.map(t => (
                 <button key={t} type="button" onClick={() => toggleTag(t)}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition-all ${tags.includes(t) ? "bg-violet-600 text-white" : "border border-white/[0.08] bg-white/[0.03] text-zinc-500 hover:text-white"}`}
@@ -219,26 +225,38 @@ function CreateCollectionModal({ onClose, onCreate }) {
             </div>
           </div>
 
-          {/* Public / Private toggle */}
-          <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
-            <div>
-              <p className="text-sm font-semibold text-white">{isPublic ? "Public Collection" : "Private Collection"}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{isPublic ? "Visible to everyone in Community" : "Only you can see this"}</p>
+          {/* Row 3: Public toggle + Cover image URL inline */}
+          <div className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-3">
+            <div className="flex-1 min-w-0">
+              <label className="block mb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">Cover Image URL</label>
+              <input
+                className="w-full bg-transparent text-xs text-zinc-300 outline-none placeholder-zinc-600"
+                value={coverImageUrl}
+                onChange={e => setCoverImageUrl(e.target.value)}
+                placeholder="https://... (optional)"
+              />
             </div>
-            <button type="button" onClick={() => setIsPublic(v => !v)}
-              style={{
-                position: "relative", height: 24, width: 44, borderRadius: 12, flexShrink: 0, border: "none", cursor: "pointer",
-                backgroundColor: isPublic ? "#7c3aed" : "#3f3f46",
-                transition: "background-color 0.2s"
-              }}>
-              <span style={{
-                position: "absolute", top: 2, left: isPublic ? 22 : 2, height: 20, width: 20,
-                borderRadius: "50%", backgroundColor: "white", boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-                transition: "left 0.2s", display: "block"
-              }} />
-            </button>
+            <div className="flex items-center gap-2.5 shrink-0 pl-3 border-l border-white/[0.06]">
+              <span className="text-xs font-semibold text-zinc-400">{isPublic ? "Public" : "Private"}</span>
+              <button
+                type="button"
+                onClick={() => setIsPublic(v => !v)}
+                style={{
+                  position: "relative", height: 22, width: 40, borderRadius: 11, border: "none", cursor: "pointer",
+                  backgroundColor: isPublic ? "#7c3aed" : "#3f3f46",
+                  transition: "background-color 0.2s", flexShrink: 0,
+                }}
+              >
+                <span style={{
+                  position: "absolute", top: 2, left: isPublic ? 20 : 2, height: 18, width: 18,
+                  borderRadius: "50%", backgroundColor: "white",
+                  transition: "left 0.2s", display: "block"
+                }} />
+              </button>
+            </div>
           </div>
 
+          {/* Actions */}
           <div className="flex gap-2 pt-1">
             <button type="button" onClick={onClose} className="flex-1 rounded-xl bg-white/5 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition">Cancel</button>
             <button type="submit" disabled={!name.trim()} className="flex-1 btn-v py-2.5 text-sm font-bold disabled:opacity-50">Create Collection</button>
@@ -248,6 +266,7 @@ function CreateCollectionModal({ onClose, onCreate }) {
     </div>
   );
 }
+
 
 /* ── Collection Detail Modal ── */
 function CollectionModal({ collection, onClose }) {

@@ -488,9 +488,16 @@ export default function ReviewSection({ mediaId, accentColor = "violet" }) {
   async function handleDelete(reviewId) {
     if (!window.confirm("Delete your review? This cannot be undone.")) return;
     try {
-      const res = await fetch(`${API}/api/reviews/${reviewId}`, { method: "DELETE" });
+      const res = await fetch(`${API}/api/reviews/${reviewId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: currentUsername }),
+      });
       if (res.ok) {
         setReviews(prev => prev.filter(r => r.id !== reviewId));
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.message || "Could not delete review. Please try again.");
       }
     } catch (e) {
       console.error("Failed to delete review", e);
