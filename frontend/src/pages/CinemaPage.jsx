@@ -191,11 +191,11 @@ function HeroSection() {
 
           {/* CTAs */}
           <div className="mt-8 flex flex-wrap gap-3 stagger-3 animate-fade-up">
-            <Link to={`/cinema/${film.id}`} className="btn-v gap-2.5 px-6 py-3 text-base">
+            <Link to={film.type === "tv" ? `/tv/${film.id}` : `/cinema/${film.id}`} className="btn-v gap-2.5 px-6 py-3 text-base">
               <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
               Watch Now
             </Link>
-            <Link to={`/cinema/${film.id}`} className="btn-ghost px-6 py-3 text-base">
+            <Link to={film.type === "tv" ? `/tv/${film.id}` : `/cinema/${film.id}`} className="btn-ghost px-6 py-3 text-base">
               View Details
             </Link>
           </div>
