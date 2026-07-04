@@ -153,9 +153,7 @@ function FeedTab({ club, isMember }) {
               {/* Left Column: Avatar & Bridge */}
               <div className="w-10 shrink-0 flex flex-col items-center">
                 <UserBubble username={post.author} />
-                {replies.length > 0 && showReplies && (
-                  <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-16px] z-0" />
-                )}
+
               </div>
 
               {/* Right Column: Content */}
@@ -232,52 +230,36 @@ function FeedTab({ club, isMember }) {
 
             {/* ── Replies Row ── */}
             {replies.length > 0 && showReplies && (
-              <div className="mt-4 pl-[52px]">
-                <div className="space-y-4">
-                  {replies.map((r, i) => {
-                    const isLast = i === replies.length - 1;
+              <div className="mt-3 pl-12">
+                <div className="border-l-2 border-violet-500/25 pl-4 space-y-4">
+                  {replies.map((r) => {
                     const content = r.content || "";
-                    const mentionMatch = content.match(/^@(\w+)\s+(.*)/);
+                    const mentionMatch = content.match(/^@(\w+)\s*(.*)/);
                     let replyTo = null;
                     let actualContent = content;
-                    if (mentionMatch) {
-                      replyTo = mentionMatch[1];
-                      actualContent = mentionMatch[2];
-                    }
-                    
+                    if (mentionMatch) { replyTo = mentionMatch[1]; actualContent = mentionMatch[2]; }
                     return (
-                      <div key={r.id} className="relative">
-                        {/* Thread Lines */}
-                        <div className={`absolute border-white/[0.15] z-0 ${
-                          isLast ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
-                        }`} style={{ width: '32px', left: '-32px', top: '0px' }} />
-                        {!isLast && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '32px', left: '-32px', top: '16px' }} />}
-
-                        <div className="relative z-10 flex gap-3">
-                          <div className="w-8 shrink-0 flex flex-col items-center">
-                            <UserBubble username={r.author} size="sm" />
+                      <div key={r.id} className="flex gap-2.5">
+                        <UserBubble username={r.author} size="sm" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap text-xs">
+                            <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
+                            {replyTo && (
+                              <span className="flex items-center gap-1 text-zinc-500">
+                                <span className="text-zinc-600">↳</span>
+                                <Link to={`/profile/${replyTo}`} className="text-sky-400 hover:text-sky-300 font-semibold">@{replyTo}</Link>
+                              </span>
+                            )}
+                            <span className="text-zinc-600">{timeAgo(r.timestamp)}</span>
                           </div>
-                          <div className="flex-1 min-w-0 pb-1">
-                            <div className="flex items-center gap-2 text-xs">
-                              <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
-                              {replyTo && (
-                                <span className="text-zinc-500 font-medium flex items-center gap-1">
-                                  <span className="inline-block -scale-x-100 opacity-60">↳</span>
-                                  <Link to={`/profile/${replyTo}`} className="text-sky-400 hover:text-sky-300">@{replyTo}</Link>
-                                </span>
-                              )}
-                              <span className="text-zinc-600">{timeAgo(r.timestamp)}</span>
-                            </div>
-                            <p className="mt-0.5 text-[13px] text-zinc-300 leading-relaxed">{actualContent}</p>
-                            
-                            <div className="mt-1 flex items-center gap-4">
-                              {isMember && (
-                                <button onClick={() => { openReply(post.id, r.id, `@${r.author} `); }} className="text-[10px] font-bold text-zinc-500 hover:text-violet-400 uppercase tracking-wide">Reply</button>
-                              )}
-                              {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
-                                <button onClick={() => { if(window.confirm("Delete reply?")) deleteReply(post.id, r.id); }} className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 uppercase tracking-wide">Delete</button>
-                              )}
-                            </div>
+                          <p className="mt-0.5 text-[13px] text-zinc-300 leading-relaxed">{actualContent}</p>
+                          <div className="mt-1 flex items-center gap-4">
+                            {isMember && (
+                              <button onClick={() => { openReply(post.id, r.id, `@${r.author} `); }} className="text-[10px] font-bold text-zinc-500 hover:text-violet-400 uppercase tracking-wide">Reply</button>
+                            )}
+                            {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
+                              <button onClick={() => { if(window.confirm("Delete reply?")) deleteReply(post.id, r.id); }} className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 uppercase tracking-wide">Delete</button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -400,9 +382,7 @@ function DiscussionsTab({ club, isMember }) {
             {/* Left Column: Avatar & Bridge */}
             <div className="w-10 shrink-0 flex flex-col items-center">
               <UserBubble username={d.author} />
-              {expandedId === d.id && d.replies.length > 0 && (
-                <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-20px] z-0" />
-              )}
+
             </div>
 
             {/* Right Column: Content */}
@@ -488,128 +468,88 @@ function DiscussionsTab({ club, isMember }) {
                     </div>
                   )}
 
-                  {/* Replies Row */}
                   {d.replies.length > 0 && showRepliesFor[d.id] && (
-                    <div className="mt-2 space-y-4">
-                      {d.replies.map((r, i) => {
-                        const isLast = i === d.replies.length - 1;
-                        return (
-                          <div key={r.id} className="relative">
-                            {/* Thread Lines L1 */}
-                            <div className={`absolute border-white/[0.15] z-0 ${
-                              isLast ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
-                            }`} style={{ width: '32px', left: '-32px', top: '0px' }} />
-                            {!isLast && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '32px', left: '-32px', top: '16px' }} />}
-
-                            <div className="relative z-10 flex gap-3">
-                              {/* L1 Left Column: Avatar & Bridge */}
-                              <div className="w-8 shrink-0 flex flex-col items-center">
-                                <UserBubble username={r.author} size="sm" />
-                                {r.replies?.length > 0 && (
-                                  <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-12px] z-0" />
+                    <div className="mt-2 border-l-2 border-violet-500/25 pl-4 space-y-4">
+                      {d.replies.map((r) => (
+                        <div key={r.id}>
+                          <div className="flex gap-2.5">
+                            <UserBubble username={r.author} size="sm" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 text-xs flex-wrap">
+                                <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
+                                <span className="text-zinc-500">{timeAgo(r.timestamp)}</span>
+                              </div>
+                              {renderReplyContent(r.content)}
+                              <div className="mt-2 flex items-center gap-4">
+                                {isMember && (
+                                  <button 
+                                    onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${r.author} `); }}
+                                    className="text-[11px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide"
+                                  >Reply</button>
+                                )}
+                                {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
+                                  <button
+                                    onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, r.id); }}
+                                    className="text-[11px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
+                                  >Delete</button>
                                 )}
                               </div>
-                              {/* L1 Right Column: Content */}
-                              <div className="flex-1 min-w-0 pb-1">
-                                <div className="flex items-center gap-2 text-xs">
-                                  <Link to={`/profile/${r.author}`} className="font-bold text-white hover:text-violet-300 transition">@{r.author}</Link>
-                                  <span className="text-zinc-500">{timeAgo(r.timestamp)}</span>
-                                </div>
-                                {renderReplyContent(r.content)}
-                                <div className="mt-2 flex items-center gap-4">
-                                  {isMember && (
-                                    <button 
-                                      onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${r.author} `); }}
-                                      className="text-[11px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide"
-                                    >
-                                      Reply
-                                    </button>
-                                  )}
-                                  {currentUsername && currentUsername.toLowerCase() === r.author.toLowerCase() && (
-                                    <button
-                                      onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, r.id); }}
-                                      className="text-[11px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                                    >
-                                      Delete
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
                             </div>
+                          </div>
 
-                            {/* Level 2 sub-replies */}
-                            {r.replies && r.replies.length > 0 && (
-                              <div className="mt-3 pl-[44px] space-y-3">
-                                {r.replies.map((subR, j) => {
-                                  const isLastL2 = j === r.replies.length - 1;
-                                  return (
-                                    <div key={subR.id} className="relative">
-                                      {/* Thread Lines L2 */}
-                                      <div className={`absolute border-white/[0.15] z-0 ${
-                                        isLastL2 ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
-                                      }`} style={{ width: '28px', left: '-28px', top: '0px' }} />
-                                      {!isLastL2 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '28px', left: '-28px', top: '16px' }} />}
-
-                                      <div className="relative z-10 flex gap-3">
-                                        <div className="w-8 shrink-0 flex flex-col items-center">
-                                          <UserBubble username={subR.author} size="sm" />
-                                        </div>
-                                        <div className="flex-1 min-w-0 pb-1">
-                                          <div className="flex items-center gap-2 text-xs">
-                                            <Link to={`/profile/${subR.author}`} className="font-bold text-white hover:text-violet-300 transition">@{subR.author}</Link>
-                                            <span className="text-zinc-500">{timeAgo(subR.timestamp)}</span>
-                                          </div>
-                                          {renderReplyContent(subR.content)}
-                                          <div className="mt-2 flex items-center gap-4">
-                                            {isMember && (
-                                              <button 
-                                                onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${subR.author} `); }}
-                                                className="text-[11px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide"
-                                              >
-                                                Reply
-                                              </button>
-                                            )}
-                                            {currentUsername && currentUsername.toLowerCase() === subR.author.toLowerCase() && (
-                                              <button
-                                                onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, subR.id); }}
-                                                className="text-[11px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                                              >
-                                                Delete
-                                              </button>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
+                          {r.replies && r.replies.length > 0 && (
+                            <div className="mt-3 ml-9 border-l-2 border-white/[0.1] pl-4 space-y-3">
+                              {r.replies.map((subR) => (
+                                <div key={subR.id} className="flex gap-2.5">
+                                  <UserBubble username={subR.author} size="sm" />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 text-xs flex-wrap">
+                                      <Link to={`/profile/${subR.author}`} className="font-bold text-white hover:text-violet-300 transition">@{subR.author}</Link>
+                                      <span className="text-zinc-500">{timeAgo(subR.timestamp)}</span>
                                     </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-
-                            {/* Reply form for level 1 reply */}
-                            {activeReply?.discussionId === d.id && activeReply?.parentId === r.id && (
-                              <div className="mt-3 pl-[44px]">
-                                <form onSubmit={(e) => submitReply(e, d.id, r.id)} className="flex gap-3">
-                                  <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
-                                  <div className="flex-1">
-                                    <input 
-                                      className="w-full border-b border-white/[0.1] bg-transparent pb-1 pt-1 text-sm text-white placeholder-zinc-500 focus:border-violet-400 focus:outline-none transition-colors" 
-                                      placeholder="Add a reply..." 
-                                      autoFocus
-                                      value={replyText} 
-                                      onChange={(e) => setReplyText(e.target.value)} 
-                                    />
-                                    <div className="mt-2 flex justify-end gap-2">
-                                      <button type="button" onClick={() => setActiveReply(null)} className="rounded-full px-4 py-1.5 text-xs font-bold text-zinc-400 hover:bg-white/[0.05]">Cancel</button>
-                                      <button type="submit" disabled={!replyText.trim()} className="rounded-full bg-violet-600 hover:bg-violet-500 px-4 py-1.5 text-xs font-bold text-white disabled:opacity-40">Reply</button>
+                                    {renderReplyContent(subR.content)}
+                                    <div className="mt-2 flex items-center gap-4">
+                                      {isMember && (
+                                        <button 
+                                          onClick={() => { setActiveReply({ discussionId: d.id, parentId: r.id }); setReplyText(`@${subR.author} `); }}
+                                          className="text-[11px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide"
+                                        >Reply</button>
+                                      )}
+                                      {currentUsername && currentUsername.toLowerCase() === subR.author.toLowerCase() && (
+                                        <button
+                                          onClick={() => { if(window.confirm("Delete this reply?")) deleteReply(club.id, d.id, subR.id); }}
+                                          className="text-[11px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
+                                        >Delete</button>
+                                      )}
                                     </div>
                                   </div>
-                                </form>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {activeReply?.discussionId === d.id && activeReply?.parentId === r.id && (
+                            <div className="mt-3 ml-9">
+                              <form onSubmit={(e) => submitReply(e, d.id, r.id)} className="flex gap-3">
+                                <UserBubble username={currentUsername || "Guest"} size="sm" linkTo={false} />
+                                <div className="flex-1">
+                                  <input 
+                                    className="w-full border-b border-white/[0.1] bg-transparent pb-1 pt-1 text-sm text-white placeholder-zinc-500 focus:border-violet-400 focus:outline-none transition-colors" 
+                                    placeholder={`Replying to @${r.author}...`} 
+                                    autoFocus
+                                    value={replyText} 
+                                    onChange={(e) => setReplyText(e.target.value)} 
+                                  />
+                                  <div className="mt-2 flex justify-end gap-2">
+                                    <button type="button" onClick={() => setActiveReply(null)} className="rounded-full px-4 py-1.5 text-xs font-bold text-zinc-400 hover:bg-white/[0.05]">Cancel</button>
+                                    <button type="submit" disabled={!replyText.trim()} className="rounded-full bg-violet-600 hover:bg-violet-500 px-4 py-1.5 text-xs font-bold text-white disabled:opacity-40">Reply</button>
+                                  </div>
+                                </div>
+                              </form>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

@@ -104,9 +104,7 @@ function ReviewCard({
               {username.slice(0, 2).toUpperCase()}
             </div>
           </Link>
-          {review.replies?.length > 0 && showReplies && (
-            <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-16px] z-0" />
-          )}
+
         </div>
 
         {/* Right Column: Content */}
@@ -229,44 +227,27 @@ function ReviewCard({
             <svg className={`h-4 w-4 transition-transform ${showReplies ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
             </svg>
-            {showReplies ? 'Hide replies' : `Show ${review.replies.length} ${review.replies.length === 1 ? 'reply' : 'replies'}`}
+            {(() => { const total = review.replies.reduce((s, r) => s + 1 + (r.replies?.length || 0), 0); return showReplies ? 'Hide replies' : `Show ${total} ${total === 1 ? 'reply' : 'replies'}`; })()}
           </button>
         </div>
       )}
 
       {/* ── Replies Row ── */}
       {review.replies?.length > 0 && showReplies && (
-        <div className="mt-4 pl-[48px]">
-          <div className="space-y-4">
-            {review.replies.map((reply, i) => {
-              const isLastL1 = i === review.replies.length - 1;
+        <div className="mt-3 pl-12">
+          <div className="border-l-2 border-violet-500/25 pl-4 space-y-4">
+            {review.replies.map((reply) => {
               const replyAuthor = reply.author?.username || "user";
               const isReplyingToLevel1 = activeReply?.reviewId === review.id && activeReply?.parentId === reply.id;
-              
               return (
-                <div key={reply.id} className="relative">
-                  {/* Thread Lines L1 */}
-                  <div className={`absolute border-white/[0.15] z-0 ${
-                    isLastL1 ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-16px] border-l-2'
-                  }`} style={{ width: '28px', left: '-28px', top: '0px' }} />
-                  {!isLastL1 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '28px', left: '-28px', top: '16px' }} />}
-
-                  {/* Level 1 Split-Anchor Row */}
-                  <div className="relative z-10 flex gap-3">
-                    {/* L1 Left Column: Avatar & Bridge */}
-                    <div className="w-8 shrink-0 flex flex-col items-center">
-                      <div className={`grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[11px] font-black text-white shadow-md`}>
-                        {replyAuthor.slice(0, 2).toUpperCase()}
-                      </div>
-                      {reply.replies?.length > 0 && (
-                        <div className="w-[2px] flex-1 bg-white/[0.15] mt-2 mb-[-12px] z-0" />
-                      )}
+                <div key={reply.id}>
+                  <div className="flex gap-2.5">
+                    <div className={`w-7 h-7 shrink-0 grid place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[10px] font-black text-white`}>
+                      {replyAuthor.slice(0,2).toUpperCase()}
                     </div>
-
-                    {/* L1 Right Column: Content */}
-                    <div className="flex-1 min-w-0 pb-1">
-                      <div className="flex items-center gap-2">
-                        <Link to={`/profile/${replyAuthor}`} className="text-[12px] font-bold text-zinc-200 hover:text-violet-300 transition">@{replyAuthor}</Link>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Link to={`/profile/${replyAuthor}`} className="text-[12px] font-bold text-white hover:text-violet-300 transition">@{replyAuthor}</Link>
                         <span className="text-[10px] text-zinc-600">{timeAgo(reply.createdAt)}</span>
                       </div>
                       <p className="mt-0.5 text-[13px] text-zinc-400 leading-relaxed">{reply.content}</p>
@@ -274,113 +255,68 @@ function ReviewCard({
                         {isAuthenticated && (
                           <button
                             onClick={() => {
-                              if (isReplyingToLevel1) {
-                                setActiveReply(null);
-                                setReplyText("");
-                              } else {
-                                setActiveReply({ reviewId: review.id, parentId: reply.id });
-                                setReplyText(`@${replyAuthor} `);
-                              }
+                              if (isReplyingToLevel1) { setActiveReply(null); setReplyText(""); }
+                              else { setActiveReply({ reviewId: review.id, parentId: reply.id }); setReplyText(`@${replyAuthor} `); }
                             }}
-                            className="text-[10px] font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-wide"
-                          >
-                            Reply
-                          </button>
+                            className="text-[10px] font-bold text-zinc-500 hover:text-violet-400 transition-colors uppercase tracking-wide"
+                          >Reply</button>
                         )}
                         {currentUsername && currentUsername.toLowerCase() === replyAuthor.toLowerCase() && (
                           <button
                             onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, reply.id); }}
                             className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                          >
-                            Delete
-                          </button>
+                          >Delete</button>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Level 2 Replies Row */}
                   {reply.replies && reply.replies.length > 0 && (
-                    <div className="mt-3 pl-[44px]">
-                      <div className="space-y-3">
-                        {reply.replies.map((subR, j) => {
-                          const isLastL2 = j === reply.replies.length - 1;
-                          const subAuthor = subR.author?.username || "user";
-                          return (
-                            <div key={subR.id} className="relative">
-                              {/* Thread Lines L2 */}
-                              <div className={`absolute border-white/[0.15] z-0 ${
-                                isLastL2 ? 'h-[16px] border-l-2 border-b-2 rounded-bl-xl' : 'bottom-[-12px] border-l-2'
-                              }`} style={{ width: '28px', left: '-28px', top: '0px' }} />
-                              {!isLastL2 && <div className="absolute border-t-2 border-white/[0.15] z-0" style={{ width: '28px', left: '-28px', top: '16px' }} />}
-
-                              <div className="relative z-10 flex gap-3">
-                                <div className="w-8 shrink-0 flex flex-col items-center">
-                                  <div className={`grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[11px] font-black text-white shadow-sm`}>
-                                    {subAuthor.slice(0, 2).toUpperCase()}
-                                  </div>
-                                </div>
-                                <div className="flex-1 min-w-0 pb-1">
-                                  <div className="flex items-center gap-2">
-                                    <Link to={`/profile/${subAuthor}`} className="text-[11px] font-bold text-zinc-300 hover:text-violet-300 transition">@{subAuthor}</Link>
-                                    <span className="text-[9px] text-zinc-600">{timeAgo(subR.createdAt)}</span>
-                                  </div>
-                                  <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
-                                  <div className="mt-1 flex items-center gap-3">
-                                    {isAuthenticated && (
-                                      <button
-                                        onClick={() => {
-                                          setActiveReply({ reviewId: review.id, parentId: reply.id });
-                                          setReplyText(`@${subAuthor} `);
-                                        }}
-                                        className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
-                                      >
-                                        Reply
-                                      </button>
-                                    )}
-                                    {currentUsername && currentUsername.toLowerCase() === subAuthor.toLowerCase() && (
-                                      <button
-                                        onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
-                                        className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
-                                      >
-                                        Delete
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
+                    <div className="mt-3 ml-9 border-l-2 border-white/[0.1] pl-4 space-y-3">
+                      {reply.replies.map((subR) => {
+                        const subAuthor = subR.author?.username || "user";
+                        return (
+                          <div key={subR.id} className="flex gap-2.5">
+                            <div className={`w-6 h-6 shrink-0 grid place-items-center rounded-full bg-gradient-to-br ${avatarGrad} text-[9px] font-black text-white`}>
+                              {subAuthor.slice(0,2).toUpperCase()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <Link to={`/profile/${subAuthor}`} className="text-[11px] font-bold text-zinc-200 hover:text-violet-300 transition">@{subAuthor}</Link>
+                                <span className="text-[9px] text-zinc-600">{timeAgo(subR.createdAt)}</span>
+                              </div>
+                              <p className="mt-0.5 text-[12px] text-zinc-400 leading-relaxed">{subR.content}</p>
+                              <div className="mt-1 flex items-center gap-3">
+                                {isAuthenticated && (
+                                  <button
+                                    onClick={() => { setActiveReply({ reviewId: review.id, parentId: reply.id }); setReplyText(`@${subAuthor} `); }}
+                                    className="text-[10px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-wide"
+                                  >Reply</button>
+                                )}
+                                {currentUsername && currentUsername.toLowerCase() === subAuthor.toLowerCase() && (
+                                  <button
+                                    onClick={() => { if (window.confirm("Delete this reply?")) onDeleteReply(review.id, subR.id); }}
+                                    className="text-[10px] font-bold text-zinc-700 hover:text-rose-400 transition-colors uppercase tracking-wide"
+                                  >Delete</button>
+                                )}
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
-                  {/* Reply form for level 1 reply */}
                   {isReplyingToLevel1 && (
-                    <form onSubmit={handleSubmitReply} className="mt-3 ml-10 flex gap-2">
+                    <form onSubmit={handleSubmitReply} className="mt-3 ml-9 flex gap-2">
                       <input
-                        type="text"
-                        autoFocus
-                        value={replyText}
+                        type="text" autoFocus value={replyText}
                         onChange={e => setReplyText(e.target.value)}
                         className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[13px] text-white placeholder-zinc-600 outline-none transition focus:border-white/20 focus:bg-white/[0.04]"
                         placeholder={`Replying to @${replyAuthor}...`}
                       />
-                      <button
-                        type="button"
-                        onClick={() => { setActiveReply(null); setReplyText(""); }}
-                        className="shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-zinc-400 hover:bg-white/[0.05] transition"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={!replyText.trim()}
-                        className={`shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}
-                      >
-                        Reply
-                      </button>
+                      <button type="button" onClick={() => { setActiveReply(null); setReplyText(""); }} className="shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-zinc-400 hover:bg-white/[0.05] transition">Cancel</button>
+                      <button type="submit" disabled={!replyText.trim()} className={`shrink-0 rounded-xl px-3 py-1.5 text-[12px] font-bold text-white transition disabled:opacity-40 ${accentBg}`}>Reply</button>
                     </form>
                   )}
                 </div>
