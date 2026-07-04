@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CollectionsProvider } from "./context/CollectionsContext";
 import { ProfileProvider } from "./context/ProfileContext";
@@ -13,6 +13,7 @@ import MoviesPage from "./pages/MoviesPage";
 import TvShowsPage from "./pages/TvShowsPage";
 import AnimePage from "./pages/AnimePage";
 import MusicPage from "./pages/MusicPage";
+import MusicMoodPage from "./pages/MusicMoodPage";
 import AlbumDetailPage from "./pages/AlbumDetailPage";
 import MovieDetailPage from "./pages/MovieDetailPage";
 import TvDetailPage from "./pages/TvDetailPage";
@@ -57,6 +58,12 @@ class ErrorBoundary extends React.Component {
 
 // Auth pages don't get the sidebar layout
 function AuthRoute({ element }) { return element; }
+
+// Redirects /collections/:id → /collection/:id (fixes MusicPage collection links)
+function CollectionRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/collection/${id}`} replace />;
+}
 
 export default function App() {
   return (
@@ -118,6 +125,11 @@ export default function App() {
                   <AlbumDetailPage />
                 </Layout>
               } />
+              <Route path="/music/mood/:mood" element={
+                <Layout>
+                  <MusicMoodPage />
+                </Layout>
+              } />
               <Route path="/cinema/:id" element={
                 <Layout>
                   <MovieDetailPage />
@@ -144,6 +156,8 @@ export default function App() {
                 </Layout>
               } />
               <Route path="/collections" element={<Navigate to="/community" replace />} />
+              {/* Redirect old plural /collections/:id URLs to correct /collection/:id */}
+              <Route path="/collections/:id" element={<CollectionRedirect />} />
               <Route path="/community" element={
                 <Layout>
                   <CommunityPage />

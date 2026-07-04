@@ -213,8 +213,9 @@ function ReleaseCard({ art, title, artist, year, id }) {
    MOOD CARD — cinematic B&W
 ═══════════════════════════════════════════════════════════════════ */
 function MoodCard({ mood }) {
+  const slug = mood.label.toLowerCase();
   return (
-    <div className="mood-card glass-panel" style={{ position: "relative", aspectRatio: "16/9", overflow: "hidden", cursor: "pointer" }}>
+    <Link to={`/music/mood/${slug}`} className="mood-card glass-panel" style={{ position: "relative", aspectRatio: "16/9", overflow: "hidden", textDecoration: "none", display: "block" }}>
       <img src={mood.img} alt={mood.label} loading="lazy" className="mc-img"
         style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", position: "absolute", inset: 0 }}
       />
@@ -227,7 +228,7 @@ function MoodCard({ mood }) {
           <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", margin: 0 }}>{mood.count} songs</p>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -276,7 +277,7 @@ function CollectionRow({ collection }) {
   const likes = collection.likeCount ?? (Array.isArray(collection.likes) ? collection.likes.length : (collection.likes ?? 0));
 
   return (
-    <Link to={`/collections/${collection.id}`} className="list-row" style={{ textDecoration: 'none' }}>
+    <Link to={`/collection/${collection.id}`} className="list-row" style={{ textDecoration: 'none' }}>
       <div style={{ width: 48, height: 48, borderRadius: 10, overflow: "hidden", flexShrink: 0 }}>
         <img src={imgSrc} alt={collection.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
       </div>
@@ -337,6 +338,9 @@ export default function MusicPage() {
         const musicOnly = data.filter(col =>
           (col.items ?? []).some(it => it.mediaType === 'album' || it.mediaType === 'track')
         );
+        // Sort by likes descending before taking top 5
+        const getLikes = (col) => col.likeCount ?? (Array.isArray(col.likes) ? col.likes.length : (col.likes ?? 0));
+        musicOnly.sort((a, b) => getLikes(b) - getLikes(a));
         setPublicCols(musicOnly.slice(0, 5));
       })
       .catch(() => {});
