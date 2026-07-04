@@ -23,23 +23,19 @@ export default function ProfilePage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Modals state
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isFollowListOpen, setIsFollowListOpen] = useState(false);
   const [followListTitle, setFollowListTitle] = useState("");
   const [followListUsernames, setFollowListUsernames] = useState([]);
 
-  // Local state for reviews and movie resolution
   const [localReviews, setLocalReviews] = useState([]);
   const [resolvedMedia, setResolvedMedia] = useState({});
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
-  // Active tab state: "reviews" | "collections" | "clubs"
   const [activeTab, setActiveTab] = useState("reviews");
   const [targetCollections, setTargetCollections] = useState([]);
   const { clubs } = useClubs();
 
-  // Determine target username
   const targetUsername = useMemo(() => {
     if (username === "me") {
       return isAuthenticated ? user?.preferredUsername : null;
@@ -47,7 +43,6 @@ export default function ProfilePage() {
     return username;
   }, [username, isAuthenticated, user]);
 
-  // Load reviews from database (visible to everyone!)
   useEffect(() => {
     if (!targetUsername) return;
     setReviewsLoading(true);
@@ -66,7 +61,6 @@ export default function ProfilePage() {
       .finally(() => setReviewsLoading(false));
   }, [targetUsername]);
 
-  // Load collections for target user
   useEffect(() => {
     if (!targetUsername) return;
     fetch(`${API}/api/collections/user/${targetUsername}`)
@@ -75,18 +69,15 @@ export default function ProfilePage() {
       .catch(() => setTargetCollections([]));
   }, [targetUsername]);
 
-  // Always load the target user profile fresh from DB (so followers are accurate)
   const { loadProfile } = useProfile();
   useEffect(() => {
     if (targetUsername) loadProfile(targetUsername);
   }, [targetUsername, loadProfile]);
 
-  // Asynchronously resolve movie/tv details for reviews
   useEffect(() => {
     localReviews.forEach(async (rev) => {
       const cacheKey = `${rev.mediaType}-${rev.mediaId}`;
       if (resolvedMedia[cacheKey]) return;
-
       try {
         let details;
         if (rev.mediaType === "movie") {
@@ -94,7 +85,6 @@ export default function ProfilePage() {
         } else {
           details = await api.getTvDetails(rev.mediaId);
         }
-
         setResolvedMedia((prev) => ({
           ...prev,
           [cacheKey]: {
@@ -109,38 +99,27 @@ export default function ProfilePage() {
     });
   }, [localReviews]);
 
-  // If auth is loading, show spinner
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#030509]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/10 border-t-violet-500" />
-          <p className="text-sm text-zinc-700 animate-pulse">Loading profile...</p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center" style={{ background: "var(--bg)" }}>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-violet-500" />
       </div>
     );
   }
 
-  // Redirect to login if "/profile/me" is visited and user is not authenticated
   if (username === "me" && !isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Retrieve/Create target user profile
   const profile = getOrCreateProfile(targetUsername);
 
   if (!profile) {
     return (
       <main className="min-h-screen text-white" style={{ background: "var(--bg)" }}>
-        <div className="mx-auto max-w-xl text-center py-20 px-4">
-          <div className="mb-6 grid h-16 w-16 mx-auto place-items-center rounded-2xl border border-white/[0.07] bg-white/[0.03]">
-            <svg className="h-7 w-7 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-black text-white">Profile Not Found</h1>
-          <p className="text-zinc-600 mt-2 text-sm">The requested user profile does not exist.</p>
-          <Link to="/" className="mt-7 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-2.5 text-sm font-bold shadow-lg shadow-violet-900/30 transition hover:-translate-y-0.5 hover:bg-violet-500">
+        <div className="mx-auto max-w-xl text-center py-32 px-4">
+          <h1 className="text-xl font-semibold text-white">User not found</h1>
+          <p className="text-zinc-500 mt-2 text-sm">This profile doesn't exist.</p>
+          <Link to="/" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white/10 px-5 py-2 text-sm font-medium text-white hover:bg-white/20 transition">
             Go Home
           </Link>
         </div>
@@ -148,7 +127,6 @@ export default function ProfilePage() {
     );
   }
 
-  // Check relationship
   const isOwnProfile = isAuthenticated && user?.preferredUsername?.toLowerCase() === profile.username.toLowerCase();
   const isFollowingTarget = isAuthenticated && !isOwnProfile && profile.followers.includes(user.preferredUsername.toLowerCase());
 
@@ -160,23 +138,18 @@ export default function ProfilePage() {
     toggleFollowUser(profile.username);
   };
 
-  // Open followers list modal
   const openFollowersModal = () => {
     setFollowListTitle("Followers");
     setFollowListUsernames(profile.followers);
     setIsFollowListOpen(true);
   };
 
-  // Open following list modal
   const openFollowingModal = () => {
     setFollowListTitle("Following");
     setFollowListUsernames(profile.following);
     setIsFollowListOpen(true);
   };
 
-  // Resolve target user collections
-  // Own profile: show all collections
-  // Other profile: show only PUBLIC collections
   const userCollections = isOwnProfile 
     ? myCollections
     : targetCollections
@@ -187,183 +160,164 @@ export default function ProfilePage() {
           items: c.items || []
         }));
 
-  // Resolve target user clubs
   const userClubs = clubs.filter((c) => c.members.some((m) => m.username.toLowerCase() === profile.username.toLowerCase()));
+
+  const tabs = [
+    { id: "reviews", label: "Reviews", count: localReviews.length },
+    { id: "collections", label: "Collections", count: userCollections.length },
+    { id: "clubs", label: "Clubs", count: userClubs.length },
+  ];
 
   return (
     <main className="min-h-screen text-white" style={{ background: "var(--bg)" }}>
-      {/* Ambient bg */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.05),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[#060608]" />
-      </div>
+      {/* Subtle noise texture background */}
+      <div className="fixed inset-0 -z-10 bg-[#08090c]" />
+      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(120,80,255,0.08),transparent)]" />
 
-      <div className="mx-auto max-w-[1100px] px-4 pt-28 lg:pt-32 pb-12 sm:px-6">
-        
-        {/* ── 1. Bento Box Header Grid ── */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-10">
-          
-          {/* Main Identity Box (Spans 8 columns on large screens) */}
-          <div className="lg:col-span-8 relative overflow-hidden rounded-3xl border border-white/5 bg-white/[0.02] p-6 md:p-8 backdrop-blur-xl shadow-2xl">
-            {/* Top gradient bar */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-emerald-500 opacity-70" />
-            
-            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
-              {/* Avatar (Circular, as requested) */}
-              <div className="relative shrink-0">
-                <div className="h-28 w-28 md:h-32 md:w-32 overflow-hidden rounded-full ring-4 ring-white/10 shadow-xl bg-zinc-800">
-                  <img src={profile.avatarUrl} alt={profile.displayName} className="h-full w-full object-cover" />
-                </div>
-                <span className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-4 border-[#09090b] bg-emerald-500 shadow-lg" />
-              </div>
+      <div className="mx-auto max-w-3xl px-4 pt-24 pb-16 sm:px-6">
 
-              {/* Info */}
-              <div className="flex-1 min-w-0 w-full mt-2 md:mt-0 flex flex-col justify-center">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="flex items-center justify-center md:justify-start gap-2">
-                      <h1 className="text-3xl font-black text-white truncate tracking-tight">{profile.displayName}</h1>
-                      {profile.isVerified && (
-                        <svg className="h-6 w-6 text-violet-400 shrink-0 drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
-                          <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-                    <p className="text-sm text-violet-400 font-bold mt-1 tracking-wide">@{profile.username}</p>
-                  </div>
-                  
-                  {/* Action */}
-                  <div className="shrink-0 flex justify-center md:justify-end mt-2 md:mt-0">
-                    {isOwnProfile ? (
-                      <button onClick={() => setIsEditOpen(true)} className="flex items-center justify-center h-10 px-6 rounded-full border border-white/20 bg-white/10 text-sm font-bold text-white hover:bg-white/20 hover:scale-105 transition-all shadow-lg">
-                        Edit Profile
-                      </button>
-                    ) : (
-                      <button onClick={handleFollowClick} className={`flex items-center justify-center h-10 min-w-[120px] rounded-full text-sm font-bold transition-all shadow-lg hover:scale-105 ${isFollowingTarget ? "border border-white/20 bg-white/10 text-zinc-300 hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/40" : "bg-violet-600 text-white hover:bg-violet-500"}`}>
-                        {isFollowingTarget ? "Unfollow" : "Follow"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <p className="mt-5 text-sm text-zinc-300 leading-relaxed max-w-2xl mx-auto md:mx-0">
-                  {profile.bio || "This user hasn't added a bio yet."}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Network & Meta Boxes (Spans 4 columns) */}
-          <div className="lg:col-span-4 flex flex-col gap-6">
-            
-            {/* Network Box */}
-            <div className="flex-1 rounded-3xl border border-white/5 bg-white/[0.02] p-6 flex flex-col justify-center backdrop-blur-xl shadow-xl transition-all hover:bg-white/[0.03]">
-              <div className="grid grid-cols-2 gap-4 divide-x divide-white/10">
-                <button onClick={openFollowersModal} className="flex flex-col items-center group">
-                  <span className="text-3xl font-black text-white group-hover:text-violet-400 transition-colors drop-shadow-md">{profile.followers?.length || 0}</span>
-                  <span className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-bold mt-1.5 group-hover:text-zinc-400">Followers</span>
-                </button>
-                <button onClick={openFollowingModal} className="flex flex-col items-center group">
-                  <span className="text-3xl font-black text-white group-hover:text-violet-400 transition-colors drop-shadow-md">{profile.following?.length || 0}</span>
-                  <span className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-bold mt-1.5 group-hover:text-zinc-400">Following</span>
-                </button>
-              </div>
+        {/* ── COMPACT PROFILE HEADER ── */}
+        <header className="mb-8">
+          {/* Top row: avatar + name block + action */}
+          <div className="flex items-center gap-4">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <img
+                src={profile.avatarUrl}
+                alt={profile.displayName}
+                className="h-16 w-16 rounded-full object-cover ring-2 ring-white/10"
+              />
+              <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-[#08090c]" />
             </div>
 
-            {/* Meta Box */}
-            <div className="rounded-3xl border border-white/5 bg-white/[0.02] p-5 flex flex-col justify-center backdrop-blur-xl shadow-xl transition-all hover:bg-white/[0.03]">
-              <div className="flex items-center justify-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                  <svg className="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            {/* Name + meta */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-bold text-white leading-tight truncate">{profile.displayName}</h1>
+              </div>
+              <p className="text-sm text-zinc-500 font-medium leading-tight mt-0.5">@{profile.username}</p>
+            </div>
+
+            {/* Action button */}
+            <div className="shrink-0">
+              {isOwnProfile ? (
+                <button
+                  onClick={() => setIsEditOpen(true)}
+                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-2.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[11px] uppercase tracking-[0.15em] text-zinc-500 font-bold">Joined</span>
-                  <span className="text-base font-black text-white mt-0.5">{profile.joinDate}</span>
-                </div>
-              </div>
+                  Edit
+                </button>
+              ) : (
+                <button
+                  onClick={handleFollowClick}
+                  className={`rounded-lg px-5 py-1.5 text-sm font-semibold transition-all ${
+                    isFollowingTarget
+                      ? "border border-white/10 bg-white/5 text-zinc-400 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/20"
+                      : "bg-violet-600 text-white hover:bg-violet-500 shadow-lg shadow-violet-900/30"
+                  }`}
+                >
+                  {isFollowingTarget ? "Unfollow" : "Follow"}
+                </button>
+              )}
             </div>
-            
           </div>
-        </section>
 
-        {/* ── 2. Sleek Tab Navigation ── */}
-        <div className="flex items-center gap-6 border-b border-white/5 mb-6 overflow-x-auto [scrollbar-width:none]">
-          {[
-            { id: "reviews", label: "Reviews", count: localReviews.length },
-            { id: "collections", label: "Collections", count: userCollections.length },
-            { id: "clubs", label: "Clubs", count: userClubs.length }
-          ].map((tab) => (
+          {/* Bio */}
+          {profile.bio && (
+            <p className="mt-4 text-sm text-zinc-400 leading-relaxed max-w-lg pl-0">
+              {profile.bio}
+            </p>
+          )}
+
+          {/* Stats row */}
+          <div className="mt-4 flex items-center gap-5 text-sm">
+            <button onClick={openFollowersModal} className="flex items-center gap-1.5 group">
+              <span className="font-semibold text-white group-hover:text-violet-400 transition-colors">{profile.followers?.length || 0}</span>
+              <span className="text-zinc-500 group-hover:text-zinc-400 transition-colors">followers</span>
+            </button>
+            <span className="text-zinc-700">·</span>
+            <button onClick={openFollowingModal} className="flex items-center gap-1.5 group">
+              <span className="font-semibold text-white group-hover:text-violet-400 transition-colors">{profile.following?.length || 0}</span>
+              <span className="text-zinc-500 group-hover:text-zinc-400 transition-colors">following</span>
+            </button>
+            <span className="text-zinc-700">·</span>
+            <span className="text-zinc-500 text-xs">Joined {profile.joinDate}</span>
+          </div>
+        </header>
+
+        {/* ── DIVIDER ── */}
+        <div className="h-px bg-white/[0.06] mb-6" />
+
+        {/* ── TABS ── */}
+        <nav className="flex items-center gap-1 mb-6">
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative pb-3 text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 activeTab === tab.id
-                  ? "text-white"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  ? "bg-white/10 text-white"
+                  : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
               }`}
             >
               {tab.label}
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-white/10 text-white' : 'bg-white/5 text-zinc-500'}`}>
+              <span className={`text-xs rounded-md px-1.5 py-0.5 font-semibold tabular-nums ${
+                activeTab === tab.id ? "bg-white/15 text-white/80" : "bg-white/5 text-zinc-600"
+              }`}>
                 {tab.count}
               </span>
-              {activeTab === tab.id && (
-                <span className="absolute bottom-0 left-0 h-0.5 w-full bg-white rounded-t-full" />
-              )}
             </button>
           ))}
-        </div>
+        </nav>
 
-        {/* ── 3. Normal-Sized Main Content ── */}
-        <div className="w-full">
-          
-          {/* TAB CONTENT: Reviews */}
+        {/* ── CONTENT ── */}
+        <div>
+
+          {/* REVIEWS TAB */}
           {activeTab === "reviews" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-3">
               {localReviews.length === 0 ? (
-                <div className="col-span-full rounded-2xl border border-dashed border-white/10 py-12 text-center">
-                  <p className="text-sm font-medium text-zinc-500">No reviews found.</p>
+                <div className="py-16 text-center">
+                  <p className="text-sm text-zinc-600">No reviews yet.</p>
                 </div>
               ) : (
                 localReviews.map((rev) => {
                   const cacheKey = `${rev.mediaType}-${rev.mediaId}`;
                   const media = resolvedMedia[cacheKey];
                   const route = rev.mediaType === "movie" ? `/cinema/${rev.mediaId}` : `/tv/${rev.mediaId}`;
-
                   return (
-                    <article 
+                    <article
                       key={rev.id}
-                      className="flex flex-col rounded-2xl border border-white/5 bg-white/[0.02] p-4 transition-all hover:bg-white/[0.03]"
+                      className="flex gap-4 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4 hover:bg-white/[0.04] hover:border-white/10 transition-all group"
                     >
-                      <div className="flex gap-3 mb-3">
-                        <Link to={route} className="w-12 h-16 rounded-lg overflow-hidden shrink-0 bg-zinc-900 block">
-                          {media?.posterPath ? (
-                            <img src={posterUrl(media.posterPath)} alt={media.title} className="h-full w-full object-cover" />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center bg-zinc-800 text-[8px] text-zinc-600">...</div>
-                          )}
-                        </Link>
-                        <div className="flex-1 min-w-0 flex flex-col justify-center">
-                          <Link to={route} className="text-sm font-bold hover:text-violet-400 transition block text-white truncate">
+                      {/* Poster */}
+                      <Link to={route} className="shrink-0 w-11 h-16 rounded-lg overflow-hidden bg-zinc-900 block border border-white/5">
+                        {media?.posterPath ? (
+                          <img src={posterUrl(media.posterPath)} alt={media.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        ) : (
+                          <div className="h-full w-full bg-zinc-800" />
+                        )}
+                      </Link>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <Link to={route} className="text-sm font-semibold text-white hover:text-violet-400 transition-colors truncate leading-snug">
                             {media?.title || "Loading..."}
                           </Link>
-                          <span className="text-[11px] text-zinc-500 block mt-0.5">
-                            {media?.year || "..."}
-                          </span>
+                          <div className="shrink-0 flex items-center gap-1 text-xs font-bold text-amber-400">
+                            <svg className="h-3 w-3 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                            {rev.rating.toFixed(1)}
+                          </div>
                         </div>
-                        <div className="shrink-0">
-                          <span className="flex items-center text-xs font-bold text-white bg-white/10 px-1.5 py-0.5 rounded">
-                            <span className="text-violet-400 mr-1">★</span>{rev.rating.toFixed(1)}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-zinc-400 leading-relaxed line-clamp-3 bg-white/[0.015] p-3 rounded-xl flex-1 border border-white/[0.02]">
-                        {rev.text}
-                      </p>
-                      <div className="mt-2 text-right">
-                        <span className="text-[9px] text-zinc-600 uppercase tracking-wide">
+                        <p className="text-xs text-zinc-500 mt-0.5">{media?.year} · {rev.mediaType === "movie" ? "Movie" : "TV"}</p>
+                        <p className="mt-2 text-xs text-zinc-400 leading-relaxed line-clamp-2">{rev.text}</p>
+                        <p className="mt-1.5 text-[10px] text-zinc-600">
                           {new Date(rev.createdAt || rev.timestamp).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                        </span>
+                        </p>
                       </div>
                     </article>
                   );
@@ -372,43 +326,38 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* TAB CONTENT: Collections */}
+          {/* COLLECTIONS TAB */}
           {activeTab === "collections" && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {userCollections.length === 0 ? (
-                <div className="col-span-full rounded-2xl border border-dashed border-white/10 py-12 text-center">
-                  <p className="text-sm font-medium text-zinc-500">No collections found.</p>
+                <div className="col-span-full py-16 text-center">
+                  <p className="text-sm text-zinc-600">No collections yet.</p>
                 </div>
               ) : (
                 userCollections.map((col) => {
                   const itemCount = col.items?.length || 0;
                   const bgImage = col.coverImage || (itemCount > 0 && col.items[0].posterPath ? posterUrl(col.items[0].posterPath) : null);
-                  
                   return (
                     <Link
                       key={col.id}
                       to={`/collection/${col.id}`}
-                      className="group relative overflow-hidden rounded-xl border border-white/5 bg-zinc-900 transition-all hover:border-white/20"
-                      style={{ aspectRatio: "16/9" }}
+                      className="group relative overflow-hidden rounded-xl bg-zinc-900 border border-white/5 hover:border-white/15 transition-all"
+                      style={{ aspectRatio: "4/3" }}
                     >
                       {bgImage ? (
-                        <img src={bgImage} alt={col.name || col.title} className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-500 group-hover:scale-105 group-hover:opacity-80" />
+                        <img src={bgImage} alt={col.name || col.title} className="absolute inset-0 h-full w-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-105 transition-all duration-500" />
                       ) : (
-                        <div className="absolute inset-0 bg-zinc-800 opacity-50" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-violet-900/20 to-zinc-900" />
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                       {isOwnProfile && col.isPublic && (
-                        <div className="absolute top-2 right-2 z-10">
-                          <span className="rounded bg-black/50 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-400 border border-emerald-500/20 backdrop-blur-sm">Public</span>
+                        <div className="absolute top-2 right-2">
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded px-1.5 py-0.5">Public</span>
                         </div>
                       )}
-                      
-                      <div className="absolute inset-x-0 bottom-0 p-3 z-10">
-                        <h3 className="text-sm font-bold text-white line-clamp-1 mb-1">{col.name || col.title}</h3>
-                        <span className="text-[10px] text-zinc-400 font-medium">
-                          {itemCount} {itemCount === 1 ? "Item" : "Items"}
-                        </span>
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <p className="text-sm font-semibold text-white truncate leading-tight">{col.name || col.title}</p>
+                        <p className="text-[10px] text-zinc-400 mt-0.5">{itemCount} {itemCount === 1 ? "item" : "items"}</p>
                       </div>
                     </Link>
                   );
@@ -417,36 +366,44 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* TAB CONTENT: Clubs */}
+          {/* CLUBS TAB */}
           {activeTab === "clubs" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="space-y-2">
               {userClubs.length === 0 ? (
-                <div className="col-span-full rounded-2xl border border-dashed border-white/10 py-12 text-center">
-                  <p className="text-sm font-medium text-zinc-500">No clubs joined.</p>
+                <div className="py-16 text-center">
+                  <p className="text-sm text-zinc-600">No clubs joined yet.</p>
                 </div>
               ) : (
                 userClubs.map((club) => (
                   <Link
                     key={club.id}
                     to={`/community/${club.slug}`}
-                    className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition hover:bg-white/5"
+                    className="flex items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3.5 hover:bg-white/[0.04] hover:border-white/10 transition-all"
                   >
-                    <div className="h-10 w-10 rounded-lg bg-zinc-800 shrink-0 overflow-hidden">
+                    <div className="h-10 w-10 rounded-lg bg-zinc-800 shrink-0 overflow-hidden border border-white/10">
                       {club.coverImage ? (
                         <img src={club.coverImage} className="w-full h-full object-cover" alt="" />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-[8px] text-zinc-500">Club</div>
+                        <div className="h-full w-full flex items-center justify-center">
+                          <svg className="h-5 w-5 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197" />
+                          </svg>
+                        </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-white truncate">{club.name}</h3>
-                      <p className="text-[10px] text-zinc-500 mt-0.5">{club.members.length} members</p>
+                      <p className="text-sm font-semibold text-white truncate">{club.name}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{club.members.length} member{club.members.length !== 1 ? "s" : ""}</p>
                     </div>
+                    <svg className="h-4 w-4 text-zinc-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
                   </Link>
                 ))
               )}
             </div>
           )}
+
         </div>
       </div>
 
