@@ -1,4 +1,4 @@
-﻿// src/pages/ClubDetailPage.jsx
+// src/pages/ClubDetailPage.jsx
 import { useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useClubs } from "../context/ClubsContext";
@@ -39,7 +39,7 @@ function UserBubble({ username, size = "sm", linkTo = true }) {
 
 /* â”€â”€ Feed Tab â”€â”€ */
 function FeedTab({ club, isMember }) {
-  const { addPost, likePost, deletePost, addPostReply } = useClubs();
+  const { addPost, likePost, deletePost, addPostReply, deleteReply } = useClubs();
   const { isAuthenticated, user } = useAuth();
   const [newPost, setNewPost] = useState("");
   const [postImageUrl, setPostImageUrl] = useState("");
