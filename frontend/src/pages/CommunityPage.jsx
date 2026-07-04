@@ -96,48 +96,89 @@ function CreateClubModal({ onClose, onCreate }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="relative w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[#0c0c12] p-8 shadow-2xl shadow-black/60 animate-scale-in" onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-lg text-zinc-500 transition hover:bg-white/[0.06] hover:text-white">
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
-        <h2 className="text-2xl font-black text-white tracking-tight">Create a Club</h2>
-        <p className="mt-1.5 text-sm text-zinc-500">Build your own community around shared interests.</p>
-        <form className="mt-7 space-y-5" onSubmit={handleCreate}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in p-4" onClick={onClose}>
+      <div
+        className="relative w-full max-w-xl rounded-2xl border border-white/[0.08] bg-[#0c0c12] shadow-2xl shadow-black/70 animate-scale-in overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Slim header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <div>
-            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500" htmlFor="club-name">Club Name</label>
-            <input id="club-name" className="input-field" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Sci-Fi Explorers" required maxLength={50} />
+            <h2 className="text-base font-black text-white tracking-tight">Create a Club</h2>
+            <p className="text-[11px] text-zinc-600 mt-0.5">Build your community around shared interests</p>
           </div>
-          <div>
-            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500" htmlFor="club-desc">Description</label>
-            <textarea id="club-desc" className="input-field min-h-[80px] resize-none" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What's your club about?" required maxLength={200} />
+          <button onClick={onClose} className="grid h-7 w-7 place-items-center rounded-lg text-zinc-500 hover:bg-white/[0.06] hover:text-white transition">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleCreate} className="p-5 space-y-4">
+          {/* Row 1: Name + Description side by side */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block mb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500" htmlFor="club-name">Club Name *</label>
+              <input
+                id="club-name"
+                className="input-field text-sm py-2"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="e.g. Sci-Fi Explorers"
+                required maxLength={50} autoFocus
+              />
+            </div>
+            <div>
+              <label className="block mb-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500" htmlFor="club-desc">Description *</label>
+              <input
+                id="club-desc"
+                className="input-field text-sm py-2"
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="What's your club about?"
+                required maxLength={200}
+              />
+            </div>
           </div>
+
+          {/* Row 2: Category pills */}
           <div>
-            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Category</label>
-            <div className="flex flex-wrap gap-2">
-              {CLUB_CATEGORIES.filter((c) => c.key !== "all").map((c) => (
-                <button key={c.key} type="button" onClick={() => setCategory(c.key)} className={`rounded-lg border px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${category === c.key ? "border-violet-500/40 bg-violet-500/10 text-violet-300" : "border-white/[0.08] bg-white/[0.03] text-zinc-500 hover:border-white/[0.12] hover:text-zinc-300"}`}>
+            <label className="block mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">Category</label>
+            <div className="flex flex-wrap gap-1.5">
+              {CLUB_CATEGORIES.filter(c => c.key !== "all").map(c => (
+                <button
+                  key={c.key} type="button" onClick={() => setCategory(c.key)}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition-all duration-150 ${
+                    category === c.key
+                      ? "bg-violet-600 text-white"
+                      : "border border-white/[0.08] bg-white/[0.03] text-zinc-500 hover:text-white"
+                  }`}
+                >
                   {c.label}
                 </button>
               ))}
             </div>
           </div>
+
+          {/* Row 3: Cover Image */}
           <div>
-            <label className="block mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-zinc-500">Cover Image</label>
-            <div className="mt-2">
-              <ImageUpload
-                currentImage={coverImage}
-                onUploadComplete={setCoverImage}
-                label="Upload Club Banner"
-              />
-            </div>
+            <label className="block mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-zinc-500">Club Banner</label>
+            <ImageUpload
+              currentImage={coverImage}
+              onUploadComplete={setCoverImage}
+              label="Upload Club Banner"
+            />
           </div>
-          <button type="submit" className="btn-v w-full py-3 text-[15px] font-bold mt-2">Create Club</button>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-1">
+            <button type="button" onClick={onClose} className="flex-1 rounded-xl bg-white/5 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition">Cancel</button>
+            <button type="submit" disabled={!name.trim() || !description.trim()} className="flex-1 btn-v py-2.5 text-sm font-bold disabled:opacity-50">Create Club</button>
+          </div>
         </form>
       </div>
     </div>
   );
 }
+
 
 const COMM_ACCENT_GRADIENTS = [
   { id: "violet",  from: "#7c3aed", to: "#4f46e5" },
