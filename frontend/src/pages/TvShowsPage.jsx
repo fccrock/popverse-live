@@ -102,7 +102,7 @@ function CustomDropdown({ label, value, options, onChange }) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-56 z-50 rounded-xl border border-white/[0.1] bg-[#0a0c14]/95 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-black/50 overflow-hidden">
+        <div className="absolute left-0 top-full mt-2 w-56 z-[99] animate-fade-in-up rounded-xl border border-white/[0.1] bg-[#0a0c14]/70 p-1.5 shadow-2xl backdrop-blur-2xl ring-1 ring-black/50 overflow-hidden">
           <div className="max-h-60 overflow-y-auto hide-scrollbar">
             {options.map((opt) => (
               <button
@@ -196,7 +196,7 @@ export default function TvShowsPage() {
         </div>
 
         {/* Filter Bar */}
-        <div className="mb-14 px-6 sm:px-10 lg:px-14 xl:px-16">
+        <div className="mb-14 px-6 sm:px-10 lg:px-14 xl:px-16 relative z-50">
           <div className="flex flex-wrap items-center gap-3">
             <CustomDropdown
               label="Genre (All)"

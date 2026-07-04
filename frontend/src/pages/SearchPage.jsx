@@ -103,7 +103,7 @@ function GlassSelect({ value, onChange, options }) {
         <div
           ref={panelRef}
           style={dropdownStyle}
-          className="rounded-2xl border border-white/[0.10] bg-[#0c0e1a] backdrop-blur-2xl shadow-2xl shadow-black/80 overflow-hidden"
+          className="rounded-2xl border border-white/[0.10] bg-[#0c0e1a]/70 backdrop-blur-2xl shadow-2xl shadow-black/80 overflow-hidden"
         >
           {options.map((opt) => (
             <button
