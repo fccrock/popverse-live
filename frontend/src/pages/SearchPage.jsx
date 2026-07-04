@@ -102,15 +102,19 @@ function GlassSelect({ value, onChange, options }) {
       {open && rect && createPortal(
         <div
           ref={panelRef}
-          style={dropdownStyle}
-          className="rounded-2xl border border-white/[0.10] bg-[#0c0e1a]/70 backdrop-blur-2xl shadow-2xl shadow-black/80 overflow-hidden"
+          style={{
+            ...dropdownStyle,
+            width: Math.max(rect.width, 180),
+            maxHeight: 320,
+          }}
+          className="rounded-2xl border border-white/[0.10] bg-[#0c0e1a]/70 backdrop-blur-2xl shadow-2xl shadow-black/80 overflow-y-auto"
         >
           {options.map((opt) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`w-full text-left px-4 py-2.5 text-sm transition-all duration-100 ${
+              className={`w-full text-left px-4 py-2.5 text-sm transition-all duration-100 truncate ${
                 value === opt.value
                   ? "bg-violet-500/20 text-violet-300 font-bold"
                   : "text-zinc-300 font-medium hover:bg-white/[0.06] hover:text-white"

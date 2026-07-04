@@ -107,7 +107,7 @@ export default function NotificationDropdown({ username }) {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-[440px] origin-top-right rounded-xl border border-white/[0.08] bg-black/30 backdrop-blur-2xl shadow-2xl" style={{ zIndex: 100 }}>
+        <div className="absolute right-0 mt-3 w-[480px] origin-top-right rounded-xl border border-white/[0.08] bg-black/30 backdrop-blur-2xl shadow-2xl overflow-hidden" style={{ zIndex: 100 }}>
           
           {/* Header */}
           <div className="flex items-center justify-between p-5 pb-3">
@@ -144,7 +144,7 @@ export default function NotificationDropdown({ username }) {
           </div>
 
           {/* Content Area */}
-          <div className="max-h-[400px] overflow-y-auto min-h-[300px] custom-scrollbar">
+          <div className="max-h-[50vh] overflow-y-auto min-h-[300px]">
             {filteredNotifications.length === 0 ? (
               <div className="flex h-[300px] flex-col items-center justify-center text-center">
                 <div className="mb-5 flex h-[88px] w-[88px] items-center justify-center rounded-full bg-white/[0.04]">
