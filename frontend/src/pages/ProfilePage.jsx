@@ -192,10 +192,10 @@ export default function ProfilePage() {
 
             {/* Name + meta */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <h1 className="text-lg font-bold text-white leading-tight truncate">{profile.displayName}</h1>
               </div>
-              <p className="text-sm text-zinc-500 font-medium leading-tight mt-0.5">@{profile.username}</p>
+              <p className="text-sm text-zinc-500 font-medium leading-tight mt-0.5 truncate">@{profile.username}</p>
             </div>
 
             {/* Action button */}

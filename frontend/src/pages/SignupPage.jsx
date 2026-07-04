@@ -249,6 +249,7 @@ export default function SignupPage() {
                     type="text"
                     autoComplete="username"
                     required
+                    maxLength={30}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="input-field"

@@ -109,7 +109,7 @@ export default function AlbumDetailPage() {
   const isSaved = inCollections.length > 0;
 
   return (
-    <main className="min-h-screen text-white pb-24 relative z-0">
+    <main className="min-h-screen text-white pb-8 relative z-0">
       {/* Ambient background — blurred album art using img tag (avoids CORS) */}
       <div className="fixed inset-0 -z-10 bg-[#060504] overflow-hidden">
         {artLarge && (
@@ -117,14 +117,14 @@ export default function AlbumDetailPage() {
             src={artLarge}
             alt=""
             aria-hidden="true"
-            className="absolute top-0 left-0 w-full h-[80vh] object-cover object-center"
+            className="absolute top-0 left-0 w-full h-full object-cover object-center"
             style={{ filter: "blur(100px) brightness(0.15) saturate(1.4)", transform: "scale(1.2)" }}
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-[#060504]/80 to-[#060504]" />
       </div>
 
-      <div className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-16 xl:px-20 pt-28 pb-20">
+      <div className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-16 xl:px-20 pt-28 pb-8">
 
         {/* ── HERO ─────────────────────────────────────────────────────────── */}
         <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:gap-10 mb-14">
