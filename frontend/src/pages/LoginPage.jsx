@@ -131,15 +131,12 @@ export default function LoginPage() {
 
         <div className="relative w-full max-w-[420px] animate-fade-up">
           {/* Logo */}
-          <Link to="/" className="mb-12 inline-flex items-center gap-3.5 group">
-            <div className="relative">
-              {/* Glow ring */}
-              <div className="absolute -inset-1.5 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 opacity-30 blur-md animate-breathe" />
-              <div className="relative grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-xl font-black text-white shadow-lg">
-                P
-              </div>
-            </div>
-            <span className="font-display text-[22px] font-extrabold tracking-[0.22em] text-white">POPVERSE</span>
+          <Link to="/" className="mb-12 inline-flex items-center gap-3 group">
+            <img
+              src="/images/popverse.png"
+              alt="Popverse"
+              style={{ height: '28px', width: 'auto', display: 'block', objectFit: 'contain' }}
+            />
           </Link>
 
           <h2 className="font-display text-[2.1rem] font-extrabold tracking-tight text-white leading-tight">

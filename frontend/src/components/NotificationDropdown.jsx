@@ -157,10 +157,14 @@ export default function NotificationDropdown({ username }) {
               </div>
             ) : (
               <div className="flex flex-col">
-                {filteredNotifications.map(notification => (
+                {filteredNotifications.map(notification => {
+                  // Backend stores /movie/:id but our frontend route is /cinema/:id
+                  const fixedLink = (notification.link || "/")
+                    .replace(/^\/movie\//, "/cinema/");
+                  return (
                   <Link
                     key={notification.id}
-                    to={notification.link}
+                    to={fixedLink}
                     onClick={() => handleNotificationClick(notification)}
                     className={`flex items-start gap-3.5 p-4 transition-colors hover:bg-white/[0.04] border-b border-white/[0.04] last:border-0 ${!notification.isRead ? 'bg-white/[0.02]' : ''}`}
                   >
@@ -187,7 +191,8 @@ export default function NotificationDropdown({ username }) {
                       </p>
                     </div>
                   </Link>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
