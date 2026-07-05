@@ -110,6 +110,17 @@ async function followUser(req, res) {
       }
     });
 
+    // Notify the target user that someone followed them
+    await prisma.notification.create({
+      data: {
+        userId: targetUser.id,
+        actorId: followerUser.id,
+        type: "USER_FOLLOW",
+        message: `started following you.`,
+        link: `/profile/${followerUser.username}`
+      }
+    });
+
     res.json({ success: true });
   } catch (error) {
     // Ignore unique constraint failures if they are already following

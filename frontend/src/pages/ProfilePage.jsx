@@ -43,6 +43,14 @@ export default function ProfilePage() {
     return username;
   }, [username, isAuthenticated, user]);
 
+  // The logged-in user's actual DB username (loaded from profile, not Cognito)
+  const currentUserDbUsername = useMemo(() => {
+    if (!isAuthenticated || !user?.preferredUsername) return null;
+    const p = getOrCreateProfile(user.preferredUsername);
+    // Use the DB-returned username if loaded, otherwise fallback to preferredUsername
+    return p?.username?.toLowerCase() || user.preferredUsername.toLowerCase();
+  }, [isAuthenticated, user, getOrCreateProfile]);
+
   useEffect(() => {
     if (!targetUsername) return;
     setReviewsLoading(true);
@@ -127,8 +135,11 @@ export default function ProfilePage() {
     );
   }
 
-  const isOwnProfile = isAuthenticated && user?.preferredUsername?.toLowerCase() === profile.username.toLowerCase();
-  const isFollowingTarget = isAuthenticated && !isOwnProfile && profile.followers.includes(user.preferredUsername.toLowerCase());
+  const isOwnProfile = isAuthenticated && (
+    currentUserDbUsername === profile.username?.toLowerCase()
+  );
+  const isFollowingTarget = isAuthenticated && !isOwnProfile &&
+    profile.followers.map(f => f.toLowerCase()).includes(currentUserDbUsername || "");
 
   const handleFollowClick = () => {
     if (!isAuthenticated) {

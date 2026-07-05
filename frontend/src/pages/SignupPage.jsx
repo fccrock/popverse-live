@@ -176,11 +176,16 @@ export default function SignupPage() {
 
         <div className="relative w-full max-w-[420px] animate-fade-up">
           {/* Logo */}
-          <Link to="/" className="mb-12 inline-flex items-center gap-3 group">
+          <Link to="/" className="mb-12 inline-flex items-center gap-2.5 group">
+            <img
+              src="/images/pop.png"
+              alt=""
+              style={{ height: '38px', width: 'auto', display: 'block', objectFit: 'contain' }}
+            />
             <img
               src="/images/popverse.png"
               alt="Popverse"
-              style={{ height: '28px', width: 'auto', display: 'block', objectFit: 'contain' }}
+              style={{ height: '22px', width: 'auto', display: 'block', objectFit: 'contain' }}
             />
           </Link>
 

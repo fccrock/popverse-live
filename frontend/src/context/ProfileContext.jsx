@@ -93,13 +93,20 @@ export function ProfileProvider({ children }) {
   // Toggle follow user
   const toggleFollowUser = useCallback(async (targetUsername) => {
     if (!isAuthenticated || !user?.preferredUsername) return;
-    const currentUsername = user.preferredUsername.toLowerCase();
     const tUser = targetUsername.toLowerCase();
-    if (currentUsername === tUser) return; // Cant follow self
 
-    const currentProfile = profiles[currentUsername] || getOrCreateProfile(currentUsername);
+    // Use the DB-stored username of the current user (not just Cognito's preferredUsername)
+    // so that the follower lists match exactly what's in the DB.
+    let currentUsername = user.preferredUsername.toLowerCase();
+    const myProfile = profiles[currentUsername];
+    if (myProfile?.username) {
+      currentUsername = myProfile.username.toLowerCase();
+    }
+
+    if (currentUsername === tUser) return; // Can't follow self
+
     const targetProfile = profiles[tUser] || getOrCreateProfile(tUser);
-    const isFollowing = currentProfile?.following?.includes(tUser);
+    const isFollowing = targetProfile?.followers?.map(f => f.toLowerCase()).includes(currentUsername);
 
     try {
       const endpoint = isFollowing ? 'unfollow' : 'follow';
