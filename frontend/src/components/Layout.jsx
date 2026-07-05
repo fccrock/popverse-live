@@ -78,14 +78,17 @@ function SidebarContent({ location, user, profile, logout, onClose }) {
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <Link to="/" onClick={onClose} className="flex items-center gap-3 px-5 py-6 group">
-        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-rose-500 text-lg font-black text-white shadow-lg shadow-violet-500/30 transition-transform duration-300 group-hover:scale-110">
-          P
-        </div>
-        <div>
-          <span className="block text-[15px] font-black tracking-[0.28em] text-white">POPVERSE</span>
-          <span className="block text-[9px] tracking-[0.14em] text-zinc-600 mt-px">POP CULTURE HUB</span>
-        </div>
+      <Link to="/" onClick={onClose} className="flex items-center gap-2.5 px-5 py-6 group">
+        <img
+          src="/images/pop.png"
+          alt=""
+          style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+        />
+        <img
+          src="/images/popverse.png"
+          alt="Popverse"
+          style={{ height: '20px', width: 'auto', objectFit: 'contain' }}
+        />
       </Link>
 
       {/* Divider */}
@@ -215,9 +218,17 @@ export default function Layout({ children }) {
           borderBottom: scrolled ? "1px solid var(--border)" : "none",
         }}
       >
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-black text-white transition-transform group-hover:scale-105">P</div>
-          <span className="text-sm font-black tracking-[0.22em] text-white">POPVERSE</span>
+        <Link to="/" className="flex items-center gap-2 group">
+          <img
+            src="/images/pop.png"
+            alt=""
+            style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
+          />
+          <img
+            src="/images/popverse.png"
+            alt="Popverse"
+            style={{ height: '18px', width: 'auto', objectFit: 'contain' }}
+          />
         </Link>
         <div className="flex items-center gap-2">
           <GlobalSearch />
