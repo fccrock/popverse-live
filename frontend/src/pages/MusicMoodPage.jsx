@@ -1,6 +1,8 @@
 // src/pages/MusicMoodPage.jsx
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import CollectionModal from "../components/CollectionModal";
+import { useAuth } from "../context/AuthContext";
 
 // Mood → iTunes search terms (English + Hindi)
 const MOOD_CONFIG = {
@@ -110,14 +112,11 @@ async function fetchMoodSongs(searches) {
   return { hindi: hindi.slice(0, 15), english: english.slice(0, 20) };
 }
 
-function SongRow({ song, index }) {
+function SongRow({ song, index, onSave }) {
   const art = song.artworkUrl100?.replace("100x100bb", "60x60bb");
   return (
-    <a
-      href={song.trackViewUrl || "#"}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all group"
+    <div
+      className="flex items-center gap-4 px-4 py-3 hover:bg-white/5 transition-all group"
     >
       <span className="text-xs font-bold text-white/30 w-5 text-right shrink-0 group-hover:text-white/60 transition-colors">
         {index + 1}
@@ -135,34 +134,72 @@ function SongRow({ song, index }) {
           {song.artistName} · {song.collectionName}
         </p>
       </div>
-      <div className="shrink-0 flex items-center gap-3">
+      <div className="shrink-0 flex items-center gap-2">
         {song.primaryGenreName && (
           <span className="hidden sm:block text-[10px] font-semibold text-zinc-600 bg-white/5 px-2 py-0.5 rounded-full">
             {song.primaryGenreName}
           </span>
         )}
-        <svg
-          className="h-4 w-4 text-zinc-600 group-hover:text-white transition-colors"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
+        {/* Add to Collection button */}
+        <button
+          onClick={() => onSave(song)}
+          title="Add to Collection"
+          className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-semibold text-zinc-300 hover:bg-amber-500/10 hover:border-amber-500/30 hover:text-amber-300"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-        </svg>
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16M4 12h16" />
+          </svg>
+          Save
+        </button>
+        {/* Apple Music link */}
+        {song.trackViewUrl && (
+          <a
+            href={song.trackViewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open in Apple Music"
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-white/10"
+          >
+            <svg
+              className="h-4 w-4 text-zinc-600 group-hover:text-white transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        )}
       </div>
-    </a>
+    </div>
   );
 }
 
 export default function MusicMoodPage() {
   const { mood } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const config = MOOD_CONFIG[mood?.toLowerCase()];
 
   const [songs, setSongs] = useState({ hindi: [], english: [] });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+  const [saveTarget, setSaveTarget] = useState(null);
+
+  const handleSave = (song) => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    setSaveTarget({
+      mediaId: `track-${song.trackId}`,
+      mediaType: "track",
+      title: song.trackName,
+      posterPath: song.artworkUrl100 || "",
+      year: song.releaseDate ? song.releaseDate.slice(0, 4) : "",
+    });
+  };
 
   useEffect(() => {
     if (!config) return;
@@ -265,7 +302,7 @@ export default function MusicMoodPage() {
           ) : (
             <div className="divide-y divide-white/[0.04]">
               {displayed.map((song, i) => (
-                <SongRow key={song.trackId} song={song} index={i} />
+                <SongRow key={song.trackId} song={song} index={i} onSave={handleSave} />
               ))}
             </div>
           )}
@@ -273,9 +310,16 @@ export default function MusicMoodPage() {
 
         {/* Credit */}
         <p className="text-center text-xs text-zinc-700 mt-6">
-          Songs sourced from iTunes · Click any song to open in Apple Music
+          Songs sourced from iTunes · Hover a track to save it or open in Apple Music
         </p>
       </div>
+
+      {/* Collection Modal */}
+      <CollectionModal
+        isOpen={!!saveTarget}
+        mediaItem={saveTarget}
+        onClose={() => setSaveTarget(null)}
+      />
     </main>
   );
 }
