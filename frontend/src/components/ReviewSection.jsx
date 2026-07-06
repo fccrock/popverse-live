@@ -279,8 +279,17 @@ function ShareReviewModal({ review, mediaTitle, mediaPoster, mediaYear, onClose 
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => drawCard(img);
-      img.onerror = () => drawCard(null);
-      img.src = mediaPoster;
+      img.onerror = () => {
+        // If crossOrigin fetch failed, try once more without it (canvas will be tainted but
+        // at least the preview will show — download will gracefully fall back)
+        const img2 = new Image();
+        img2.onload = () => drawCard(img2);
+        img2.onerror = () => drawCard(null);
+        img2.src = mediaPoster;
+      };
+      // Append cache-buster so browser doesn't reuse the non-CORS cached version
+      // that was already loaded by the page's <img> tag
+      img.src = mediaPoster + (mediaPoster.includes("?") ? "&" : "?") + "canvas=1";
     } else {
       drawCard(null);
     }
