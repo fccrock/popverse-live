@@ -73,207 +73,208 @@ function ShareReviewModal({ review, mediaTitle, mediaPoster, mediaYear, onClose 
   const canvasRef = useRef(null);
   const [isGenerating, setIsGenerating] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [canvasAspect, setCanvasAspect] = useState(600 / 900);
 
   const username = review.author?.username || review.username || "user";
   const rating = review.rating || 0;
   const reviewText = review.text || "";
   const dateStr = formatDate(review.createdAt || review.timestamp);
 
-  // Canvas dimensions (Instagram story friendly: 9:16 ratio → 540x960, but we do a nice 600x700 card)
   const W = 600;
-  const H = 700;
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
+
+    // ── Step 1: measure text to calculate dynamic canvas height ──
+    const POSTER_W = 200;
+    const POSTER_H = 290;
+    const POSTER_X = 40;
+    const POSTER_Y = 40;
+    const INFO_X = POSTER_X + POSTER_W + 28;
+    const INFO_W = W - INFO_X - 40;
+    const BODY_X = 40;
+    const BODY_TEXT_W = W - 80 - 18; // body width minus left bar indent
+    const BODY_LINE_H = 27;
+    const FOOTER_H = 100;
+
+    // Measure review lines using a temp canvas
+    const tmpCanvas = document.createElement("canvas");
+    const tmpCtx = tmpCanvas.getContext("2d");
+    tmpCtx.font = "15px Arial, sans-serif";
+    const reviewLines = wrapText(tmpCtx, reviewText, BODY_TEXT_W, 15);
+    const textBlockH = reviewLines.length * BODY_LINE_H + 50; // +50 for top/bottom padding
+
+    const HEADER_SECTION_H = POSTER_Y + POSTER_H + 30; // top of body section
+    const H = Math.max(HEADER_SECTION_H + textBlockH + FOOTER_H, 750);
+
     canvas.width = W;
     canvas.height = H;
+    setCanvasAspect(W / H);
 
-    // We draw the card in layers. Poster must be loaded async.
     const drawCard = (posterImg) => {
       // ── Background ──
-      // Deep dark base
-      ctx.fillStyle = "#09090b";
+      ctx.fillStyle = "#0a0a10";
       ctx.fillRect(0, 0, W, H);
 
-      // Subtle noise grain feel — just a slightly lighter inner rect with rounded corners
+      // Gradient overlay
       const bgGrad = ctx.createLinearGradient(0, 0, W, H);
-      bgGrad.addColorStop(0, "rgba(124,58,237,0.10)");
-      bgGrad.addColorStop(0.5, "rgba(0,0,0,0)");
-      bgGrad.addColorStop(1, "rgba(232,72,141,0.08)");
+      bgGrad.addColorStop(0, "rgba(124,58,237,0.13)");
+      bgGrad.addColorStop(0.45, "rgba(0,0,0,0)");
+      bgGrad.addColorStop(1, "rgba(167,80,200,0.09)");
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, W, H);
 
-      // ── Card border glow ──
-      ctx.strokeStyle = "rgba(124,58,237,0.4)";
+      // Card border glow
+      ctx.strokeStyle = "rgba(124,58,237,0.38)";
       ctx.lineWidth = 1.5;
-      roundRect(ctx, 16, 16, W - 32, H - 32, 24);
+      roundRect(ctx, 14, 14, W - 28, H - 28, 22);
       ctx.stroke();
 
-      // ── Top section: poster + movie info ──
-      const POSTER_W = 140;
-      const POSTER_H = 210;
-      const POSTER_X = 48;
-      const POSTER_Y = 48;
-
-      // Poster placeholder (gradient)
-      const posterGrad = ctx.createLinearGradient(POSTER_X, POSTER_Y, POSTER_X + POSTER_W, POSTER_Y + POSTER_H);
-      posterGrad.addColorStop(0, "#1e1b4b");
-      posterGrad.addColorStop(1, "#4c1d95");
-      ctx.fillStyle = posterGrad;
-      roundRect(ctx, POSTER_X, POSTER_Y, POSTER_W, POSTER_H, 12);
+      // ── POSTER ──
+      // Shadow
+      ctx.shadowColor = "rgba(0,0,0,0.7)";
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetX = 4;
+      ctx.shadowOffsetY = 10;
+      const pGrad = ctx.createLinearGradient(POSTER_X, POSTER_Y, POSTER_X + POSTER_W, POSTER_Y + POSTER_H);
+      pGrad.addColorStop(0, "#1e1b4b");
+      pGrad.addColorStop(1, "#312e81");
+      ctx.fillStyle = pGrad;
+      roundRect(ctx, POSTER_X, POSTER_Y, POSTER_W, POSTER_H, 14);
       ctx.fill();
+      ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
 
-      // Draw poster image if loaded
       if (posterImg) {
         ctx.save();
-        roundRect(ctx, POSTER_X, POSTER_Y, POSTER_W, POSTER_H, 12);
+        roundRect(ctx, POSTER_X, POSTER_Y, POSTER_W, POSTER_H, 14);
         ctx.clip();
         ctx.drawImage(posterImg, POSTER_X, POSTER_Y, POSTER_W, POSTER_H);
         ctx.restore();
       }
 
       // Poster border
-      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.strokeStyle = "rgba(255,255,255,0.10)";
       ctx.lineWidth = 1;
-      roundRect(ctx, POSTER_X, POSTER_Y, POSTER_W, POSTER_H, 12);
+      roundRect(ctx, POSTER_X, POSTER_Y, POSTER_W, POSTER_H, 14);
       ctx.stroke();
 
-      // ── Movie info (right of poster) ──
-      const INFO_X = POSTER_X + POSTER_W + 28;
-      const INFO_W = W - INFO_X - 48;
-
-      // POPVERSE branding label
-      ctx.fillStyle = "rgba(124,58,237,0.25)";
-      roundRect(ctx, INFO_X, POSTER_Y, 90, 24, 6);
+      // ── MOVIE INFO (right of poster) ──
+      // POPVERSE badge
+      ctx.fillStyle = "rgba(124,58,237,0.28)";
+      roundRect(ctx, INFO_X, POSTER_Y, 88, 22, 6);
       ctx.fill();
-      ctx.fillStyle = "#a78bfa";
-      ctx.font = "bold 11px 'Arial', sans-serif";
-      ctx.letterSpacing = "2px";
-      ctx.fillText("POPVERSE", INFO_X + 10, POSTER_Y + 16);
-      ctx.letterSpacing = "0px";
+      ctx.fillStyle = "#c4b5fd";
+      ctx.font = "bold 10px Arial, sans-serif";
+      ctx.fillText("POPVERSE", INFO_X + 9, POSTER_Y + 15);
 
       // Movie title
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 26px 'Arial', sans-serif";
-      const titleLines = wrapText(ctx, mediaTitle || "Unknown Title", INFO_W, 26);
+      ctx.font = "bold 27px Arial, sans-serif";
+      const titleLines = wrapText(ctx, mediaTitle || "Unknown", INFO_W, 27);
       titleLines.slice(0, 2).forEach((line, i) => {
-        ctx.fillText(line, INFO_X, POSTER_Y + 52 + i * 34);
+        ctx.fillText(line, INFO_X, POSTER_Y + 50 + i * 34);
       });
+      const afterTitleY = POSTER_Y + 50 + Math.min(titleLines.length, 2) * 34;
 
       // Year
       if (mediaYear) {
         ctx.fillStyle = "#71717a";
-        ctx.font = "14px 'Arial', sans-serif";
-        ctx.fillText(mediaYear, INFO_X, POSTER_Y + 52 + Math.min(titleLines.length, 2) * 34 + 12);
+        ctx.font = "13px Arial, sans-serif";
+        ctx.fillText(mediaYear, INFO_X, afterTitleY + 18);
       }
 
-      // Divider line
-      const DIVIDER_Y = POSTER_Y + 150;
-      ctx.strokeStyle = "rgba(255,255,255,0.06)";
+      // Divider
+      const divY = afterTitleY + 42;
+      ctx.strokeStyle = "rgba(255,255,255,0.07)";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(INFO_X, DIVIDER_Y);
-      ctx.lineTo(INFO_X + INFO_W, DIVIDER_Y);
+      ctx.moveTo(INFO_X, divY);
+      ctx.lineTo(INFO_X + INFO_W, divY);
       ctx.stroke();
 
-      // "Rated by" label
-      ctx.fillStyle = "#52525b";
-      ctx.font = "12px 'Arial', sans-serif";
-      ctx.fillText("Rated by @" + username, INFO_X, DIVIDER_Y + 22);
+      // Rated by
+      ctx.fillStyle = "#71717a";
+      ctx.font = "11px Arial, sans-serif";
+      ctx.fillText("Rated by @" + username, INFO_X, divY + 22);
 
       // Stars
-      const STAR_Y = DIVIDER_Y + 42;
-      const starSize = 22;
+      const starY = divY + 48;
+      const starSz = 22;
       for (let s = 1; s <= 5; s++) {
-        ctx.fillStyle = s <= rating ? "#facc15" : "#27272a";
-        ctx.font = `${starSize}px 'Arial', sans-serif`;
-        ctx.fillText("★", INFO_X + (s - 1) * (starSize + 4), STAR_Y);
+        ctx.fillStyle = s <= rating ? "#facc15" : "#3f3f46";
+        ctx.font = `${starSz}px Arial, sans-serif`;
+        ctx.fillText("★", INFO_X + (s - 1) * (starSz + 3), starY);
       }
-      // Rating number
       ctx.fillStyle = "#facc15";
-      ctx.font = "bold 14px 'Arial', sans-serif";
-      ctx.fillText(`${rating}.0 / 5`, INFO_X, STAR_Y + 26);
+      ctx.font = "bold 13px Arial, sans-serif";
+      ctx.fillText(`${rating}.0 / 5`, INFO_X, starY + 25);
 
-      // ── Review body ──
-      const BODY_Y = POSTER_Y + POSTER_H + 36;
-      const BODY_X = 48;
-      const BODY_W = W - 96;
+      // ── REVIEW BODY ──
+      const BODY_Y = HEADER_SECTION_H;
 
-      // Subtle left accent bar
-      const barGrad = ctx.createLinearGradient(BODY_X, BODY_Y, BODY_X, BODY_Y + 180);
+      // Left accent bar — full height of text block
+      const barH = textBlockH - 30;
+      const barGrad = ctx.createLinearGradient(BODY_X, BODY_Y, BODY_X, BODY_Y + barH);
       barGrad.addColorStop(0, "#7c3aed");
       barGrad.addColorStop(1, "rgba(124,58,237,0)");
       ctx.fillStyle = barGrad;
-      ctx.fillRect(BODY_X, BODY_Y, 3, 180);
+      ctx.fillRect(BODY_X, BODY_Y, 3, barH);
 
-      // Review text
+      // All review lines — NO truncation
       ctx.fillStyle = "#d4d4d8";
-      ctx.font = "15px 'Arial', sans-serif";
-      const reviewLines = wrapText(ctx, reviewText, BODY_W - 20, 15);
-      const maxLines = 8;
-      reviewLines.slice(0, maxLines).forEach((line, i) => {
-        if (i === maxLines - 1 && reviewLines.length > maxLines) {
-          ctx.fillStyle = "#71717a";
-          ctx.fillText(line.slice(0, -3) + "...", BODY_X + 16, BODY_Y + 22 + i * 26);
-        } else {
-          ctx.fillText(line, BODY_X + 16, BODY_Y + 22 + i * 26);
-        }
+      ctx.font = "15px Arial, sans-serif";
+      reviewLines.forEach((line, i) => {
+        ctx.fillText(line, BODY_X + 18, BODY_Y + 26 + i * BODY_LINE_H);
       });
 
-      // ── Footer: avatar + username + date + Popverse logo ──
-      const FOOTER_Y = H - 80;
+      // ── FOOTER ──
+      const FOOTER_Y = H - FOOTER_H + 8;
 
-      // Footer separator
-      ctx.strokeStyle = "rgba(255,255,255,0.06)";
+      // Separator
+      ctx.strokeStyle = "rgba(255,255,255,0.07)";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(48, FOOTER_Y - 16);
-      ctx.lineTo(W - 48, FOOTER_Y - 16);
+      ctx.moveTo(40, FOOTER_Y - 8);
+      ctx.lineTo(W - 40, FOOTER_Y - 8);
       ctx.stroke();
 
-      // Avatar circle
-      const AVT_X = 58;
-      const AVT_Y = FOOTER_Y + 14;
+      // Avatar
+      const AVT_X = 56;
+      const AVT_Y = FOOTER_Y + 27;
       const AVT_R = 22;
-
-      const avatarGrad2 = ctx.createLinearGradient(AVT_X - AVT_R, AVT_Y - AVT_R, AVT_X + AVT_R, AVT_Y + AVT_R);
-      avatarGrad2.addColorStop(0, "#7c3aed");
-      avatarGrad2.addColorStop(1, "#c026d3");
-      ctx.fillStyle = avatarGrad2;
+      const aGrad = ctx.createLinearGradient(AVT_X - AVT_R, AVT_Y - AVT_R, AVT_X + AVT_R, AVT_Y + AVT_R);
+      aGrad.addColorStop(0, "#7c3aed");
+      aGrad.addColorStop(1, "#c026d3");
+      ctx.fillStyle = aGrad;
       ctx.beginPath();
       ctx.arc(AVT_X, AVT_Y, AVT_R, 0, Math.PI * 2);
       ctx.fill();
 
-      // Avatar initials
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 14px 'Arial', sans-serif";
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 14px Arial, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText(username.slice(0, 2).toUpperCase(), AVT_X, AVT_Y + 5);
       ctx.textAlign = "left";
 
-      // Username
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 14px 'Arial', sans-serif";
-      ctx.fillText("@" + username, AVT_X + AVT_R + 12, FOOTER_Y + 10);
+      ctx.font = "bold 14px Arial, sans-serif";
+      ctx.fillText("@" + username, AVT_X + AVT_R + 12, FOOTER_Y + 20);
 
-      // Date
-      ctx.fillStyle = "#52525b";
-      ctx.font = "12px 'Arial', sans-serif";
-      ctx.fillText(dateStr, AVT_X + AVT_R + 12, FOOTER_Y + 28);
+      ctx.fillStyle = "#71717a";
+      ctx.font = "12px Arial, sans-serif";
+      ctx.fillText(dateStr, AVT_X + AVT_R + 12, FOOTER_Y + 38);
 
-      // Popverse watermark (right side of footer)
-      ctx.fillStyle = "rgba(124,58,237,0.5)";
-      ctx.font = "bold 13px 'Arial', sans-serif";
       ctx.textAlign = "right";
-      ctx.fillText("popverse.tech", W - 48, FOOTER_Y + 20);
+      ctx.fillStyle = "rgba(167,139,250,0.55)";
+      ctx.font = "bold 12px Arial, sans-serif";
+      ctx.fillText("popverse.tech", W - 40, FOOTER_Y + 30);
       ctx.textAlign = "left";
 
       setIsGenerating(false);
     };
 
-    // Load poster image (handle CORS by using crossOrigin)
     if (mediaPoster) {
       const img = new Image();
       img.crossOrigin = "anonymous";
@@ -300,71 +301,78 @@ function ShareReviewModal({ review, mediaTitle, mediaPoster, mediaYear, onClose 
   };
 
   return (
+    // Scrollable overlay — modal always stays within viewport
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm overflow-y-auto"
       onClick={onClose}
     >
-      <div
-        className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#0c0c12] shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.07]">
-          <div className="flex items-center gap-2.5">
-            <div className="grid h-8 w-8 place-items-center rounded-full bg-violet-500/20">
-              <svg className="h-4 w-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-            </div>
-            <h2 className="text-base font-black text-white">Share Your Review</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-full text-zinc-500 hover:bg-white/10 hover:text-white transition"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Canvas Preview */}
-        <div className="px-6 pt-5 pb-4">
-          <div className="relative rounded-xl overflow-hidden border border-white/[0.07] bg-[#09090b]" style={{ aspectRatio: `${600/700}` }}>
-            {isGenerating && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-8 w-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
-              </div>
-            )}
-            <canvas
-              ref={canvasRef}
-              style={{ width: "100%", height: "100%", display: "block", opacity: isGenerating ? 0 : 1, transition: "opacity 0.3s" }}
-            />
-          </div>
-          <p className="mt-3 text-center text-xs text-zinc-600">Perfect for Instagram Stories · 600×700 PNG</p>
-        </div>
-
-        {/* Download Button */}
-        <div className="px-6 pb-6">
-          <button
-            onClick={handleDownload}
-            disabled={isGenerating || isDownloading}
-            className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-violet-600 py-3.5 text-sm font-black text-white hover:bg-violet-500 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-900/30"
-          >
-            {isDownloading ? (
-              <>
-                <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div
+          className="relative w-full max-w-md rounded-2xl border border-white/[0.10] shadow-2xl"
+          style={{ backgroundColor: '#0c0c14' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Modal Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+            <div className="flex items-center gap-2.5">
+              <div className="grid h-8 w-8 place-items-center rounded-full bg-violet-500/20">
+                <svg className="h-4 w-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                 </svg>
-                Save Image
-              </>
-            )}
-          </button>
+              </div>
+              <h2 className="text-base font-black text-white">Share Your Review</h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="grid h-8 w-8 place-items-center rounded-full text-zinc-500 hover:bg-white/10 hover:text-white transition"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Canvas Preview — scales to fit, scrolls if needed */}
+          <div className="px-5 pt-4 pb-3">
+            <div
+              className="relative rounded-xl overflow-hidden border border-white/[0.07]"
+              style={{ backgroundColor: '#09090b', aspectRatio: canvasAspect }}
+            >
+              {isGenerating && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+                </div>
+              )}
+              <canvas
+                ref={canvasRef}
+                style={{ width: '100%', height: '100%', display: 'block', opacity: isGenerating ? 0 : 1, transition: 'opacity 0.3s' }}
+              />
+            </div>
+            <p className="mt-2 text-center text-[11px] text-zinc-600">600×{Math.round(600 / canvasAspect)} PNG · perfect for Instagram</p>
+          </div>
+
+          {/* Download Button */}
+          <div className="px-5 pb-5">
+            <button
+              onClick={handleDownload}
+              disabled={isGenerating || isDownloading}
+              className="w-full flex items-center justify-center gap-2.5 rounded-xl bg-violet-600 py-3 text-sm font-black text-white hover:bg-violet-500 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-900/30"
+            >
+              {isDownloading ? (
+                <>
+                  <div className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Save Image
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -436,20 +444,28 @@ function ReviewMenu({ onDelete, onShare }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-8 z-50 w-44 rounded-xl border border-white/[0.08] bg-[#111118] shadow-2xl shadow-black/50 overflow-hidden">
+        <div
+          className="absolute right-0 top-8 z-50 w-44 rounded-xl shadow-2xl overflow-hidden"
+          style={{ backgroundColor: '#18181f', border: '1px solid rgba(255,255,255,0.10)' }}
+        >
           <button
             onClick={() => { setOpen(false); onShare(); }}
-            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-zinc-300 hover:bg-white/[0.06] hover:text-white transition"
+            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-zinc-200 hover:text-white transition"
+            style={{ ':hover': { backgroundColor: 'rgba(255,255,255,0.06)' } }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.07)'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <svg className="h-4 w-4 text-violet-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
             Share Review
           </button>
-          <div className="mx-3 h-px bg-white/[0.06]" />
+          <div style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.07)', margin: '0 12px' }} />
           <button
             onClick={() => { setOpen(false); onDelete(); }}
-            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-zinc-500 hover:bg-rose-500/10 hover:text-rose-400 transition"
+            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-zinc-500 transition"
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.10)'; e.currentTarget.style.color = '#f87171'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = ''; }}
           >
             <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
