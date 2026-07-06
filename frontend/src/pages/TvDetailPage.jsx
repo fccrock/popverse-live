@@ -306,7 +306,13 @@ export default function TvDetailPage() {
               </div>
             </section>
           )}
-          <ReviewSection mediaId={`tv-${id}`} accentColor="violet" />
+          <ReviewSection
+            mediaId={`tv-${id}`}
+            accentColor="violet"
+            mediaTitle={show.name}
+            mediaPoster={show.poster_path ? `https://image.tmdb.org/t/p/w342${show.poster_path}` : null}
+            mediaYear={year(show.first_air_date)}
+          />
         </div>
 
         {/* ── Sidebar ── */}

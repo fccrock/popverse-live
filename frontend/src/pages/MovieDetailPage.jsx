@@ -288,7 +288,13 @@ export default function MovieDetailPage() {
               </div>
             </section>
           )}
-          <ReviewSection mediaId={`movie-${id}`} accentColor="rose" />
+          <ReviewSection
+            mediaId={`movie-${id}`}
+            accentColor="rose"
+            mediaTitle={movie.title}
+            mediaPoster={movie.poster_path ? `https://image.tmdb.org/t/p/w342${movie.poster_path}` : null}
+            mediaYear={year(movie.release_date)}
+          />
         </div>
 
         {/* ── Sidebar ── */}
