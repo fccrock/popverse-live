@@ -75,6 +75,10 @@ async function upsertReview(req, res) {
   try {
     const { username, mediaId, mediaType, rating, text, isSpoiler } = req.body;
 
+    if (!username || !mediaId || !mediaType || rating === undefined || !text) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     let user = await prisma.user.findFirst({
       where: { username: { equals: username, mode: "insensitive" } },
     });
@@ -84,46 +88,59 @@ async function upsertReview(req, res) {
       });
     }
 
-    const review = await prisma.review.upsert({
-      where: {
-        authorId_mediaId_mediaType: {
-          authorId: user.id,
-          mediaId: String(mediaId),
-          mediaType,
+    const includeClause = {
+      author: true,
+      likes: { include: { user: true } },
+      replies: {
+        where: { parentId: null },
+        include: {
+          author: true,
+          replies: {
+            include: { author: true },
+            orderBy: { createdAt: "asc" }
+          }
         },
-      },
-      update: { rating, text, isSpoiler: isSpoiler ?? false },
-      create: {
+        orderBy: { createdAt: "asc" }
+      }
+    };
+
+    // Use findFirst + create/update instead of upsert to avoid compound key issues
+    const existing = await prisma.review.findFirst({
+      where: {
         authorId: user.id,
         mediaId: String(mediaId),
         mediaType,
-        rating,
-        text,
-        isSpoiler: isSpoiler ?? false,
-      },
-      include: {
-        author: true,
-        likes: { include: { user: true } },
-        replies: {
-          where: { parentId: null },
-          include: {
-            author: true,
-            replies: {
-              include: { author: true },
-              orderBy: { createdAt: "asc" }
-            }
-          },
-          orderBy: { createdAt: "asc" }
-        }
       },
     });
+
+    let review;
+    if (existing) {
+      review = await prisma.review.update({
+        where: { id: existing.id },
+        data: { rating, text, isSpoiler: isSpoiler ?? false },
+        include: includeClause,
+      });
+    } else {
+      review = await prisma.review.create({
+        data: {
+          authorId: user.id,
+          mediaId: String(mediaId),
+          mediaType,
+          rating,
+          text,
+          isSpoiler: isSpoiler ?? false,
+        },
+        include: includeClause,
+      });
+    }
 
     res.json(review);
   } catch (error) {
     console.error("Error upserting review:", error);
-    res.status(500).json({ error: "Failed to save review" });
+    res.status(500).json({ error: "Failed to save review", details: error.message });
   }
 }
+
 
 // Delete a review
 async function deleteReview(req, res) {
