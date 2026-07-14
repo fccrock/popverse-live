@@ -1,4 +1,4 @@
-// server.js
+// server.js - deployed: 2026-07-14 (database-2 migration)
 const express = require("express");
 const cors = require("cors");
 const { PORT, NODE_ENV } = require("./config");
